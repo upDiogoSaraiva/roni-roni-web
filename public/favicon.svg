@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="16" fill="#E5482A" />
+  <text x="32" y="43" text-anchor="middle" font-family="'Space Grotesk',system-ui,sans-serif"
+        font-size="30" font-weight="700" fill="#F6F1E8" letter-spacing="-1">RR</text>
+</svg>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#E5482A" />
+    <title>Roni Roni — pool de seleções 2026</title>
+    <meta name="description" content="Apostas, classificação e resultados do pool Torneio Roni Roni." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar para o conteúdo</a>
+
+    <header class="topbar">
+      <a class="brand" href="#/geral" aria-label="Roni Roni — início">
+        <span class="brand-badge" aria-hidden="true">RR</span>
+        <span class="brand-name">
+          <strong>Roni&nbsp;Roni</strong>
+          <small>Pool de seleções · 2026</small>
+        </span>
+      </a>
+      <div class="topbar-actions">
+        <span id="window-pill" class="pill" hidden></span>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Mudar tema" title="Mudar tema"></button>
+      </div>
+    </header>
+
+    <nav class="tabbar" aria-label="Navegação principal">
+      <a class="tab" href="#/apostar" data-route="apostar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+        <span>Apostar</span>
+      </a>
+      <a class="tab" href="#/geral" data-route="geral">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20V10M12 20V4M18 20v-7"/></svg>
+        <span>Geral</span>
+      </a>
+      <a class="tab" href="#/resultados" data-route="resultados">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+        <span>Resultados</span>
+      </a>
+      <a class="tab" href="#/admin" data-route="admin">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/></svg>
+        <span>Admin</span>
+      </a>
+    </nav>
+
+    <main id="main" tabindex="-1" class="main"></main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="app.js?v=2"></script>
+  </body>
+</html>
