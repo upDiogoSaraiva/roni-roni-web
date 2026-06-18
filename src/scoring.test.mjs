@@ -124,3 +124,49 @@ test('não há dupla contagem quando a mesma equipa aparece em dois slots', () =
   const d = scoreBet(bet, world, () => 'A');
   assert.equal(d.qualification, 2); // {Alfa, Bravo} apuram = 2 equipas distintas
 });
+
+// ---------- mata-mata ----------
+const koBracket = {
+  rounds: [
+    { id: 'r32', winPts: 2, methodPts: 1, joker: true },
+    { id: 'sf', winPts: 4, methodPts: 2, joker: false },
+    { id: 'final', winPts: 6, methodPts: 3, joker: false },
+  ],
+  matches: { '73': { round: 'r32' }, '85': { round: 'r32' }, '101': { round: 'sf' }, '102': { round: 'sf' }, '104': { round: 'final' } },
+};
+const koResults = {
+  '73': { home: 'Alfa', away: 'Bravo', winner: 'Alfa', method: 'PEN' },
+  '85': { home: 'Eco', away: 'Foxtrot', winner: 'Eco', method: 'TR' },
+  '101': { home: 'Eco', away: 'Golf' }, // semifinalistas
+  '102': { home: 'Hotel', away: 'India' },
+  '104': { winner: 'Eco' }, // campeão
+};
+const koWorld = () => computeWorldState({}, {}, { bracket: koBracket, knockoutResults: koResults });
+
+test('mata-mata: vencedor + fase, com joker a duplicar', () => {
+  const bet = { groups: {}, knockouts: { '73': { winner: 'Alfa', method: 'PEN' } }, jokers: ['73'] };
+  const d = scoreBet(bet, koWorld(), () => null);
+  // 2 (vencedor) + 1 (PEN) = 3, joker duplica -> 6
+  assert.equal(d.knockout, 6);
+  assert.equal(d.correctWinners, 1);
+});
+
+test('mata-mata: vencedor certo, fase errada = só pontos de vitória', () => {
+  const bet = { groups: {}, knockouts: { '85': { winner: 'Eco', method: 'PEN' } } };
+  const d = scoreBet(bet, koWorld(), () => null);
+  assert.equal(d.knockout, 2); // venceu certo (+2), fase errada (TR≠PEN)
+});
+
+test('mata-mata: vencedor errado = 0 mesmo com fase certa', () => {
+  const bet = { groups: {}, knockouts: { '73': { winner: 'Bravo', method: 'PEN' } } };
+  const d = scoreBet(bet, koWorld(), () => null);
+  assert.equal(d.knockout, 0);
+  assert.equal(d.correctWinners, 0);
+});
+
+test('mata-mata: campeão (8) e Final 4 (3 cada)', () => {
+  const bet = { groups: {}, champion: 'Eco', final4: ['Eco', 'Golf', 'Zulu', 'Yankee'] };
+  const d = scoreBet(bet, koWorld(), () => null);
+  assert.equal(d.champion, 8);
+  assert.equal(d.final4, 6); // Eco e Golf são semifinalistas; Zulu/Yankee não
+});

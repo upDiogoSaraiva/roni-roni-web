@@ -340,10 +340,15 @@ function sheetDetail(bet, score) {
   box.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', margin: '0 0 4px' } },
     'Campeão e Final 4 contam nas eliminatórias.'));
   if (score) {
-    box.appendChild(el('div', { class: 'sheet-top' },
+    const kvs = [
       el('div', { class: 'kv' }, el('b', {}, 'Apuramento'), el('span', { class: 'num', style: { color: 'var(--ok)' } }, '+' + score.qualification)),
       el('div', { class: 'kv' }, el('b', {}, 'Posições'), el('span', { class: 'num', style: { color: 'var(--gold)' } }, '+' + score.position)),
-      el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total))));
+    ];
+    if (score.knockout) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Mata-mata'), el('span', { class: 'num', style: { color: 'var(--brand)' } }, '+' + score.knockout)));
+    if (score.champion) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Campeão'), el('span', { class: 'num' }, '+' + score.champion)));
+    if (score.final4) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Final 4'), el('span', { class: 'num' }, '+' + score.final4)));
+    kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total)));
+    box.appendChild(el('div', { class: 'sheet-top' }, ...kvs));
   }
   box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo · de onde vêm os pontos'));
   box.appendChild(el('div', { class: 'sheet-legend' },
@@ -377,6 +382,9 @@ function formSteps() {
 function countThirds() { return STATE.groupOrder.filter((g) => draft.groups[g].third).length; }
 
 async function pageApostar() {
+  // mata-mata tem prioridade quando uma ronda eliminatória está aberta (aposta-se ronda a ronda)
+  const koOpen = STATE.koRounds.filter((r) => STATE.windows[r.id]).map((r) => r.id);
+  if (koOpen.length) return renderKoBetting(koOpen);
   if (!draft) draft = blankDraft();
   paintForm();
 }
@@ -654,6 +662,8 @@ async function pageResultados() {
       el('span', {}, t.qualifies ? el('span', { class: 'badge ok' }, icon('check'), 'Apura') : el('span', { class: 'badge pending' }, 'Fora'))));
   });
   host.appendChild(tcard);
+
+  await bracketSection(host);
 }
 function groupResultCard(g, data) {
   const card = el('div', { class: 'card grp-card' });
@@ -692,6 +702,146 @@ function groupResultCard(g, data) {
   return card;
 }
 
+/* ---------------- MATA-MATA (bracket + apostas) ---------------- */
+const METHOD_LABEL = { TR: 'Tempo regulamentar', PROL: 'Prolongamento', PEN: 'Penáltis' };
+const METHODS = ['TR', 'PROL', 'PEN'];
+function slotTeam(side) { return side.team ? teamChip(side.team) : el('span', { class: 'muted', style: { fontSize: '12px' } }, side.label); }
+function roundLabel(id) { return (STATE.koRounds.find((r) => r.id === id) || {}).label || id; }
+
+function bracketMatchRow(m) {
+  const homeWin = m.winner && m.winner === m.home.team;
+  const awayWin = m.winner && m.winner === m.away.team;
+  return el('div', { class: 'ko-row' },
+    el('div', { class: 'ko-team h' + (homeWin ? ' win' : '') }, el('span', { class: 'num jn' }, m.id), slotTeam(m.home)),
+    el('div', { class: 'ko-mid' },
+      el('span', { class: 'ko-score num' + (m.played ? '' : ' tbd') }, m.played ? `${m.homeGoals}–${m.awayGoals}` : 'vs'),
+      m.played && m.method ? el('span', { class: 'ko-method' }, METHOD_LABEL[m.method]) : null),
+    el('div', { class: 'ko-team a' + (awayWin ? ' win' : '') }, slotTeam(m.away), el('span', { class: 'num jn' }, '')));
+}
+
+async function bracketSection(host) {
+  host.appendChild(el('div', { class: 'section-label' }, 'Mata-mata · cruzamento'));
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', marginTop: '-4px' } },
+    'Estrutura oficial do Mundial 2026. As equipas resolvem-se quando a fase de grupos terminar.'));
+  const data = await api('/api/bracket');
+  for (const r of data.rounds) {
+    const card = el('div', { class: 'card', style: { padding: '8px 0', marginTop: '8px' } });
+    card.appendChild(el('div', { class: 'ko-round' }, r.label, STATE.windows[r.id] ? el('span', { class: 'pill open', style: { marginLeft: '8px' } }, el('span', { class: 'dot' }), 'apostas abertas') : null));
+    for (const mid of r.matches) card.appendChild(bracketMatchRow(data.resolved[String(mid)]));
+    host.appendChild(card);
+  }
+}
+
+// ---- apostas de mata-mata ----
+let koBet = null; // { player, pin, round, picks:{mid:{winner,method}}, jokers:[mid], resolved }
+async function renderKoBetting(openRounds) {
+  clear(MAIN);
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Apostas — mata-mata'),
+    el('p', {}, 'Escolhe o vencedor e a fase (tempo reg., prolongamento ou penáltis) de cada jogo.')));
+  if (!koBet) koBet = { player: '', pin: '', round: openRounds[0], picks: {}, jokers: [], resolved: null };
+
+  // identificação + ronda
+  const ctrl = el('div', { class: 'card', style: { padding: '16px' } });
+  const sel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { koBet.player = e.target.value; } },
+    el('option', { value: '' }, '— escolher jogador —'),
+    ...STATE.players.map((p) => el('option', { value: p.player, selected: koBet.player === p.player }, p.player + (p.hasPin ? ' 🔒' : ''))));
+  ctrl.appendChild(el('div', { class: 'field' }, el('label', { for: '' }, 'Jogador'), sel));
+  if (openRounds.length > 1) {
+    ctrl.appendChild(el('div', { class: 'field' }, el('label', {}, 'Ronda'),
+      el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { koBet.round = e.target.value; koBet.resolved = null; load(); } },
+        ...openRounds.map((r) => el('option', { value: r, selected: koBet.round === r }, roundLabel(r))))));
+  }
+  ctrl.appendChild(el('button', { class: 'btn btn-primary btn-block', onclick: load }, 'Carregar jogos de ' + roundLabel(koBet.round)));
+  MAIN.appendChild(ctrl);
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  if (koBet.resolved) paintMatches(host);
+
+  async function load() {
+    if (!koBet.player) return toast('Escolhe um jogador.', true);
+    try {
+      const [bracket, betRes] = await Promise.all([api('/api/bracket'), api('/api/bet/' + encodeURIComponent(koBet.player))]);
+      koBet.resolved = bracket.resolved;
+      koBet.roundMatches = bracket.rounds.find((r) => r.id === koBet.round).matches.map(String);
+      // prefill com a aposta existente
+      const bet = betRes.bet;
+      if (bet.hasPin && !koBet.pin) { const pin = prompt('Esta aposta tem PIN. Introduz o PIN:'); koBet.pin = (pin || '').replace(/\D/g, ''); }
+      koBet.picks = {};
+      for (const mid of koBet.roundMatches) if (bet.knockouts[mid]) koBet.picks[mid] = { ...bet.knockouts[mid] };
+      koBet.jokers = (bet.jokers || []).map(String);
+      paintForm();
+    } catch (e) { toast(e.message, true); }
+  }
+  function paintMatches(h) { clear(h); h.appendChild(matchesCard()); }
+  function paintForm() { clear(host); host.appendChild(matchesCard()); }
+
+  function jokerEligible() { return (STATE.koRounds.find((r) => r.id === koBet.round) || {}).joker; }
+  function matchesCard() {
+    const wrap = el('div', {});
+    if (jokerEligible()) {
+      wrap.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px' } },
+        `Jokers: ${koBet.jokers.length}/2 — duplicam os pontos do jogo (16-avos/8-avos/quartos).`));
+    }
+    for (const mid of koBet.roundMatches) {
+      const m = koBet.resolved[mid];
+      const teams = [m.home.team, m.away.team].filter(Boolean);
+      const card = el('div', { class: 'card ko-bet', style: { padding: '14px', marginTop: '8px' } });
+      card.appendChild(el('div', { class: 'ko-bet-head' }, el('span', { class: 'num jn' }, 'Jogo ' + mid),
+        teams.length < 2 ? el('span', { class: 'muted', style: { fontSize: '11.5px' } }, 'aguarda equipas') : null));
+      if (teams.length < 2) {
+        card.appendChild(el('div', { class: 'ko-row' },
+          el('div', { class: 'ko-team h' }, slotTeam(m.home)), el('div', { class: 'ko-mid' }, 'vs'), el('div', { class: 'ko-team a' }, slotTeam(m.away))));
+        wrap.appendChild(card);
+        continue;
+      }
+      const pick = koBet.picks[mid] || {};
+      // vencedor: dois botões
+      const winRow = el('div', { class: 'ko-pick' });
+      for (const t of teams) {
+        winRow.appendChild(el('button', { type: 'button', class: 'ko-opt' + (pick.winner === t ? ' on' : ''),
+          onclick: () => { koBet.picks[mid] = { ...(koBet.picks[mid] || {}), winner: t }; paintForm(); } },
+          flag(t), el('span', {}, t)));
+      }
+      card.appendChild(el('div', { class: 'ko-lbl' }, 'Vencedor'));
+      card.appendChild(winRow);
+      // fase
+      card.appendChild(el('div', { class: 'ko-lbl' }, 'Acaba em'));
+      const methRow = el('div', { class: 'ko-seg' });
+      for (const meth of METHODS) {
+        methRow.appendChild(el('button', { type: 'button', class: 'seg-opt' + (pick.method === meth ? ' on' : ''),
+          disabled: !pick.winner,
+          onclick: () => { koBet.picks[mid] = { ...(koBet.picks[mid] || {}), method: meth }; paintForm(); } }, METHOD_LABEL[meth]));
+      }
+      card.appendChild(methRow);
+      // joker
+      if (jokerEligible()) {
+        const on = koBet.jokers.includes(mid);
+        card.appendChild(el('button', { type: 'button', class: 'ko-joker' + (on ? ' on' : ''),
+          onclick: () => {
+            if (on) koBet.jokers = koBet.jokers.filter((x) => x !== mid);
+            else { if (!pick.winner) return toast('Aposta no vencedor antes de pôr o joker.', true); if (koBet.jokers.length >= 2) return toast('Já tens 2 jokers.', true); koBet.jokers.push(mid); }
+            paintForm();
+          } }, '★ Joker' + (on ? ' (x2)' : '')));
+      }
+      wrap.appendChild(card);
+    }
+    wrap.appendChild(el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '16px' }, onclick: submitKo }, icon('check'), 'Gravar apostas de ' + roundLabel(koBet.round)));
+    return wrap;
+  }
+
+  async function submitKo() {
+    const picks = {};
+    for (const [mid, p] of Object.entries(koBet.picks)) if (p.winner) picks[mid] = p;
+    try {
+      await api('/api/bet/knockout', { method: 'POST', body: { player: koBet.player, pin: koBet.pin || undefined, round: koBet.round, picks, jokers: koBet.jokers } });
+      localStorage.setItem('roni-me', koBet.player);
+      toast('Apostas de mata-mata gravadas!');
+      navigate('geral');
+    } catch (e) { toast((e.data?.errors || [e.message])[0], true); }
+  }
+}
+
 /* ---------------- PÁGINA: ADMIN ---------------- */
 async function pageAdmin() {
   if (!ADMIN_TOKEN) return renderAdminLogin();
@@ -705,15 +855,18 @@ async function pageAdmin() {
   catch (e) { if (e.status === 401) { ADMIN_TOKEN = null; sessionStorage.removeItem('roni-admin'); return renderAdminLogin(); } throw e; }
   clear(host);
 
-  // janela
-  host.appendChild(el('div', { class: 'section-label' }, 'Janela de submissões'));
-  const winCard = el('div', { class: 'card', style: { padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' } });
-  winCard.appendChild(el('div', {}, el('div', { style: { fontWeight: '700' } }, status.windowOpen ? 'Aberta' : 'Fechada'),
-    el('div', { class: 'muted', style: { fontSize: '13px' } }, 'Quando fechada, ninguém pode submeter nem editar.')));
-  winCard.appendChild(el('button', { class: 'btn ' + (status.windowOpen ? 'btn-ghost' : 'btn-primary'),
-    onclick: async () => { await api('/api/admin/window', { method: 'POST', body: { open: !status.windowOpen } }); toast('Janela ' + (!status.windowOpen ? 'aberta' : 'fechada')); render(); } },
-    status.windowOpen ? 'Fechar janela' : 'Abrir janela'));
-  host.appendChild(winCard);
+  // janelas de apostas (grupos + cada ronda do mata-mata) — abrem-se ronda a ronda
+  host.appendChild(el('div', { class: 'section-label' }, 'Janelas de apostas'));
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', marginTop: '-4px' } }, 'Abre uma ronda de cada vez. Janela fechada = ninguém aposta nessa fase.'));
+  const winRow = el('div', { class: 'status-row' });
+  const winRounds = [{ id: 'grupos', label: 'Grupos' }, ...STATE.koRounds.map((r) => ({ id: r.id, label: r.label }))];
+  for (const r of winRounds) {
+    const open = status.windows[r.id];
+    winRow.appendChild(el('button', { class: 'win-toggle' + (open ? ' open' : ''), 'aria-pressed': open ? 'true' : 'false',
+      onclick: async () => { await api('/api/admin/window', { method: 'POST', body: { round: r.id, open: !open } }); toast(`${r.label}: ${!open ? 'aberta' : 'fechada'}`); render(); } },
+      el('span', { class: 'dot' }), r.label, ' · ', open ? 'aberta' : 'fechada'));
+  }
+  host.appendChild(winRow);
 
   // estado das submissões
   host.appendChild(el('div', { class: 'section-label' }, `Submissões · ${status.submitted.length} jogadores`));
@@ -746,6 +899,22 @@ async function pageAdmin() {
     } catch (e) { toast(e.message, true); fetchBtn.disabled = false; }
   }
   paintResEditor(STATE.groupOrder[0]);
+
+  // editor de resultados do mata-mata
+  host.appendChild(el('div', { class: 'section-label' }, 'Resultados do mata-mata'));
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', marginTop: '-4px' } }, 'Define vencedor + fase. "Buscar resultados" também tenta preenchê-los pela ESPN.'));
+  const bracket = await api('/api/bracket');
+  const koRoundSel = el('select', { class: 'select', 'aria-label': 'Ronda do mata-mata', onchange: (e) => paintKo(e.target.value) },
+    ...STATE.koRounds.map((r) => el('option', { value: r.id }, r.label)));
+  host.appendChild(el('div', { class: 'toolbar' }, koRoundSel));
+  const koHost = el('div', {});
+  host.appendChild(koHost);
+  function paintKo(rid) {
+    clear(koHost);
+    const r = bracket.rounds.find((x) => x.id === rid);
+    for (const mid of r.matches) koHost.appendChild(koResultEditor(String(mid), bracket.resolved[String(mid)]));
+  }
+  paintKo(STATE.koRounds[0].id);
 
   // grelha de apostas
   host.appendChild(el('div', { class: 'section-label' }, 'Apostas de todos'));
@@ -803,6 +972,46 @@ function resultEditor(g, results, repaint) {
       toast(`${res.saved} resultado(s) gravado(s) no Grupo ${g}. Classificação recalculada.`);
       repaint(g);
     } catch (e) { toast(e.message, true); saveBtn.disabled = false; }
+  }
+  return card;
+}
+
+function koResultEditor(mid, m) {
+  const teams = [m.home.team, m.away.team].filter(Boolean);
+  const card = el('div', { class: 'card', style: { padding: '14px', marginTop: '8px' } });
+  card.appendChild(el('div', { class: 'ko-bet-head' }, el('span', { class: 'num jn' }, 'Jogo ' + mid),
+    el('span', { class: 'muted', style: { fontSize: '11.5px' } }, roundLabel(m.round))));
+  card.appendChild(el('div', { class: 'ko-row' },
+    el('div', { class: 'ko-team h' }, slotTeam(m.home)), el('div', { class: 'ko-mid' }, 'vs'), el('div', { class: 'ko-team a' }, slotTeam(m.away))));
+  if (teams.length < 2) { card.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', margin: '6px 0 0' } }, 'Aguarda os emparelhamentos (fim dos grupos).')); return card; }
+
+  const state = { winner: m.winner || null, method: m.method || null, hg: m.homeGoals ?? '', ag: m.awayGoals ?? '' };
+  const hg = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: state.hg, 'aria-label': 'golos casa', oninput: (e) => (state.hg = e.target.value) });
+  const ag = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: state.ag, 'aria-label': 'golos fora', oninput: (e) => (state.ag = e.target.value) });
+  card.appendChild(el('div', { class: 'gscore', style: { margin: '8px 0' } }, m.home.team, ' ', hg, el('span', { class: 'muted' }, ':'), ag, ' ', m.away.team));
+
+  const winWrap = el('div', { class: 'ko-pick' });
+  const methWrap = el('div', { class: 'ko-seg' });
+  const repaint = () => {
+    clear(winWrap);
+    for (const t of teams) winWrap.appendChild(el('button', { type: 'button', class: 'ko-opt' + (state.winner === t ? ' on' : ''), onclick: () => { state.winner = t; repaint(); } }, flag(t), el('span', {}, t)));
+    clear(methWrap);
+    for (const meth of METHODS) methWrap.appendChild(el('button', { type: 'button', class: 'seg-opt' + (state.method === meth ? ' on' : ''), onclick: () => { state.method = meth; repaint(); } }, METHOD_LABEL[meth]));
+  };
+  repaint();
+  card.appendChild(el('div', { class: 'ko-lbl' }, 'Vencedor'));
+  card.appendChild(winWrap);
+  card.appendChild(el('div', { class: 'ko-lbl' }, 'Acaba em'));
+  card.appendChild(methWrap);
+  card.appendChild(el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, onclick: save }, icon('check'), 'Gravar jogo ' + mid));
+
+  async function save() {
+    if (!state.winner) return toast('Escolhe o vencedor.', true);
+    try {
+      await api('/api/admin/knockout', { method: 'POST', body: { match: mid, home: m.home.team, away: m.away.team, homeGoals: state.hg === '' ? null : Number(state.hg), awayGoals: state.ag === '' ? null : Number(state.ag), winner: state.winner, method: state.method } });
+      toast(`Jogo ${mid} gravado.`);
+      render();
+    } catch (e) { toast(e.message, true); }
   }
   return card;
 }

@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { computeWorldState, leaderboard } from './src/scoring.mjs';
-import { loadResultsSource } from './src/results_source.mjs';
+import { loadResultsSource, fetchEspnKnockout } from './src/results_source.mjs';
+import { resolveBracket } from './src/bracket.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
@@ -23,6 +24,11 @@ const GROUPS = seed.groups;
 const GROUP_ORDER = seed.groupOrder;
 const TEAMS = seed.teams;
 const META = seed.meta;
+const BRACKET = JSON.parse(readFileSync(join(root, 'data/bracket.json'), 'utf8'));
+const KO_ROUNDS = BRACKET.rounds.map((r) => r.id); // r32..final
+const matchRound = {};
+for (const [id, m] of Object.entries(BRACKET.matches)) matchRound[id] = m.round;
+const roundJoker = Object.fromEntries(BRACKET.rounds.map((r) => [r.id, !!r.joker]));
 const groupOf = {};
 for (const [g, ts] of Object.entries(GROUPS)) for (const t of ts) groupOf[t] = g;
 const teamGroup = (t) => groupOf[t] || null;
@@ -31,16 +37,22 @@ const codeToTeam = {};
 for (const [name, meta] of Object.entries(TEAMS)) codeToTeam[meta.code] = name;
 
 // --- estado mutável (apostas, resultados, janela) em store.json ---
+function defaultWindows(groupsOpen) {
+  // só a janela de grupos abre por defeito; as do mata-mata abrem-se à medida (ronda a ronda)
+  const w = { grupos: groupsOpen };
+  for (const r of KO_ROUNDS) w[r] = false;
+  return w;
+}
 function loadStore() {
-  if (existsSync(STORE_PATH)) return JSON.parse(readFileSync(STORE_PATH, 'utf8'));
-  // primeira execução: inicializa a partir das 27 apostas reais (seed)
-  const init = {
-    windowOpen: seed.windowOpen !== false,
-    results: structuredClone(seed.results),
-    bets: structuredClone(seed.bets),
-  };
-  writeFileSync(STORE_PATH, JSON.stringify(init, null, 2));
-  return init;
+  let s;
+  if (existsSync(STORE_PATH)) s = JSON.parse(readFileSync(STORE_PATH, 'utf8'));
+  else s = { windowOpen: seed.windowOpen !== false, results: structuredClone(seed.results), bets: structuredClone(seed.bets) };
+  // migração / campos novos do mata-mata
+  if (!s.windows) s.windows = defaultWindows(s.windowOpen !== false);
+  if (!s.knockouts) s.knockouts = {}; // { matchId: { home, away, homeGoals, awayGoals, winner, method } }
+  for (const b of s.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; }
+  writeFileSync(STORE_PATH, JSON.stringify(s, null, 2));
+  return s;
 }
 let store = loadStore();
 const saveStore = () => writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
@@ -102,7 +114,7 @@ function validateBet(b) {
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups);
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts });
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -134,6 +146,8 @@ function publicBet(b) {
     champion: b.champion,
     final4: b.final4,
     groups: b.groups,
+    knockouts: b.knockouts || {},
+    jokers: b.jokers || [],
     seed: !!b.seed,
     hasPin: !!b.pin,
     submittedAt: b.submittedAt || null,
@@ -142,7 +156,8 @@ function publicBet(b) {
 function submissionStatus() {
   const submitted = store.bets.map((b) => b.player);
   return {
-    windowOpen: store.windowOpen,
+    windowOpen: store.windows.grupos,
+    windows: store.windows,
     total: store.bets.length,
     seedPlayers: seed.bets.map((b) => b.player),
     submitted,
@@ -159,8 +174,20 @@ async function api(req, res, path) {
       groupOrder: GROUP_ORDER,
       teams: TEAMS,
       meta: META,
-      windowOpen: store.windowOpen,
+      windowOpen: store.windows.grupos,
+      windows: store.windows,
+      koRounds: BRACKET.rounds.map((r) => ({ id: r.id, label: r.label, joker: !!r.joker, winPts: r.winPts, methodPts: r.methodPts, matches: r.matches })),
       players: store.bets.map((b) => ({ player: b.player, seed: !!b.seed, hasPin: !!b.pin })),
+    });
+  }
+
+  if (path === '/api/bracket' && method === 'GET') {
+    const w = world();
+    return json(res, 200, {
+      rounds: BRACKET.rounds,
+      matches: BRACKET.matches,
+      resolved: resolveBracket(BRACKET, w.standings, store.knockouts),
+      windows: store.windows,
     });
   }
 
@@ -252,6 +279,48 @@ async function api(req, res, path) {
     return json(res, 201, { ok: true, created: true, bet: publicBet(bet) });
   }
 
+  // aposta de mata-mata (vencedor + fase por jogo de uma ronda + jokers)
+  if (path === '/api/bet/knockout' && method === 'POST') {
+    const body = await readBody(req);
+    const existing = store.bets.find((b) => b.player === (body.player || '').trim());
+    if (!existing) return json(res, 404, { errors: ['Jogador não encontrado. Faz primeiro a aposta da fase de grupos.'] });
+    const round = body.round;
+    if (!KO_ROUNDS.includes(round)) return json(res, 400, { errors: ['Ronda inválida.'] });
+    if (!store.windows[round] && !isAdmin(req)) return json(res, 403, { errors: [`A janela de apostas (${round}) está fechada.`] });
+    if (existing.pin && existing.pin !== (body.pin || '') && !isAdmin(req)) {
+      return json(res, 403, { errors: ['PIN incorreto para editar esta aposta.'] });
+    }
+    const w = world();
+    const resolved = resolveBracket(BRACKET, w.standings, store.knockouts);
+    const errors = [];
+    const picks = body.picks || {};
+    for (const [mid, pick] of Object.entries(picks)) {
+      if (matchRound[mid] !== round) { errors.push(`Jogo ${mid} não é da ronda ${round}.`); continue; }
+      const teams = [resolved[mid]?.home?.team, resolved[mid]?.away?.team].filter(Boolean);
+      if (pick.winner && !teams.includes(pick.winner)) errors.push(`Jogo ${mid}: vencedor inválido.`);
+      if (pick.method && !['TR', 'PROL', 'PEN'].includes(pick.method)) errors.push(`Jogo ${mid}: fase inválida.`);
+    }
+    // junta as escolhas desta ronda à aposta
+    const merged = { ...(existing.knockouts || {}) };
+    for (const [mid, pick] of Object.entries(picks)) {
+      if (!pick || !pick.winner) { delete merged[mid]; continue; }
+      merged[mid] = { winner: pick.winner, method: pick.method || null };
+    }
+    // jokers: lista completa do jogador (máx 2, só em rondas elegíveis, só em jogos apostados)
+    const jokers = [...new Set((body.jokers || []).map(String))];
+    if (jokers.length > 2) errors.push('No máximo 2 jokers.');
+    for (const j of jokers) {
+      if (!roundJoker[matchRound[j]]) errors.push(`Joker inválido no jogo ${j} (só 16-avos/8-avos/quartos).`);
+      else if (!merged[j]) errors.push(`Joker no jogo ${j} exige uma aposta nesse jogo.`);
+    }
+    if (errors.length) return json(res, 400, { errors });
+    existing.knockouts = merged;
+    existing.jokers = jokers;
+    existing.submittedAt = new Date().toISOString();
+    saveStore();
+    return json(res, 200, { ok: true, bet: publicBet(existing) });
+  }
+
   // ---------- admin ----------
   if (path === '/api/admin/login' && method === 'POST') {
     const body = await readBody(req);
@@ -267,9 +336,38 @@ async function api(req, res, path) {
 
     if (path === '/api/admin/window' && method === 'POST') {
       const body = await readBody(req);
-      store.windowOpen = !!body.open;
+      const round = body.round || 'grupos';
+      if (round !== 'grupos' && !KO_ROUNDS.includes(round)) return json(res, 400, { error: 'Ronda inválida.' });
+      store.windows[round] = !!body.open;
+      if (round === 'grupos') store.windowOpen = !!body.open;
       saveStore();
-      return json(res, 200, { windowOpen: store.windowOpen });
+      return json(res, 200, { windows: store.windows });
+    }
+
+    // resultado de um jogo do mata-mata (vencedor + fase)
+    if (path === '/api/admin/knockout' && method === 'POST') {
+      const body = await readBody(req);
+      const { match, home, away, homeGoals, awayGoals, winner, method } = body;
+      if (!BRACKET.matches[match]) return json(res, 400, { error: 'Jogo inválido.' });
+      if (winner && winner !== home && winner !== away) return json(res, 400, { error: 'Vencedor tem de ser uma das equipas.' });
+      if (method && !['TR', 'PROL', 'PEN'].includes(method)) return json(res, 400, { error: 'Fase inválida.' });
+      snapshotRanks();
+      store.knockouts[match] = {
+        home: home || null, away: away || null,
+        homeGoals: homeGoals == null ? null : Number(homeGoals),
+        awayGoals: awayGoals == null ? null : Number(awayGoals),
+        winner: winner || null, method: method || null,
+      };
+      saveStore();
+      return json(res, 200, { ok: true });
+    }
+
+    if (path === '/api/admin/knockout' && method === 'DELETE') {
+      const body = await readBody(req);
+      snapshotRanks();
+      delete store.knockouts[body.match];
+      saveStore();
+      return json(res, 200, { ok: true });
     }
 
     if (path === '/api/admin/result' && method === 'POST') {
@@ -311,8 +409,15 @@ async function api(req, res, path) {
           try { counts[upsertResult({ group, ...m })]++; } catch (e) { errors.push(`${group}: ${e.message}`); }
         }
       }
+      // mata-mata (best-effort): emparelhamentos + resultados já resolvidos
+      let koImported = 0;
+      try {
+        const standings = world().standings;
+        const ko = await fetchEspnKnockout({ codeToTeam, teamGroup, bracket: BRACKET, standings });
+        for (const [mid, m] of Object.entries(ko)) { store.knockouts[mid] = { ...(store.knockouts[mid] || {}), ...m }; koImported++; }
+      } catch (e) { errors.push('mata-mata: ' + e.message); }
       saveStore();
-      return json(res, 200, { ok: true, source: loaded.source, ...counts, imported: counts.novo + counts.atualizado, errors });
+      return json(res, 200, { ok: true, source: loaded.source, ...counts, imported: counts.novo + counts.atualizado, koImported, errors });
     }
 
     if (path === '/api/admin/result' && method === 'DELETE') {

@@ -81,13 +81,37 @@ export function qualifiedSet(standings, bestThirdsSet) {
   return set;
 }
 
+// Estado do mata-mata a partir do bracket + resultados reais dos jogos eliminatórios.
+// koResults: { "73": { home, away, homeGoals, awayGoals, winner, method }, ... } (method: TR|PROL|PEN)
+export function computeKnockout(bracket, koResults) {
+  const roundPts = {};
+  for (const r of bracket?.rounds || []) roundPts[r.id] = { win: r.winPts, method: r.methodPts, joker: !!r.joker };
+  const matchRound = {};
+  for (const [id, m] of Object.entries(bracket?.matches || {})) matchRound[id] = m.round;
+  const results = {};
+  for (const [id, r] of Object.entries(koResults || {})) {
+    if (!r || !r.winner) continue;
+    results[id] = { winner: r.winner, method: r.method || null, round: matchRound[id] };
+  }
+  // Final 4 = os 4 semifinalistas = participantes das meias-finais (jogos 101 e 102)
+  const final4 = [];
+  for (const sf of ['101', '102']) {
+    const m = koResults?.[sf];
+    if (m?.home) final4.push(m.home);
+    if (m?.away) final4.push(m.away);
+  }
+  const champion = koResults?.['104']?.winner || null;
+  return { roundPts, matchRound, results, final4, champion };
+}
+
 // Estado completo derivado dos resultados reais — calculado uma vez por pedido.
-export function computeWorldState(groups, resultsByGroup) {
+export function computeWorldState(groups, resultsByGroup, ko = null) {
   const standings = allStandings(groups, resultsByGroup);
   const thirds = bestThirds(standings);
   const qualified = qualifiedSet(standings, thirds.set);
   const matchesPlayed = Object.values(resultsByGroup).reduce((n, g) => n + (g?.length || 0), 0);
-  return { standings, thirds, qualified, matchesPlayed };
+  const knockout = ko ? computeKnockout(ko.bracket, ko.knockoutResults) : null;
+  return { standings, thirds, qualified, matchesPlayed, knockout };
 }
 
 // Posição real de uma equipa no seu grupo (1..4) ou null.
@@ -131,13 +155,34 @@ export function scoreBet(bet, world, groupOf) {
     detail.groups[g] = { mexido, position: groupPos, picks };
   }
 
-  // Apostas iniciais (campeão / Final 4) — só pontuam quando as eliminatórias resolverem.
-  // Enquanto não há dados de mata-mata, ficam a 0 ("por decidir").
-  if (world.championDecided && bet.champion && bet.champion === world.realChampion) {
-    detail.champion = CHAMPION_POINTS;
-  }
-  if (Array.isArray(world.realFinal4) && Array.isArray(bet.final4)) {
-    for (const t of bet.final4) if (world.realFinal4.includes(t)) detail.final4 += FINAL4_POINTS;
+  // Mata-mata: campeão (8), Final 4 (3 cada) e jogos eliminatórios (vencedor + fase + jokers).
+  const ko = world.knockout;
+  detail.knockoutDetail = {};
+  detail.correctWinners = 0; // prémio "acertei mais jogos" (vitórias acertadas nos playoffs)
+  if (ko) {
+    if (bet.champion && ko.champion && bet.champion === ko.champion) detail.champion = CHAMPION_POINTS;
+    if (Array.isArray(bet.final4) && ko.final4.length) {
+      for (const t of bet.final4) if (ko.final4.includes(t)) detail.final4 += FINAL4_POINTS;
+    }
+    const jokers = new Set((bet.jokers || []).map(String));
+    for (const [id, pick] of Object.entries(bet.knockouts || {})) {
+      const res = ko.results[id];
+      if (!res || !pick) continue; // jogo ainda não decidido
+      const cfg = ko.roundPts[res.round] || { win: 0, method: 0, joker: false };
+      const winnerCorrect = !!pick.winner && pick.winner === res.winner;
+      let pts = 0;
+      if (winnerCorrect) {
+        detail.correctWinners += 1;
+        pts = cfg.win;
+        if (pick.method && pick.method === res.method) pts += cfg.method;
+      }
+      const joker = jokers.has(String(id)) && cfg.joker;
+      if (joker) pts *= 2;
+      detail.knockout += pts;
+      detail.knockoutDetail[id] = {
+        pts, winnerCorrect, methodCorrect: winnerCorrect && pick.method === res.method, joker,
+      };
+    }
   }
 
   detail.total = detail.qualification + detail.position + detail.champion + detail.final4 + detail.knockout;

@@ -34,6 +34,21 @@ Não inventa resultados — só importa jogos **terminados** da fonte real. Clic
 traz os jogos novos e recalcula a classificação (com indicador de movimento).
 CLI equivalente: `node scripts/fetch_results.mjs` (escreve em `data/store.json`).
 
+### Mata-mata (eliminatórias)
+A transição grupos → eliminatórias é por **janelas de apostas** que o Admin abre **ronda a ronda**
+(16-avos → 8-avos → quartos → meias → 3.º/4.º → final).
+- **Cruzamento**: estrutura oficial do Mundial 2026 em [`data/bracket.json`](data/bracket.json)
+  (ex.: jogo 73 = 2.º A × 2.º B; jogo 79 = 1.º A × melhor 3.º de [C/E/F/H/I]). Os slots resolvem-se
+  em equipas reais a partir da classificação dos grupos; os 3.os e os emparelhamentos vêm da ESPN.
+- **Apostar**: quando uma ronda está aberta, cada jogo pede **vencedor** + **fase**
+  (Tempo regulamentar / Prolongamento / Penáltis) e permite **2 jokers** (16-avos/8-avos/quartos,
+  duplicam os pontos do jogo).
+- **Pontuação**: vencedor 2/4/6, fase +1/+2/+3 (só se o vencedor estiver certo), joker ×2;
+  Campeão 8 e Final 4 (3 cada) resolvem-se aqui. Tudo em `src/scoring.mjs` (com testes).
+- **Resultados (mata-mata)**: o Admin define vencedor + fase por jogo; *Buscar resultados* também
+  tenta preenchê-los pela ESPN (mapeando os jogos aos IDs do bracket por ponto-fixo). A deteção
+  TR/Prolongamento/Penáltis valida-se quando os jogos acontecerem.
+
 ## Stack
 Node ≥ 20, **zero dependências** (servidor em `node:http`, persistência em JSON). Frontend vanilla
 sem build. Arranca com um comando.
@@ -83,9 +98,11 @@ acessível, sem sinais de UI gerada por AI. Sem branding oficial do torneio.
 ## Estrutura
 ```
 server.mjs            servidor (http + API + estáticos + persistência JSON)
-src/scoring.mjs       motor de pontuação (de raiz) + testes
+src/scoring.mjs       motor de pontuação (grupos + mata-mata, de raiz) + testes
+src/bracket.mjs       resolução dos cruzamentos do mata-mata (slots -> equipas)
+src/results_source.mjs   fonte de resultados ao vivo (ESPN, grupos + mata-mata)
 scripts/build_seed.mjs   CSV/JSON reais -> data/seed.json
 scripts/fetch_flags.mjs  descarrega os 48 SVGs de bandeira
 public/               SPA (index.html, styles.css, app.js, flags/)
-data/                 groups.json, field_2026_real.csv, seed.json, store.json (runtime)
+data/                 groups.json, field_2026_real.csv, bracket.json, seed.json, store.json (runtime)
 ```
