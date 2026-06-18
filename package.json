@@ -1,0 +1,15 @@
+{
+  "name": "roni-roni-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "App do pool Torneio Roni Roni — submissão de apostas, classificação, admin e resultados. Conteúdo neutro (apostas, resultados, pontos).",
+  "scripts": {
+    "seed": "node scripts/build_seed.mjs",
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

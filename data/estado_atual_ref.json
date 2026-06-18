@@ -1,0 +1,280 @@
+{
+  "checkpoint": "grupos_pos_J1",
+  "modo": "grupos",
+  "grupos_resultados": {
+    "A": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "México",
+          "África do Sul",
+          2,
+          0
+        ],
+        [
+          "Coreia do Sul",
+          "Chéquia",
+          2,
+          1
+        ]
+      ]
+    },
+    "B": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Canadá",
+          "Bósnia-Herzegovina",
+          1,
+          1
+        ],
+        [
+          "Catar",
+          "Suíça",
+          1,
+          1
+        ]
+      ]
+    },
+    "C": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Brasil",
+          "Marrocos",
+          1,
+          1
+        ],
+        [
+          "Escócia",
+          "Haiti",
+          1,
+          0
+        ]
+      ]
+    },
+    "D": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "EUA",
+          "Paraguai",
+          4,
+          1
+        ],
+        [
+          "Austrália",
+          "Turquia",
+          2,
+          0
+        ]
+      ]
+    },
+    "E": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Alemanha",
+          "Curaçao",
+          7,
+          1
+        ],
+        [
+          "Costa do Marfim",
+          "Equador",
+          1,
+          0
+        ]
+      ]
+    },
+    "F": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Suécia",
+          "Tunísia",
+          5,
+          1
+        ],
+        [
+          "Holanda",
+          "Japão",
+          2,
+          2
+        ]
+      ]
+    },
+    "G": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Bélgica",
+          "Egito",
+          1,
+          1
+        ],
+        [
+          "Irão",
+          "Nova Zelândia",
+          2,
+          2
+        ]
+      ]
+    },
+    "H": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Espanha",
+          "Cabo Verde",
+          0,
+          0
+        ],
+        [
+          "Arábia Saudita",
+          "Uruguai",
+          1,
+          1
+        ]
+      ]
+    },
+    "I": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "França",
+          "Senegal",
+          3,
+          1
+        ],
+        [
+          "Noruega",
+          "Iraque",
+          4,
+          1
+        ]
+      ]
+    },
+    "J": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Argentina",
+          "Argélia",
+          3,
+          0
+        ],
+        [
+          "Áustria",
+          "Jordânia",
+          3,
+          1
+        ]
+      ]
+    },
+    "K": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Colômbia",
+          "Uzbequistão",
+          3,
+          1
+        ],
+        [
+          "Portugal",
+          "Congo",
+          1,
+          1
+        ]
+      ]
+    },
+    "L": {
+      "jornadas": 1,
+      "jogos": [
+        [
+          "Inglaterra",
+          "Croácia",
+          4,
+          2
+        ],
+        [
+          "Gana",
+          "Panamá",
+          1,
+          0
+        ]
+      ]
+    }
+  },
+  "minhas_apostas": {
+    "campeao": "Espanha",
+    "final4": [
+      "Espanha",
+      "França",
+      "Inglaterra",
+      "Argentina"
+    ],
+    "grupos": {
+      "A": [
+        "México",
+        "Coreia do Sul"
+      ],
+      "B": [
+        "Suíça",
+        "Canadá"
+      ],
+      "C": [
+        "Brasil",
+        "Marrocos"
+      ],
+      "D": [
+        "Turquia",
+        "EUA"
+      ],
+      "E": [
+        "Alemanha",
+        "Equador"
+      ],
+      "F": [
+        "Holanda",
+        "Japão"
+      ],
+      "G": [
+        "Bélgica",
+        "Irão"
+      ],
+      "H": [
+        "Espanha",
+        "Uruguai"
+      ],
+      "I": [
+        "França",
+        "Senegal"
+      ],
+      "J": [
+        "Argentina",
+        "Áustria"
+      ],
+      "K": [
+        "Portugal",
+        "Colômbia"
+      ],
+      "L": [
+        "Inglaterra",
+        "Croácia"
+      ]
+    },
+    "terceiros": [
+      "Noruega",
+      "Argélia",
+      "Chéquia",
+      "Austrália",
+      "Bósnia-Herzegovina",
+      "Escócia",
+      "Costa do Marfim",
+      "Egito"
+    ],
+    "grupos_mexidos": []
+  }
+}

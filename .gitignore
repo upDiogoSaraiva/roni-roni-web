@@ -1,0 +1,12 @@
+# dependências (não há runtime deps, mas por segurança)
+node_modules/
+
+# estado mutável gerado em runtime (recriado a partir de data/seed.json no 1.º arranque)
+data/store.json
+
+# screenshots de teste e artefactos do browser
+/*.png
+.playwright-mcp/
+
+.DS_Store
+Thumbs.db

@@ -1,0 +1,162 @@
+// Motor de pontuação — implementado de raiz a partir do regulamento do Torneio Roni Roni.
+// NÃO importa nada do motor de decisão (wc2026-roni); só aplica as regras de pontos.
+//
+// Regulamento (fase de grupos):
+//   - Cada equipa corretamente identificada como APURADA: +1 (independente da posição prevista).
+//   - POSIÇÃO final correta no grupo (1.º/2.º/3.º): +1.
+//   - 3.º só pontua (apura) se entrar nos 8 MELHORES 3.os do torneio inteiro.
+//   - Alterar picks de um grupo após o início faz perder o bónus de POSIÇÃO desse grupo
+//     (mantém-se o +1 de apuramento por equipa).
+// Apostas iniciais: Campeão = 8; cada seleção do Final 4 = 3.
+// Eliminatórias: apostadas ronda a ronda (fora da aposta inicial; 0 enquanto não há dados).
+//
+// Apuram-se 32 equipas: 1.º e 2.º de cada grupo (24) + os 8 melhores 3.os.
+
+const CHAMPION_POINTS = 8;
+const FINAL4_POINTS = 3;
+
+// Desempate de classificação de grupo: pontos, diferença de golos, golos marcados e,
+// como critério final transparente, ordem alfabética (estável e explicável num protótipo).
+function compareStanding(a, b) {
+  if (b.points !== a.points) return b.points - a.points;
+  if (b.gd !== a.gd) return b.gd - a.gd;
+  if (b.gf !== a.gf) return b.gf - a.gf;
+  return a.team.localeCompare(b.team, 'pt');
+}
+
+// Classificação de UM grupo a partir dos jogos já inseridos (3/1/0).
+export function standingsForGroup(teams, games) {
+  const rows = new Map(
+    teams.map((team) => [team, { team, played: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, points: 0 }]),
+  );
+  for (const g of games) {
+    const home = rows.get(g.home);
+    const away = rows.get(g.away);
+    if (!home || !away) continue; // jogo com equipa fora do grupo — ignora defensivamente
+    if (g.homeGoals == null || g.awayGoals == null) continue;
+    home.played++; away.played++;
+    home.gf += g.homeGoals; home.ga += g.awayGoals;
+    away.gf += g.awayGoals; away.ga += g.homeGoals;
+    if (g.homeGoals > g.awayGoals) { home.w++; home.points += 3; away.l++; }
+    else if (g.homeGoals < g.awayGoals) { away.w++; away.points += 3; home.l++; }
+    else { home.d++; away.d++; home.points++; away.points++; }
+  }
+  const list = [...rows.values()];
+  for (const r of list) r.gd = r.gf - r.ga;
+  list.sort(compareStanding);
+  list.forEach((r, i) => (r.rank = i + 1));
+  return list;
+}
+
+// Classificação de todos os grupos.
+export function allStandings(groups, resultsByGroup) {
+  const out = {};
+  for (const [g, teams] of Object.entries(groups)) {
+    out[g] = standingsForGroup(teams, resultsByGroup[g] || []);
+  }
+  return out;
+}
+
+// Os 8 melhores 3.os do torneio inteiro (corte global), por pontos/DG/GM.
+export function bestThirds(standings, limit = 8) {
+  const thirds = [];
+  for (const [g, list] of Object.entries(standings)) {
+    const third = list.find((r) => r.rank === 3);
+    if (third) thirds.push({ ...third, group: g });
+  }
+  thirds.sort(compareStanding);
+  const qualified = thirds.slice(0, limit);
+  return {
+    ranked: thirds.map((t, i) => ({ ...t, thirdRank: i + 1, qualifies: i < limit })),
+    set: new Set(qualified.map((t) => t.team)),
+  };
+}
+
+// Conjunto das 32 equipas apuradas: 1.º + 2.º de cada grupo + 8 melhores 3.os.
+export function qualifiedSet(standings, bestThirdsSet) {
+  const set = new Set(bestThirdsSet);
+  for (const list of Object.values(standings)) {
+    for (const r of list) if (r.rank === 1 || r.rank === 2) set.add(r.team);
+  }
+  return set;
+}
+
+// Estado completo derivado dos resultados reais — calculado uma vez por pedido.
+export function computeWorldState(groups, resultsByGroup) {
+  const standings = allStandings(groups, resultsByGroup);
+  const thirds = bestThirds(standings);
+  const qualified = qualifiedSet(standings, thirds.set);
+  const matchesPlayed = Object.values(resultsByGroup).reduce((n, g) => n + (g?.length || 0), 0);
+  return { standings, thirds, qualified, matchesPlayed };
+}
+
+// Posição real de uma equipa no seu grupo (1..4) ou null.
+function rankOf(standings, group, team) {
+  const row = (standings[group] || []).find((r) => r.team === team);
+  return row ? row.rank : null;
+}
+
+// Pontua UMA aposta contra o estado real. Devolve total e detalhe por secção.
+export function scoreBet(bet, world, groupOf) {
+  const { standings, thirds, qualified } = world;
+  const detail = { groups: {}, qualification: 0, position: 0, champion: 0, final4: 0, knockout: 0 };
+
+  // Equipas distintas que o jogador previu apurar (qualquer slot) -> +1 por equipa apurada.
+  const predicted = new Set();
+  for (const g of Object.keys(bet.groups || {})) {
+    const { first, second, third } = bet.groups[g] || {};
+    for (const t of [first, second, third]) if (t) predicted.add(t);
+  }
+  for (const team of predicted) if (qualified.has(team)) detail.qualification += 1;
+
+  // Bónus de posição, grupo a grupo (perde-se num grupo "mexido").
+  for (const g of Object.keys(bet.groups || {})) {
+    const pick = bet.groups[g] || {};
+    const mexido = !!pick.mexido;
+    const gd = { first: 0, second: 0, third: 0, mexido };
+    if (!mexido) {
+      if (pick.first && rankOf(standings, g, pick.first) === 1) gd.first = 1;
+      if (pick.second && rankOf(standings, g, pick.second) === 2) gd.second = 1;
+      // 3.º: só pontua posição se a equipa for de facto 3.º E entrar nos 8 melhores 3.os.
+      if (pick.third && rankOf(standings, g, pick.third) === 3 && thirds.set.has(pick.third)) {
+        gd.third = 1;
+      }
+    }
+    detail.position += gd.first + gd.second + gd.third;
+    detail.groups[g] = gd;
+  }
+
+  // Apostas iniciais (campeão / Final 4) — só pontuam quando as eliminatórias resolverem.
+  // Enquanto não há dados de mata-mata, ficam a 0 ("por decidir").
+  if (world.championDecided && bet.champion && bet.champion === world.realChampion) {
+    detail.champion = CHAMPION_POINTS;
+  }
+  if (Array.isArray(world.realFinal4) && Array.isArray(bet.final4)) {
+    for (const t of bet.final4) if (world.realFinal4.includes(t)) detail.final4 += FINAL4_POINTS;
+  }
+
+  detail.total = detail.qualification + detail.position + detail.champion + detail.final4 + detail.knockout;
+  return detail;
+}
+
+// Constrói a tabela de classificação geral (ordenada por pontos, depois nome).
+export function leaderboard(bets, world, groupOf) {
+  const rows = bets.map((bet) => {
+    const score = scoreBet(bet, world, groupOf);
+    return { player: bet.player, score, seed: !!bet.seed };
+  });
+  rows.sort((a, b) => b.score.total - a.score.total || a.player.localeCompare(b.player, 'pt'));
+  // posições com empates (mesma posição para pontuações iguais)
+  let lastPoints = null;
+  let lastRank = 0;
+  rows.forEach((r, i) => {
+    if (r.score.total !== lastPoints) {
+      lastRank = i + 1;
+      lastPoints = r.score.total;
+    }
+    r.rank = lastRank;
+  });
+  return rows;
+}
+
+export const POINTS = { CHAMPION_POINTS, FINAL4_POINTS };
