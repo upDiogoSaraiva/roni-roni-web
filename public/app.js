@@ -315,28 +315,50 @@ async function pageGeral() {
   paint();
 }
 
+// chips de pontos por seleção: verde = apurou (+1), âmbar = posição certa (+1)
+function pointBadges(pick) {
+  const b = el('span', { class: 'pt-badges' });
+  if (!pick) return b;
+  if (pick.credited) b.appendChild(el('span', { class: 'pt-chip apura', title: 'Apurou (+1)' }, '+1'));
+  if (pick.position) b.appendChild(el('span', { class: 'pt-chip pos', title: 'Posição certa (+1)' }, '+1'));
+  if (pick.qualifies && !pick.credited) b.appendChild(el('span', { class: 'pt-chip dup', title: 'Apurou, mas já contada noutro lugar' }, '✓'));
+  if (!pick.qualifies) b.appendChild(el('span', { class: 'pt-chip out', title: 'Não apurou' }, '—'));
+  return b;
+}
+function sheetLine(label, team, pick) {
+  if (!team) return null;
+  const qualifies = pick ? pick.qualifies : null;
+  return el('div', { class: 'sheet-line' + (qualifies === false ? ' faded' : '') },
+    el('span', { class: 'pos' }, label), teamChip(team), pointBadges(pick));
+}
 function sheetDetail(bet, score) {
   const box = el('div', { class: 'lb-detail' });
   if (!bet) { box.appendChild(el('p', { class: 'muted' }, 'Sem folha.')); return box; }
   box.appendChild(el('div', { class: 'sheet-top' },
     el('div', { class: 'kv' }, el('b', {}, 'Campeão'), teamChip(bet.champion)),
     ...bet.final4.map((t) => el('div', { class: 'kv' }, el('b', {}, 'Final 4'), teamChip(t)))));
+  box.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', margin: '0 0 4px' } },
+    'Campeão e Final 4 contam nas eliminatórias.'));
   if (score) {
     box.appendChild(el('div', { class: 'sheet-top' },
-      el('div', { class: 'kv' }, el('b', {}, 'Apuramento'), el('span', { class: 'num' }, '+' + score.qualification)),
-      el('div', { class: 'kv' }, el('b', {}, 'Posições'), el('span', { class: 'num' }, '+' + score.position)),
+      el('div', { class: 'kv' }, el('b', {}, 'Apuramento'), el('span', { class: 'num', style: { color: 'var(--ok)' } }, '+' + score.qualification)),
+      el('div', { class: 'kv' }, el('b', {}, 'Posições'), el('span', { class: 'num', style: { color: 'var(--gold)' } }, '+' + score.position)),
       el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total))));
   }
+  box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo · de onde vêm os pontos'));
+  box.appendChild(el('div', { class: 'sheet-legend' },
+    el('span', {}, el('span', { class: 'pt-chip apura' }, '+1'), 'apurou'),
+    el('span', {}, el('span', { class: 'pt-chip pos' }, '+1'), 'posição certa')));
   const grid = el('div', { class: 'sheet-grid' });
   for (const g of STATE.groupOrder) {
     const p = bet.groups[g] || {};
+    const picks = (score && score.groups && score.groups[g] && score.groups[g].picks) || {};
     grid.appendChild(el('div', { class: 'sheet-grp' },
       el('div', { class: 'g' }, 'GRUPO ' + g),
-      el('div', { class: 'sheet-line' }, el('span', { class: 'pos' }, '1.º'), teamChip(p.first)),
-      el('div', { class: 'sheet-line' }, el('span', { class: 'pos' }, '2.º'), teamChip(p.second)),
-      p.third && el('div', { class: 'sheet-line' }, el('span', { class: 'pos' }, '3.º'), teamChip(p.third))));
+      sheetLine('1.º', p.first, picks.first),
+      sheetLine('2.º', p.second, picks.second),
+      p.third ? sheetLine('3.º', p.third, picks.third) : null));
   }
-  box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo'));
   box.appendChild(grid);
   return box;
 }

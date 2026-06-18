@@ -101,29 +101,34 @@ export function scoreBet(bet, world, groupOf) {
   const { standings, thirds, qualified } = world;
   const detail = { groups: {}, qualification: 0, position: 0, champion: 0, final4: 0, knockout: 0 };
 
-  // Equipas distintas que o jogador previu apurar (qualquer slot) -> +1 por equipa apurada.
-  const predicted = new Set();
-  for (const g of Object.keys(bet.groups || {})) {
-    const { first, second, third } = bet.groups[g] || {};
-    for (const t of [first, second, third]) if (t) predicted.add(t);
-  }
-  for (const team of predicted) if (qualified.has(team)) detail.qualification += 1;
-
-  // Bónus de posição, grupo a grupo (perde-se num grupo "mexido").
+  // Pontua slot a slot, guardando o detalhe por seleção (de onde vieram os pontos).
+  // Apuramento conta UMA vez por equipa distinta (credita-se a 1.ª ocorrência).
+  const credited = new Set();
+  const SLOTS = [['first', 1], ['second', 2], ['third', 3]];
   for (const g of Object.keys(bet.groups || {})) {
     const pick = bet.groups[g] || {};
     const mexido = !!pick.mexido;
-    const gd = { first: 0, second: 0, third: 0, mexido };
-    if (!mexido) {
-      if (pick.first && rankOf(standings, g, pick.first) === 1) gd.first = 1;
-      if (pick.second && rankOf(standings, g, pick.second) === 2) gd.second = 1;
-      // 3.º: só pontua posição se a equipa for de facto 3.º E entrar nos 8 melhores 3.os.
-      if (pick.third && rankOf(standings, g, pick.third) === 3 && thirds.set.has(pick.third)) {
-        gd.third = 1;
+    const picks = {};
+    let groupPos = 0;
+    for (const [slot, expectedRank] of SLOTS) {
+      const team = pick[slot] || null;
+      if (!team) { picks[slot] = null; continue; }
+      const qualifies = qualified.has(team);
+      // +1 de apuramento (uma vez por equipa)
+      const creditQ = qualifies && !credited.has(team);
+      if (creditQ) { credited.add(team); detail.qualification += 1; }
+      // +1 de posição exata (3.º só se for 3.º real E entrar nos 8 melhores; perde-se em grupo mexido)
+      let position = 0;
+      if (!mexido) {
+        if (slot === 'third') {
+          if (rankOf(standings, g, team) === 3 && thirds.set.has(team)) position = 1;
+        } else if (rankOf(standings, g, team) === expectedRank) position = 1;
       }
+      groupPos += position;
+      picks[slot] = { team, qualifies, credited: creditQ, position };
     }
-    detail.position += gd.first + gd.second + gd.third;
-    detail.groups[g] = gd;
+    detail.position += groupPos;
+    detail.groups[g] = { mexido, position: groupPos, picks };
   }
 
   // Apostas iniciais (campeão / Final 4) — só pontuam quando as eliminatórias resolverem.

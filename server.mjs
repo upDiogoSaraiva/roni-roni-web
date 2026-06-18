@@ -151,7 +151,7 @@ async function api(req, res, path) {
       totalPoints += r.score.total;
       for (const g of GROUP_ORDER) {
         const gd = r.score.groups[g];
-        if (gd) pointsByGroup[g] += gd.first + gd.second + gd.third;
+        if (gd) pointsByGroup[g] += gd.position;
       }
     }
     return json(res, 200, {

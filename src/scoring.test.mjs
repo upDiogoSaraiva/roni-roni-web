@@ -95,6 +95,28 @@ test('3.º só pontua se entrar nos 8 melhores 3.os', () => {
   assert.equal(dIn.position, 3);
 });
 
+test('detalhe por seleção: apurou (verde) e posição (âmbar) por slot', () => {
+  const world = computeWorldState(groups, results);
+  const bet = { groups: { A: { first: 'Alfa', second: 'Charlie', third: null } } };
+  const d = scoreBet(bet, world, () => 'A');
+  const a = d.groups.A.picks;
+  // Alfa: apura (1.ª vez -> creditado) e posição 1.º certa
+  assert.deepEqual({ q: a.first.qualifies, c: a.first.credited, p: a.first.position }, { q: true, c: true, p: 1 });
+  // Charlie previsto como 2.º mas é 3.º: apura (nos 8 melhores) mas posição 2.º errada
+  assert.deepEqual({ q: a.second.qualifies, c: a.second.credited, p: a.second.position }, { q: true, c: true, p: 0 });
+  assert.equal(a.third, null);
+});
+
+test('detalhe não credita apuramento duas vezes para a mesma equipa', () => {
+  const world = computeWorldState(groups, results);
+  const bet = { groups: { A: { first: 'Alfa', second: 'Bravo', third: 'Alfa' } } };
+  const d = scoreBet(bet, world, () => 'A');
+  assert.equal(d.groups.A.picks.first.credited, true);
+  assert.equal(d.groups.A.picks.third.qualifies, true);
+  assert.equal(d.groups.A.picks.third.credited, false); // já contado no 1.º slot
+  assert.equal(d.qualification, 2);
+});
+
 test('não há dupla contagem quando a mesma equipa aparece em dois slots', () => {
   const world = computeWorldState(groups, results);
   // Alfa como 1.º E como 3.º (dado real tem quirks destes). Apura uma só vez.
