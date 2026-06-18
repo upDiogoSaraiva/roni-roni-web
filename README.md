@@ -1,108 +1,143 @@
-# Roni Roni — app do pool
+# Roni Roni
 
-App web (protótipo) do pool **Torneio Roni Roni** do Mundial 2026, pensada para substituir o
-Excel partilhado. **Mobile-first** (abre-se pelo link no telemóvel a partir do WhatsApp) e também
-responsiva em desktop.
+Aplicação web do pool de apostas **Torneio Roni Roni** para o Campeonato do Mundo de 2026,
+criada para substituir a folha de Excel partilhada do grupo. É *mobile-first*: os participantes
+abrem o link no telemóvel, submetem a aposta e acompanham a classificação ao vivo.
 
-Conteúdo **estritamente neutro**: apostas, resultados e pontos. Sem probabilidades, recomendações
-ou qualquer output de motor de decisão. Repositório separado e autónomo.
+<p align="center">
+  <img src="docs/leaderboard.png" width="31%" alt="Classificação geral" />
+  <img src="docs/apostar.png" width="31%" alt="Submissão de apostas" />
+  <img src="docs/resultados.png" width="31%" alt="Resultados por grupo" />
+</p>
 
-## O que faz (4 áreas)
-- **Apostar** — formulário guiado por passos com barra de progresso: identificação (escolher-se da
-  lista dos 27 ou nome novo; PIN opcional) → Campeão → Final 4 → 12 grupos (1.º e 2.º) → 8 melhores
-  3.os → revisão → sucesso. Selects pesquisáveis, validação inline, edição da própria aposta.
-- **Geral** — leaderboard ao vivo: posição, pontos, indicador de movimento, destaque do topo,
-  ordenável, pesquisa, e folha pública ao expandir cada jogador.
-- **Resultados** — jogos por jornada, classificação por grupo (top-2 + 8 melhores 3.os) e pontos
-  distribuídos.
-- **Admin** — grelha de todas as apostas (pesquisa/filtro), estado das submissões, edição de
-  resultados (botão **Gravar** por grupo, recalcula tudo), **Buscar resultados** (importa de uma
-  fonte) e abrir/fechar a janela. Password simples.
+## Índice
 
-### Buscar resultados (fetch)
-O botão *Buscar resultados* (Admin) corre `loadResultsSource()` e sincroniza a fase de grupos a
-partir de uma fonte real, por ordem:
-1. `RESULTS_SOURCE_URL` — um feed JSON `{ "groups": { "A": [{home,away,homeGoals,awayGoals,matchday}] } }`;
-2. **ESPN ao vivo** (por defeito) — `site.api.espn.com/.../soccer/fifa.world/scoreboard`, **sem chave**.
-   Os jogos vêm com nomes em inglês e juntam-se às seleções do pool pelo **código FIFA**
-   (abbreviation ESPN == `teams_meta.code`), imune a diacríticos (`Türkiye`→`Turquia`,
-   `Ivory Coast`→`Costa do Marfim`). O grupo é determinado pelo `groups.json` (o mata-mata é
-   excluído pela verificação "mesmo grupo");
-3. `data/results_source.json` — fallback local, caso a ESPN esteja indisponível.
+- [Funcionalidades](#funcionalidades)
+- [Stack](#stack)
+- [Arranque](#arranque)
+- [Configuração](#configuração)
+- [Sistema de pontos](#sistema-de-pontos)
+- [Fonte de resultados](#fonte-de-resultados)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Testes](#testes)
+- [Notas](#notas)
 
-Não inventa resultados — só importa jogos **terminados** da fonte real. Clicar *Buscar resultados*
-traz os jogos novos e recalcula a classificação (com indicador de movimento).
-CLI equivalente: `node scripts/fetch_results.mjs` (escreve em `data/store.json`).
+## Funcionalidades
 
-### Mata-mata (eliminatórias)
-A transição grupos → eliminatórias é por **janelas de apostas** que o Admin abre **ronda a ronda**
-(16-avos → 8-avos → quartos → meias → 3.º/4.º → final).
-- **Cruzamento**: estrutura oficial do Mundial 2026 em [`data/bracket.json`](data/bracket.json)
-  (ex.: jogo 73 = 2.º A × 2.º B; jogo 79 = 1.º A × melhor 3.º de [C/E/F/H/I]). Os slots resolvem-se
-  em equipas reais a partir da classificação dos grupos; os 3.os e os emparelhamentos vêm da ESPN.
-- **Apostar**: quando uma ronda está aberta, cada jogo pede **vencedor** + **fase**
-  (Tempo regulamentar / Prolongamento / Penáltis) e permite **2 jokers** (16-avos/8-avos/quartos,
-  duplicam os pontos do jogo).
-- **Pontuação**: vencedor 2/4/6, fase +1/+2/+3 (só se o vencedor estiver certo), joker ×2;
-  Campeão 8 e Final 4 (3 cada) resolvem-se aqui. Tudo em `src/scoring.mjs` (com testes).
-- **Resultados (mata-mata)**: o Admin define vencedor + fase por jogo; *Buscar resultados* também
-  tenta preenchê-los pela ESPN (mapeando os jogos aos IDs do bracket por ponto-fixo). A deteção
-  TR/Prolongamento/Penáltis valida-se quando os jogos acontecerem.
+- **Submissão de apostas** guiada por passos: campeão, Final 4, 1.º e 2.º de cada grupo e os
+  8 melhores 3.os classificados. Validação inline, ecrã de revisão e edição da própria aposta
+  (com PIN opcional).
+- **Classificação ao vivo**, ordenável e pesquisável, com indicador de movimento e a folha
+  pública de cada jogador (incluindo a origem dos pontos).
+- **Resultados** por grupo, com a classificação de cada grupo e o quadro do mata-mata.
+- **Mata-mata**: apostas ronda a ronda (vencedor, fase — tempo regulamentar, prolongamento ou
+  penáltis — e 2 jokers), com o cruzamento oficial do torneio.
+- **Administração** protegida por palavra-passe: edição de resultados, abertura e fecho das
+  janelas de apostas e grelha com as apostas de todos os participantes.
+- **Resultados reais automáticos**, importados de uma fonte pública (ESPN), e tema claro/escuro.
 
 ## Stack
-Node ≥ 20, **zero dependências** (servidor em `node:http`, persistência em JSON). Frontend vanilla
-sem build. Arranca com um comando.
 
-## Correr
+Node.js (versão 20 ou superior), **sem dependências externas** — o servidor usa apenas o módulo
+`node:http` e persiste o estado num ficheiro JSON. O frontend é uma *single-page application* em
+JavaScript, sem passo de *build*.
+
+## Arranque
+
 ```bash
-npm run seed     # (opcional) regenera data/seed.json a partir dos dados reais
-npm start        # arranca em http://0.0.0.0:4026
+git clone https://github.com/upDiogoSaraiva/roni-roni-web.git
+cd roni-roni-web
+npm start
 ```
-Variáveis: `PORT` (4026), `HOST` (0.0.0.0), `ADMIN_PASSWORD` (`roni2026` por defeito).
 
-Estado mutável (apostas + resultados + janela) vive em `data/store.json`, criado no 1.º arranque a
-partir de `data/seed.json` (as 27 apostas reais + os resultados reais pós-jornada 1). Para repor o
-estado inicial: apagar `data/store.json` e reiniciar.
+A aplicação fica disponível em `http://localhost:4026`. O estado inicial (`data/store.json`) é
+criado no primeiro arranque a partir de `data/seed.json`; para o repor, basta apagar esse ficheiro.
 
-## Partilhar fora da rede (túnel temporário)
-O servidor faz bind a `0.0.0.0`, por isso já é acessível na LAN em `http://<ip-local>:4026`.
-Para um link público temporário, com o servidor a correr:
+Para regenerar os dados-semente a partir das fontes reais:
+
 ```bash
-# cloudflared (sem conta):
-cloudflared tunnel --url http://localhost:4026
-
-# ou ngrok (requer conta/token):
-ngrok http 4026
+npm run seed
 ```
-Qualquer um imprime um URL `https://…` para enviar a um amigo.
 
-## Dados e pontuação
-- **Dados reais**: 48 seleções por grupo (A–L), 27 apostas reais e os resultados reais conhecidos,
-  importados dos dados do pool. Bandeiras SVG locais em `public/flags/` (domínio público).
-- **Pontuação implementada de raiz** a partir do regulamento (ver `src/scoring.mjs`, testes em
-  `src/scoring.test.mjs` — `npm test`):
-  - +1 por cada equipa corretamente identificada como **apurada** (top-2 do grupo ou um dos
-    **8 melhores 3.os**), contada uma vez por equipa.
-  - +1 por **posição** exata (1.º/2.º; o 3.º só conta se entrar nos 8 melhores 3.os).
-  - Campeão = 8 e cada seleção do Final 4 = 3 (resolvem nas eliminatórias; 0 durante os grupos).
-  - Classificação de grupo por 3/1/0, desempate por DG, golos marcados e nome.
+## Configuração
 
-Durante a fase de grupos a classificação é **provisória/ao vivo**: recalcula a cada resultado
-inserido no Admin.
+Comportamento controlado por variáveis de ambiente (todas opcionais):
 
-## Design
-Ver [`DESIGN_WEB.md`](DESIGN_WEB.md) — identidade própria (paleta *ember* + ouro escasso, neutros
-quentes; Space Grotesk / Hanken Grotesk / DM Mono), mobile-first, todos os estados tratados,
-acessível, sem sinais de UI gerada por AI. Sem branding oficial do torneio.
+| Variável | Por omissão | Descrição |
+| --- | --- | --- |
+| `PORT` | `4026` | Porta do servidor. |
+| `HOST` | `0.0.0.0` | Interface de *bind* (acessível na rede local). |
+| `ADMIN_PASSWORD` | `roni2026` | Palavra-passe da área de administração. |
+| `RESULTS_SOURCE_URL` | — | Feed JSON alternativo para os resultados (ver abaixo). |
 
-## Estrutura
+## Sistema de pontos
+
+Implementado de raiz a partir do regulamento, em [`src/scoring.mjs`](src/scoring.mjs).
+
+**Fase de grupos**
+
+- +1 por cada equipa corretamente identificada como apurada (1.º, 2.º ou um dos 8 melhores 3.os).
+- +1 por cada posição final correta no grupo.
+
+**Mata-mata** (apostado ronda a ronda)
+
+| Ronda | Vencedor | Fase correta |
+| --- | --- | --- |
+| 16-avos, 8-avos, quartos | 2 | +1 |
+| Meias-finais e 3.º/4.º | 4 | +2 |
+| Final | 6 | +3 |
+
+A fase só pontua se o vencedor estiver certo. Cada um dos 2 jokers (16-avos a quartos) duplica os
+pontos de um jogo. As apostas iniciais valem 8 pontos pelo campeão e 3 por cada seleção do Final 4.
+
+Durante a fase de grupos a classificação é provisória e recalcula a cada resultado inserido.
+
+## Fonte de resultados
+
+O botão *Buscar resultados* (administração) sincroniza os jogos a partir de uma fonte real, por
+esta ordem de prioridade:
+
+1. `RESULTS_SOURCE_URL`, se definido — um feed JSON no formato
+   `{ "groups": { "A": [{ "home": "...", "away": "...", "homeGoals": 0, "awayGoals": 0 }] } }`.
+2. A API pública da ESPN (`fifa.world`), sem necessidade de chave — usada por omissão para a fase
+   de grupos e para o mata-mata. As seleções são associadas pelo código FIFA.
+3. `data/results_source.json` como alternativa local, caso a fonte online esteja indisponível.
+
+São importados apenas jogos terminados; nenhum resultado é inventado. O equivalente em linha de
+comandos é `node scripts/fetch_results.mjs`.
+
+## Estrutura do projeto
+
 ```
-server.mjs            servidor (http + API + estáticos + persistência JSON)
-src/scoring.mjs       motor de pontuação (grupos + mata-mata, de raiz) + testes
-src/bracket.mjs       resolução dos cruzamentos do mata-mata (slots -> equipas)
-src/results_source.mjs   fonte de resultados ao vivo (ESPN, grupos + mata-mata)
-scripts/build_seed.mjs   CSV/JSON reais -> data/seed.json
-scripts/fetch_flags.mjs  descarrega os 48 SVGs de bandeira
-public/               SPA (index.html, styles.css, app.js, flags/)
-data/                 groups.json, field_2026_real.csv, bracket.json, seed.json, store.json (runtime)
+roni-roni-web/
+├── server.mjs              servidor HTTP, API e persistência em JSON
+├── data/
+│   ├── groups.json         as 48 seleções por grupo (A–L)
+│   ├── bracket.json        cruzamento oficial do mata-mata
+│   ├── field_2026_real.csv apostas reais (origem dos dados-semente)
+│   └── seed.json           estado inicial gerado
+├── src/
+│   ├── scoring.mjs         pontuação (grupos + mata-mata) e testes
+│   ├── bracket.mjs         resolução dos cruzamentos do mata-mata
+│   └── results_source.mjs  fonte de resultados ao vivo
+├── scripts/                geração dos dados-semente, bandeiras e fetch
+└── public/                 SPA (HTML, CSS, JavaScript e bandeiras SVG)
 ```
+
+As decisões de design da interface estão documentadas em [`DESIGN_WEB.md`](DESIGN_WEB.md).
+
+## Testes
+
+```bash
+npm test
+```
+
+A suite cobre o motor de pontuação: pontos de grupo, regra dos 8 melhores 3.os, ausência de
+dupla contagem, pontuação do mata-mata com jokers e a atribuição dos 3.os ao bracket.
+
+## Notas
+
+Projeto privado, de uso interno do grupo. Os dados incluem nomes reais dos participantes, pelo que
+o repositório deve manter-se privado. As bandeiras (SVG) provêm do projeto de domínio público
+[flag-icons](https://github.com/lipis/flag-icons). Não é usado qualquer logótipo ou marca oficial
+do torneio.
