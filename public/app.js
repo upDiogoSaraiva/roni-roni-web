@@ -639,6 +639,7 @@ function groupResultCard(g, data) {
   const standings = data.standings[g];
   const table = el('table', { class: 'stand' },
     el('thead', {}, el('tr', {},
+      el('th', { class: 'rank-col', 'aria-label': 'Posição' }, ''),
       el('th', { class: 'team-cell' }, 'Equipa'),
       el('th', {}, 'J'), el('th', {}, 'DG'), el('th', {}, 'Pts'))));
   const tb = el('tbody', {});

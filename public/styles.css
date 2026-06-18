@@ -300,7 +300,9 @@ button { font: inherit; cursor: pointer; }
 .stand { width: 100%; border-collapse: collapse; }
 .stand th, .stand td { padding: 7px 4px; font-size: 13px; text-align: right; }
 .stand th { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); font-weight: 700; border-bottom: 1px solid var(--hairline); }
-.stand td.team-cell, .stand th.team-cell { text-align: left; width: 100%; }
+.stand td.team-cell, .stand th.team-cell { text-align: left; width: 100%; padding-left: 4px; }
+.stand th.rank-col, .stand tr td:first-child { width: 26px; text-align: right; padding-right: 6px; white-space: nowrap; }
+.stand td.num { width: 34px; }
 .stand td .num, .stand .pts { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
 .stand .pts { font-weight: 500; }
 .stand tr td:first-child { color: var(--text-soft); font-family: var(--font-num); }
