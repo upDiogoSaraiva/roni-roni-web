@@ -202,6 +202,9 @@ button { font: inherit; cursor: pointer; }
 }
 .team { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
 .team .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team.mini { gap: 6px; }
+/* códigos de 3 letras nas listas de jogos (grupos + mata-mata): mono, ar de marcador */
+.match .team .nm, .ko-team .nm { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; }
 
 /* ---------- inputs / combobox ---------- */
 .field { margin-bottom: var(--s4); }

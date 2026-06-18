@@ -100,6 +100,12 @@ function teamChip(name, { code = false } = {}) {
   return el('span', { class: 'team' }, flag(name),
     el('span', { class: 'nm' }, code ? STATE.teams[name]?.code || name : name));
 }
+function codeOf(name) { return STATE.teams[name]?.code || name; }
+// bandeira + código de 3 letras — compacto, para listas de jogos (sem nomes longos)
+function teamMini(name, { reverse = false } = {}) {
+  const parts = [flag(name), el('span', { class: 'nm' }, codeOf(name))];
+  return el('span', { class: 'team mini' }, ...(reverse ? parts.reverse() : parts));
+}
 const MONO_COLORS = ['#C2410C', '#B45309', '#15803D', '#0E7490', '#9A3412', '#1D4ED8', '#7C2D12', '#A16207', '#0F766E', '#9D174D'];
 function monoColor(name) {
   let h = 0;
@@ -693,9 +699,9 @@ function groupResultCard(g, data) {
     matches.sort((a, b) => (a.matchday || 0) - (b.matchday || 0));
     matches.forEach((m) => {
       card.appendChild(el('div', { class: 'match' },
-        el('div', { class: 'team h' }, el('span', { class: 'nm' }, m.home), flag(m.home)),
+        el('div', { class: 'team h' }, el('span', { class: 'nm' }, codeOf(m.home)), flag(m.home)),
         el('span', { class: 'score num' }, `${m.homeGoals} – ${m.awayGoals}`),
-        el('div', { class: 'team a' }, flag(m.away), el('span', { class: 'nm' }, m.away))));
+        el('div', { class: 'team a' }, flag(m.away), el('span', { class: 'nm' }, codeOf(m.away)))));
     });
   }
   card.appendChild(el('div', { class: 'match-pts' }, `${data.pointsByGroup[g]} pontos de posição distribuídos`));
@@ -706,17 +712,18 @@ function groupResultCard(g, data) {
 const METHOD_LABEL = { TR: 'Tempo regulamentar', PROL: 'Prolongamento', PEN: 'Penáltis' };
 const METHODS = ['TR', 'PROL', 'PEN'];
 function slotTeam(side) { return side.team ? teamChip(side.team) : el('span', { class: 'muted', style: { fontSize: '12px' } }, side.label); }
+function slotTeamMini(side, opts) { return side.team ? teamMini(side.team, opts) : el('span', { class: 'muted', style: { fontSize: '11px' } }, side.label); }
 function roundLabel(id) { return (STATE.koRounds.find((r) => r.id === id) || {}).label || id; }
 
 function bracketMatchRow(m) {
   const homeWin = m.winner && m.winner === m.home.team;
   const awayWin = m.winner && m.winner === m.away.team;
   return el('div', { class: 'ko-row' },
-    el('div', { class: 'ko-team h' + (homeWin ? ' win' : '') }, el('span', { class: 'num jn' }, m.id), slotTeam(m.home)),
+    el('div', { class: 'ko-team h' + (homeWin ? ' win' : '') }, el('span', { class: 'num jn' }, m.id), slotTeamMini(m.home, { reverse: true })),
     el('div', { class: 'ko-mid' },
       el('span', { class: 'ko-score num' + (m.played ? '' : ' tbd') }, m.played ? `${m.homeGoals}–${m.awayGoals}` : 'vs'),
       m.played && m.method ? el('span', { class: 'ko-method' }, METHOD_LABEL[m.method]) : null),
-    el('div', { class: 'ko-team a' + (awayWin ? ' win' : '') }, slotTeam(m.away), el('span', { class: 'num jn' }, '')));
+    el('div', { class: 'ko-team a' + (awayWin ? ' win' : '') }, slotTeamMini(m.away)));
 }
 
 async function bracketSection(host) {
