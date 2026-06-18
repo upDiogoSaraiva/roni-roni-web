@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { computeWorldState, leaderboard } from './src/scoring.mjs';
+import { loadResultsSource } from './src/results_source.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
@@ -104,6 +105,25 @@ function world() {
 function snapshotRanks() {
   const lb = leaderboard(store.bets, world(), teamGroup);
   store.prevRanks = Object.fromEntries(lb.map((r) => [r.player, r.rank]));
+}
+
+// valida e insere/atualiza UM resultado (sem snapshot nem save — o chamador trata disso).
+// devolve 'novo' | 'atualizado' | 'igual', ou lança Error com mensagem clara.
+function upsertResult({ group, home, away, homeGoals, awayGoals, matchday }) {
+  if (!GROUPS[group]) throw new Error(`Grupo inválido: ${group}`);
+  if (teamGroup(home) !== group || teamGroup(away) !== group) throw new Error(`Equipa fora do grupo ${group}.`);
+  if (home === away) throw new Error('Equipas iguais.');
+  const hg = Number(homeGoals);
+  const ag = Number(awayGoals);
+  if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0) throw new Error('Resultado inválido.');
+  const list = store.results.groups[group];
+  const idx = list.findIndex((m) => (m.home === home && m.away === away) || (m.home === away && m.away === home));
+  const match = { home, away, homeGoals: hg, awayGoals: ag, matchday: Number(matchday) || 1 };
+  if (idx < 0) { list.push(match); return 'novo'; }
+  const prev = list[idx];
+  const same = prev.home === home && prev.away === away && prev.homeGoals === hg && prev.awayGoals === ag;
+  list[idx] = match;
+  return same ? 'igual' : 'atualizado';
 }
 function publicBet(b) {
   return {
@@ -251,23 +271,45 @@ async function api(req, res, path) {
 
     if (path === '/api/admin/result' && method === 'POST') {
       const body = await readBody(req);
-      const { group, home, away, homeGoals, awayGoals, matchday } = body;
-      if (!GROUPS[group]) return json(res, 400, { error: 'Grupo inválido.' });
-      if (teamGroup(home) !== group || teamGroup(away) !== group) return json(res, 400, { error: 'Equipa fora do grupo.' });
-      if (home === away) return json(res, 400, { error: 'Equipas iguais.' });
-      const hg = Number(homeGoals);
-      const ag = Number(awayGoals);
-      if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0) return json(res, 400, { error: 'Resultado inválido.' });
+      try {
+        snapshotRanks();
+        const status = upsertResult(body);
+        saveStore();
+        return json(res, 200, { ok: true, status });
+      } catch (e) {
+        return json(res, 400, { error: e.message });
+      }
+    }
+
+    // gravar VÁRIOS resultados de uma vez (um snapshot só -> movimento correto)
+    if (path === '/api/admin/results' && method === 'POST') {
+      const body = await readBody(req);
+      const items = Array.isArray(body.results) ? body.results : [];
+      if (!items.length) return json(res, 400, { error: 'Sem resultados para gravar.' });
       snapshotRanks();
-      const list = store.results.groups[group];
-      const idx = list.findIndex(
-        (m) => (m.home === home && m.away === away) || (m.home === away && m.away === home),
-      );
-      const match = { home, away, homeGoals: hg, awayGoals: ag, matchday: Number(matchday) || 1 };
-      if (idx >= 0) list[idx] = match;
-      else list.push(match);
+      const counts = { novo: 0, atualizado: 0, igual: 0 };
+      const errors = [];
+      for (const it of items) {
+        try { counts[upsertResult(it)]++; } catch (e) { errors.push(e.message); }
+      }
       saveStore();
-      return json(res, 200, { ok: true });
+      return json(res, 200, { ok: true, ...counts, saved: counts.novo + counts.atualizado, errors });
+    }
+
+    // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
+    if (path === '/api/admin/fetch' && method === 'POST') {
+      let loaded;
+      try { loaded = await loadResultsSource(); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      snapshotRanks();
+      const counts = { novo: 0, atualizado: 0, igual: 0 };
+      const errors = [];
+      for (const [group, matches] of Object.entries(loaded.groups || {})) {
+        for (const m of matches) {
+          try { counts[upsertResult({ group, ...m })]++; } catch (e) { errors.push(`${group}: ${e.message}`); }
+        }
+      }
+      saveStore();
+      return json(res, 200, { ok: true, source: loaded.source, ...counts, imported: counts.novo + counts.atualizado, errors });
     }
 
     if (path === '/api/admin/result' && method === 'DELETE') {

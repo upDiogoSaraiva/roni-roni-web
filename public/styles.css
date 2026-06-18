@@ -361,10 +361,14 @@ button { font: inherit; cursor: pointer; }
 
 /* admin result editor */
 .res-editor { padding: var(--s4); }
-.res-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--s2); align-items: center; padding: 8px 0; border-top: 1px dashed var(--hairline); }
+.res-row { display: grid; grid-template-columns: 26px 1fr auto 1fr; gap: var(--s2); align-items: center; padding: 9px 0; border-top: 1px dashed var(--hairline); }
+.res-row:first-child { border-top: none; }
+.res-row .jtag { font-size: 10px; font-weight: 700; letter-spacing: .03em; color: var(--text-soft); }
 .res-row .gscore { display: flex; align-items: center; gap: 4px; justify-content: center; }
 .res-row .gscore input { width: 46px; text-align: center; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--hairline); background: var(--surface-2); color: var(--text); font-family: var(--font-num); min-height: 40px; }
+.res-row .gscore input:focus { outline: none; border-color: var(--brand); background: var(--surface); }
 .res-row .nm { font-size: 13px; }
+.res-footer { padding-top: var(--s4); margin-top: var(--s2); border-top: 1px solid var(--hairline); }
 
 /* ---------- states ---------- */
 .skeleton { background: linear-gradient(90deg, var(--surface-2) 25%, var(--hairline) 37%, var(--surface-2) 63%); background-size: 400% 100%; animation: shimmer 1.3s infinite; border-radius: 8px; }

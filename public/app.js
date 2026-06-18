@@ -726,15 +726,24 @@ async function pageAdmin() {
 
   // editor de resultados
   host.appendChild(el('div', { class: 'section-label' }, 'Editar resultados'));
-  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', marginTop: '-4px' } }, 'Cada alteração recalcula a classificação.'));
-  const grpSel = el('select', { class: 'select', onchange: (e) => paintResEditor(e.target.value) },
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', marginTop: '-4px' } }, 'Mete os golos e carrega em Gravar. Cada gravação recalcula a classificação.'));
+  const grpSel = el('select', { class: 'select', 'aria-label': 'Escolher grupo', onchange: (e) => paintResEditor(e.target.value) },
     ...STATE.groupOrder.map((g) => el('option', { value: g }, 'Grupo ' + g)));
-  host.appendChild(el('div', { class: 'toolbar' }, grpSel));
+  const fetchBtn = el('button', { class: 'btn btn-ghost', onclick: doFetch }, icon('refresh'), 'Buscar resultados');
+  host.appendChild(el('div', { class: 'toolbar' }, grpSel, fetchBtn));
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '-6px' } },
+    'Buscar resultados corre o script que importa da fonte (data/results_source.json ou RESULTS_SOURCE_URL).'));
   const resHost = el('div', {});
   host.appendChild(resHost);
-  function paintResEditor(g) {
-    clear(resHost);
-    resHost.appendChild(resultEditor(g, results.results[g] || []));
+  function paintResEditor(g) { clear(resHost); resHost.appendChild(resultEditor(g, results, paintResEditor)); }
+  async function doFetch() {
+    fetchBtn.disabled = true;
+    try {
+      const r = await api('/api/admin/fetch', { method: 'POST' });
+      const novos = r.imported || 0;
+      toast(novos ? `Sincronizado: ${novos} resultado(s) atualizados.` : `Fonte sincronizada · ${r.igual} já estavam certos.`);
+      render();
+    } catch (e) { toast(e.message, true); fetchBtn.disabled = false; }
   }
   paintResEditor(STATE.groupOrder[0]);
 
@@ -748,7 +757,8 @@ async function pageAdmin() {
   betsHost.appendChild(betsGrid(bets));
 }
 
-function resultEditor(g, existing) {
+function resultEditor(g, results, repaint) {
+  const existing = results.results[g] || (results.results[g] = []);
   const teams = STATE.groups[g];
   // calendário canónico de um grupo de 4 (3 jornadas)
   const schedule = [
@@ -758,28 +768,42 @@ function resultEditor(g, existing) {
   ];
   const findExisting = (a, b) => existing.find((m) => (m.home === a && m.away === b) || (m.home === b && m.away === a));
   const card = el('div', { class: 'card res-editor' });
+  const rows = [];
   schedule.forEach(([md, a, b]) => {
     const ex = findExisting(a, b);
-    // mantém a ordem casa/fora já registada
-    const home = ex ? ex.home : a;
+    const home = ex ? ex.home : a; // mantém a ordem casa/fora já registada
     const away = ex ? ex.away : b;
     const hg = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: ex ? ex.homeGoals : '', 'aria-label': `golos ${home}` });
     const ag = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: ex ? ex.awayGoals : '', 'aria-label': `golos ${away}` });
-    const save = async () => {
-      if (hg.value === '' || ag.value === '') return;
-      try {
-        await api('/api/admin/result', { method: 'POST', body: { group: g, home, away, homeGoals: Number(hg.value), awayGoals: Number(ag.value), matchday: md } });
-        toast(`J${md}: ${home} ${hg.value}–${ag.value} ${away}`);
-        render();
-      } catch (e) { toast(e.message, true); }
-    };
+    rows.push({ md, home, away, hg, ag });
     card.appendChild(el('div', { class: 'res-row' },
+      el('div', { class: 'jtag num' }, 'J' + md),
       el('div', { class: 'team h', style: { justifySelf: 'end' } }, el('span', { class: 'nm' }, home), flag(home)),
-      el('div', { class: 'gscore' }, hg, el('span', { class: 'muted' }, ':'), ag,
-        el('button', { class: 'icon-btn', style: { width: '36px', height: '36px' }, title: 'Guardar', 'aria-label': 'Guardar resultado', onclick: save }, icon('check'))),
+      el('div', { class: 'gscore' }, hg, el('span', { class: 'muted' }, ':'), ag),
       el('div', { class: 'team a', style: { justifySelf: 'start' } }, flag(away), el('span', { class: 'nm' }, away))));
-    card.lastChild.dataset.md = md;
   });
+
+  const saveBtn = el('button', { class: 'btn btn-primary btn-block', onclick: saveAll }, icon('check'), `Gravar resultados do Grupo ${g}`);
+  card.appendChild(el('div', { class: 'res-footer' }, saveBtn));
+
+  async function saveAll() {
+    const payload = rows
+      .filter((r) => r.hg.value !== '' && r.ag.value !== '')
+      .map((r) => ({ group: g, home: r.home, away: r.away, homeGoals: Number(r.hg.value), awayGoals: Number(r.ag.value), matchday: r.md }));
+    if (!payload.length) return toast('Mete pelo menos um resultado.', true);
+    saveBtn.disabled = true;
+    try {
+      const res = await api('/api/admin/results', { method: 'POST', body: { results: payload } });
+      // mantém os dados locais em sincronia (upsert por par de equipas)
+      for (const p of payload) {
+        const idx = existing.findIndex((m) => (m.home === p.home && m.away === p.away) || (m.home === p.away && m.away === p.home));
+        const m = { home: p.home, away: p.away, homeGoals: p.homeGoals, awayGoals: p.awayGoals, matchday: p.matchday };
+        if (idx >= 0) existing[idx] = m; else existing.push(m);
+      }
+      toast(`${res.saved} resultado(s) gravado(s) no Grupo ${g}. Classificação recalculada.`);
+      repaint(g);
+    } catch (e) { toast(e.message, true); saveBtn.disabled = false; }
+  }
   return card;
 }
 

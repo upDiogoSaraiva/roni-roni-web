@@ -16,7 +16,19 @@ ou qualquer output de motor de decisão. Repositório separado e autónomo.
 - **Resultados** — jogos por jornada, classificação por grupo (top-2 + 8 melhores 3.os) e pontos
   distribuídos.
 - **Admin** — grelha de todas as apostas (pesquisa/filtro), estado das submissões, edição de
-  resultados (recalcula tudo) e abrir/fechar a janela. Password simples.
+  resultados (botão **Gravar** por grupo, recalcula tudo), **Buscar resultados** (importa de uma
+  fonte) e abrir/fechar a janela. Password simples.
+
+### Buscar resultados (fetch)
+O botão *Buscar resultados* (Admin) corre `loadResultsSource()` e sincroniza a fase de grupos a
+partir de uma fonte, por ordem:
+1. `RESULTS_SOURCE_URL` — um feed JSON `{ "groups": { "A": [{home,away,homeGoals,awayGoals,matchday}] } }`;
+2. `data/results_source.json` — ficheiro local que o organizador mantém (por defeito, os resultados
+   reais conhecidos, J1).
+
+Não inventa resultados — só importa o que a fonte fornece. Atualizar a fonte (ou apontar o URL a um
+feed real) e clicar *Buscar resultados* traz os jogos novos e recalcula a classificação.
+CLI equivalente: `node scripts/fetch_results.mjs` (escreve em `data/store.json`).
 
 ## Stack
 Node ≥ 20, **zero dependências** (servidor em `node:http`, persistência em JSON). Frontend vanilla
