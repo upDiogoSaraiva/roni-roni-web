@@ -1,0 +1,2685 @@
+{
+  "meta": {
+    "tournament": "Torneio Roni Roni 2026",
+    "players": 27,
+    "generatedFrom": "field_2026_real.csv + estado_atual_ref.json",
+    "note": "Conteúdo neutro: apostas, resultados e pontos. Sem outputs do motor de decisão."
+  },
+  "groups": {
+    "A": [
+      "México",
+      "África do Sul",
+      "Coreia do Sul",
+      "Chéquia"
+    ],
+    "B": [
+      "Canadá",
+      "Bósnia-Herzegovina",
+      "Catar",
+      "Suíça"
+    ],
+    "C": [
+      "Brasil",
+      "Marrocos",
+      "Haiti",
+      "Escócia"
+    ],
+    "D": [
+      "EUA",
+      "Paraguai",
+      "Austrália",
+      "Turquia"
+    ],
+    "E": [
+      "Alemanha",
+      "Curaçao",
+      "Costa do Marfim",
+      "Equador"
+    ],
+    "F": [
+      "Holanda",
+      "Japão",
+      "Suécia",
+      "Tunísia"
+    ],
+    "G": [
+      "Bélgica",
+      "Egito",
+      "Irão",
+      "Nova Zelândia"
+    ],
+    "H": [
+      "Espanha",
+      "Cabo Verde",
+      "Arábia Saudita",
+      "Uruguai"
+    ],
+    "I": [
+      "França",
+      "Senegal",
+      "Iraque",
+      "Noruega"
+    ],
+    "J": [
+      "Argentina",
+      "Argélia",
+      "Áustria",
+      "Jordânia"
+    ],
+    "K": [
+      "Portugal",
+      "Congo",
+      "Uzbequistão",
+      "Colômbia"
+    ],
+    "L": [
+      "Inglaterra",
+      "Croácia",
+      "Gana",
+      "Panamá"
+    ]
+  },
+  "groupOrder": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L"
+  ],
+  "teams": {
+    "México": {
+      "name": "México",
+      "iso": "MX",
+      "code": "MEX",
+      "flag": "🇲🇽",
+      "flagFile": "mx"
+    },
+    "África do Sul": {
+      "name": "África do Sul",
+      "iso": "ZA",
+      "code": "RSA",
+      "flag": "🇿🇦",
+      "flagFile": "za"
+    },
+    "Coreia do Sul": {
+      "name": "Coreia do Sul",
+      "iso": "KR",
+      "code": "KOR",
+      "flag": "🇰🇷",
+      "flagFile": "kr"
+    },
+    "Chéquia": {
+      "name": "Chéquia",
+      "iso": "CZ",
+      "code": "CZE",
+      "flag": "🇨🇿",
+      "flagFile": "cz"
+    },
+    "Canadá": {
+      "name": "Canadá",
+      "iso": "CA",
+      "code": "CAN",
+      "flag": "🇨🇦",
+      "flagFile": "ca"
+    },
+    "Bósnia-Herzegovina": {
+      "name": "Bósnia-Herzegovina",
+      "iso": "BA",
+      "code": "BIH",
+      "flag": "🇧🇦",
+      "flagFile": "ba"
+    },
+    "Catar": {
+      "name": "Catar",
+      "iso": "QA",
+      "code": "QAT",
+      "flag": "🇶🇦",
+      "flagFile": "qa"
+    },
+    "Suíça": {
+      "name": "Suíça",
+      "iso": "CH",
+      "code": "SUI",
+      "flag": "🇨🇭",
+      "flagFile": "ch"
+    },
+    "Brasil": {
+      "name": "Brasil",
+      "iso": "BR",
+      "code": "BRA",
+      "flag": "🇧🇷",
+      "flagFile": "br"
+    },
+    "Marrocos": {
+      "name": "Marrocos",
+      "iso": "MA",
+      "code": "MAR",
+      "flag": "🇲🇦",
+      "flagFile": "ma"
+    },
+    "Haiti": {
+      "name": "Haiti",
+      "iso": "HT",
+      "code": "HAI",
+      "flag": "🇭🇹",
+      "flagFile": "ht"
+    },
+    "Escócia": {
+      "name": "Escócia",
+      "iso": "GB",
+      "code": "SCO",
+      "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+      "flagFile": "gb-sct"
+    },
+    "EUA": {
+      "name": "EUA",
+      "iso": "US",
+      "code": "USA",
+      "flag": "🇺🇸",
+      "flagFile": "us"
+    },
+    "Paraguai": {
+      "name": "Paraguai",
+      "iso": "PY",
+      "code": "PAR",
+      "flag": "🇵🇾",
+      "flagFile": "py"
+    },
+    "Austrália": {
+      "name": "Austrália",
+      "iso": "AU",
+      "code": "AUS",
+      "flag": "🇦🇺",
+      "flagFile": "au"
+    },
+    "Turquia": {
+      "name": "Turquia",
+      "iso": "TR",
+      "code": "TUR",
+      "flag": "🇹🇷",
+      "flagFile": "tr"
+    },
+    "Alemanha": {
+      "name": "Alemanha",
+      "iso": "DE",
+      "code": "GER",
+      "flag": "🇩🇪",
+      "flagFile": "de"
+    },
+    "Curaçao": {
+      "name": "Curaçao",
+      "iso": "CW",
+      "code": "CUW",
+      "flag": "🇨🇼",
+      "flagFile": "cw"
+    },
+    "Costa do Marfim": {
+      "name": "Costa do Marfim",
+      "iso": "CI",
+      "code": "CIV",
+      "flag": "🇨🇮",
+      "flagFile": "ci"
+    },
+    "Equador": {
+      "name": "Equador",
+      "iso": "EC",
+      "code": "ECU",
+      "flag": "🇪🇨",
+      "flagFile": "ec"
+    },
+    "Holanda": {
+      "name": "Holanda",
+      "iso": "NL",
+      "code": "NED",
+      "flag": "🇳🇱",
+      "flagFile": "nl"
+    },
+    "Japão": {
+      "name": "Japão",
+      "iso": "JP",
+      "code": "JPN",
+      "flag": "🇯🇵",
+      "flagFile": "jp"
+    },
+    "Suécia": {
+      "name": "Suécia",
+      "iso": "SE",
+      "code": "SWE",
+      "flag": "🇸🇪",
+      "flagFile": "se"
+    },
+    "Tunísia": {
+      "name": "Tunísia",
+      "iso": "TN",
+      "code": "TUN",
+      "flag": "🇹🇳",
+      "flagFile": "tn"
+    },
+    "Bélgica": {
+      "name": "Bélgica",
+      "iso": "BE",
+      "code": "BEL",
+      "flag": "🇧🇪",
+      "flagFile": "be"
+    },
+    "Egito": {
+      "name": "Egito",
+      "iso": "EG",
+      "code": "EGY",
+      "flag": "🇪🇬",
+      "flagFile": "eg"
+    },
+    "Irão": {
+      "name": "Irão",
+      "iso": "IR",
+      "code": "IRN",
+      "flag": "🇮🇷",
+      "flagFile": "ir"
+    },
+    "Nova Zelândia": {
+      "name": "Nova Zelândia",
+      "iso": "NZ",
+      "code": "NZL",
+      "flag": "🇳🇿",
+      "flagFile": "nz"
+    },
+    "Espanha": {
+      "name": "Espanha",
+      "iso": "ES",
+      "code": "ESP",
+      "flag": "🇪🇸",
+      "flagFile": "es"
+    },
+    "Cabo Verde": {
+      "name": "Cabo Verde",
+      "iso": "CV",
+      "code": "CPV",
+      "flag": "🇨🇻",
+      "flagFile": "cv"
+    },
+    "Arábia Saudita": {
+      "name": "Arábia Saudita",
+      "iso": "SA",
+      "code": "KSA",
+      "flag": "🇸🇦",
+      "flagFile": "sa"
+    },
+    "Uruguai": {
+      "name": "Uruguai",
+      "iso": "UY",
+      "code": "URU",
+      "flag": "🇺🇾",
+      "flagFile": "uy"
+    },
+    "França": {
+      "name": "França",
+      "iso": "FR",
+      "code": "FRA",
+      "flag": "🇫🇷",
+      "flagFile": "fr"
+    },
+    "Senegal": {
+      "name": "Senegal",
+      "iso": "SN",
+      "code": "SEN",
+      "flag": "🇸🇳",
+      "flagFile": "sn"
+    },
+    "Iraque": {
+      "name": "Iraque",
+      "iso": "IQ",
+      "code": "IRQ",
+      "flag": "🇮🇶",
+      "flagFile": "iq"
+    },
+    "Noruega": {
+      "name": "Noruega",
+      "iso": "NO",
+      "code": "NOR",
+      "flag": "🇳🇴",
+      "flagFile": "no"
+    },
+    "Argentina": {
+      "name": "Argentina",
+      "iso": "AR",
+      "code": "ARG",
+      "flag": "🇦🇷",
+      "flagFile": "ar"
+    },
+    "Argélia": {
+      "name": "Argélia",
+      "iso": "DZ",
+      "code": "ALG",
+      "flag": "🇩🇿",
+      "flagFile": "dz"
+    },
+    "Áustria": {
+      "name": "Áustria",
+      "iso": "AT",
+      "code": "AUT",
+      "flag": "🇦🇹",
+      "flagFile": "at"
+    },
+    "Jordânia": {
+      "name": "Jordânia",
+      "iso": "JO",
+      "code": "JOR",
+      "flag": "🇯🇴",
+      "flagFile": "jo"
+    },
+    "Portugal": {
+      "name": "Portugal",
+      "iso": "PT",
+      "code": "POR",
+      "flag": "🇵🇹",
+      "flagFile": "pt"
+    },
+    "Congo": {
+      "name": "Congo",
+      "iso": "CG",
+      "code": "CGO",
+      "flag": "🇨🇬",
+      "flagFile": "cg"
+    },
+    "Uzbequistão": {
+      "name": "Uzbequistão",
+      "iso": "UZ",
+      "code": "UZB",
+      "flag": "🇺🇿",
+      "flagFile": "uz"
+    },
+    "Colômbia": {
+      "name": "Colômbia",
+      "iso": "CO",
+      "code": "COL",
+      "flag": "🇨🇴",
+      "flagFile": "co"
+    },
+    "Inglaterra": {
+      "name": "Inglaterra",
+      "iso": "GB",
+      "code": "ENG",
+      "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "flagFile": "gb-eng"
+    },
+    "Croácia": {
+      "name": "Croácia",
+      "iso": "HR",
+      "code": "CRO",
+      "flag": "🇭🇷",
+      "flagFile": "hr"
+    },
+    "Gana": {
+      "name": "Gana",
+      "iso": "GH",
+      "code": "GHA",
+      "flag": "🇬🇭",
+      "flagFile": "gh"
+    },
+    "Panamá": {
+      "name": "Panamá",
+      "iso": "PA",
+      "code": "PAN",
+      "flag": "🇵🇦",
+      "flagFile": "pa"
+    }
+  },
+  "results": {
+    "groups": {
+      "A": [
+        {
+          "home": "México",
+          "away": "África do Sul",
+          "homeGoals": 2,
+          "awayGoals": 0,
+          "matchday": 1
+        },
+        {
+          "home": "Coreia do Sul",
+          "away": "Chéquia",
+          "homeGoals": 2,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "B": [
+        {
+          "home": "Canadá",
+          "away": "Bósnia-Herzegovina",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Catar",
+          "away": "Suíça",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "C": [
+        {
+          "home": "Brasil",
+          "away": "Marrocos",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Escócia",
+          "away": "Haiti",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 1
+        }
+      ],
+      "D": [
+        {
+          "home": "EUA",
+          "away": "Paraguai",
+          "homeGoals": 4,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Austrália",
+          "away": "Turquia",
+          "homeGoals": 2,
+          "awayGoals": 0,
+          "matchday": 1
+        }
+      ],
+      "E": [
+        {
+          "home": "Alemanha",
+          "away": "Curaçao",
+          "homeGoals": 7,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Costa do Marfim",
+          "away": "Equador",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 1
+        }
+      ],
+      "F": [
+        {
+          "home": "Suécia",
+          "away": "Tunísia",
+          "homeGoals": 5,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Holanda",
+          "away": "Japão",
+          "homeGoals": 2,
+          "awayGoals": 2,
+          "matchday": 1
+        }
+      ],
+      "G": [
+        {
+          "home": "Bélgica",
+          "away": "Egito",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Irão",
+          "away": "Nova Zelândia",
+          "homeGoals": 2,
+          "awayGoals": 2,
+          "matchday": 1
+        }
+      ],
+      "H": [
+        {
+          "home": "Espanha",
+          "away": "Cabo Verde",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 1
+        },
+        {
+          "home": "Arábia Saudita",
+          "away": "Uruguai",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "I": [
+        {
+          "home": "França",
+          "away": "Senegal",
+          "homeGoals": 3,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Noruega",
+          "away": "Iraque",
+          "homeGoals": 4,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "J": [
+        {
+          "home": "Argentina",
+          "away": "Argélia",
+          "homeGoals": 3,
+          "awayGoals": 0,
+          "matchday": 1
+        },
+        {
+          "home": "Áustria",
+          "away": "Jordânia",
+          "homeGoals": 3,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "K": [
+        {
+          "home": "Colômbia",
+          "away": "Uzbequistão",
+          "homeGoals": 3,
+          "awayGoals": 1,
+          "matchday": 1
+        },
+        {
+          "home": "Portugal",
+          "away": "Congo",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 1
+        }
+      ],
+      "L": [
+        {
+          "home": "Inglaterra",
+          "away": "Croácia",
+          "homeGoals": 4,
+          "awayGoals": 2,
+          "matchday": 1
+        },
+        {
+          "home": "Gana",
+          "away": "Panamá",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 1
+        }
+      ]
+    }
+  },
+  "windowOpen": true,
+  "bets": [
+    {
+      "player": "Afonso Luís",
+      "champion": "Portugal",
+      "final4": [
+        "Brasil",
+        "Espanha",
+        "França",
+        "Portugal"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": null
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Panamá"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Ana Portugal",
+      "champion": "Brasil",
+      "final4": [
+        "Portugal",
+        "Argentina",
+        "Alemanha",
+        "Espanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Catar"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": null
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": null
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "António Gameiro",
+      "champion": "Espanha",
+      "final4": [
+        "Espanha",
+        "França",
+        "Portugal",
+        "Brasil"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": null
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Benavente",
+      "champion": "Portugal",
+      "final4": [
+        "Argentina",
+        "Portugal",
+        "Brasil",
+        "Espanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "África do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Arábia Saudita",
+          "third": "Uruguai"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Bernardo Macara",
+      "champion": "Espanha",
+      "final4": [
+        "Alemanha",
+        "Espanha",
+        "Inglaterra",
+        "Portugal"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": null
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": null
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Uzbequistão",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Bernardo Rodrigues",
+      "champion": "Portugal",
+      "final4": [
+        "Espanha",
+        "França",
+        "Portugal",
+        "Alemanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "Coreia do Sul",
+          "second": "México",
+          "third": null
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Bósnia-Herzegovina",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Marrocos",
+          "second": "Brasil",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "Paraguai",
+          "third": null
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Japão",
+          "second": "Suécia",
+          "third": "Holanda"
+        },
+        "G": {
+          "first": "Egito",
+          "second": "Bélgica",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Gana",
+          "third": "Croácia"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Bruna Araujo",
+      "champion": "Argentina",
+      "final4": [
+        "Argentina",
+        "Espanha",
+        "Portugal",
+        "Brasil"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": null
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": null
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Carolina",
+      "champion": "Espanha",
+      "final4": [
+        "Espanha",
+        "Portugal",
+        "Argentina",
+        "Brasil"
+      ],
+      "groups": {
+        "A": {
+          "first": "Coreia do Sul",
+          "second": "México",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Catar"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": null
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Panamá"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Diogo Saraiva",
+      "champion": "Espanha",
+      "final4": [
+        "Espanha",
+        "França",
+        "Inglaterra",
+        "Argentina"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": null
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Senegal",
+          "third": "Noruega"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Ezequiel Fonseca",
+      "champion": "Espanha",
+      "final4": [
+        "França",
+        "Brasil",
+        "Espanha",
+        "Argentina"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": null
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": null
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "Paraguai",
+          "third": "EUA"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Senegal",
+          "third": "Noruega"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Francisco Mendes",
+      "champion": "Portugal",
+      "final4": [
+        "França",
+        "Espanha",
+        "Portugal",
+        "Inglaterra"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Austrália",
+          "second": "EUA",
+          "third": "Turquia"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Áustria",
+          "second": "Argentina",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Gonçalo Carvalho",
+      "champion": "França",
+      "final4": [
+        "França",
+        "Espanha",
+        "Portugal",
+        "Argentina"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Bósnia-Herzegovina",
+          "third": "Canadá"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Guilherme Líbano",
+      "champion": "Espanha",
+      "final4": [
+        "Espanha",
+        "Argentina",
+        "França",
+        "Inglaterra"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": null
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Bósnia-Herzegovina",
+          "third": "Canadá"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Paraguai",
+          "third": "Turquia"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Senegal",
+          "third": "Noruega"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Colômbia",
+          "second": "Portugal",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Jay Dee",
+      "champion": "Espanha",
+      "final4": [
+        "França",
+        "Espanha",
+        "Inglaterra",
+        "Portugal"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": null
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Joao morais",
+      "champion": "Inglaterra",
+      "final4": [
+        "Portugal",
+        "França",
+        "Espanha",
+        "Japão"
+      ],
+      "groups": {
+        "A": {
+          "first": "Coreia do Sul",
+          "second": "México",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Escócia",
+          "third": "Marrocos"
+        },
+        "D": {
+          "first": "Paraguai",
+          "second": "Turquia",
+          "third": "EUA"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Japão",
+          "second": "Holanda",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Nova Zelândia"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Panamá"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "José Malaquias",
+      "champion": "França",
+      "final4": [
+        "Alemanha",
+        "França",
+        "Espanha",
+        "Croácia"
+      ],
+      "groups": {
+        "A": {
+          "first": "Coreia do Sul",
+          "second": "México",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Bósnia-Herzegovina",
+          "third": "Canadá"
+        },
+        "C": {
+          "first": "Marrocos",
+          "second": "Brasil",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Costa do Marfim",
+          "second": "Alemanha",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Japão",
+          "second": "Holanda",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Egito"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Uzbequistão"
+        },
+        "L": {
+          "first": "Croácia",
+          "second": "Inglaterra",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Manel",
+      "champion": "Portugal",
+      "final4": [
+        "Portugal",
+        "França",
+        "Espanha",
+        "Brasil"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Catar"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": null
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Irão",
+          "third": "Nova Zelândia"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Mariana Leonardo",
+      "champion": "Argentina",
+      "final4": [
+        "Alemanha",
+        "Argentina",
+        "Inglaterra",
+        "Espanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": null
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Bósnia-Herzegovina",
+          "third": "Canadá"
+        },
+        "C": {
+          "first": "Marrocos",
+          "second": "Brasil",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Paraguai",
+          "second": "Turquia",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": null
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Argélia",
+          "third": "Áustria"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Master PD",
+      "champion": "França",
+      "final4": [
+        "Portugal",
+        "Espanha",
+        "Brasil",
+        "França"
+      ],
+      "groups": {
+        "A": {
+          "first": "Chéquia",
+          "second": "México",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Catar",
+          "third": null
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Paraguai",
+          "third": "Turquia"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Croácia",
+          "second": "Inglaterra",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Miguel Diniz",
+      "champion": "Espanha",
+      "final4": [
+        "França",
+        "Portugal",
+        "Brasil",
+        "Espanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": null
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": null
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Gana",
+          "third": "Croácia"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Pedro Matos",
+      "champion": "Espanha",
+      "final4": [
+        "Portugal",
+        "França",
+        "Inglaterra",
+        "Argentina"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Chéquia",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Canadá"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "Paraguai",
+          "third": "EUA"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Curaçao"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Senegal",
+          "third": "Noruega"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Argélia",
+          "third": "Áustria"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Panamá"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Piloto",
+      "champion": "Portugal",
+      "final4": [
+        "Espanha",
+        "França",
+        "Argentina",
+        "Alemanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "Coreia do Sul",
+          "second": "México",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Catar",
+          "third": "Catar"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Paraguai",
+          "third": "Turquia"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Japão",
+          "second": "Holanda",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Senegal",
+          "third": "Noruega"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Jordânia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Panamá"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Rafael Benavente",
+      "champion": "Portugal",
+      "final4": [
+        "França",
+        "Portugal",
+        "Espanha",
+        "Inglaterra"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": null
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Suécia",
+          "third": "Japão"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": null
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Ricardo Tenreiro",
+      "champion": "Espanha",
+      "final4": [
+        "Inglaterra",
+        "Espanha",
+        "França",
+        "Brasil"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Turquia",
+          "third": "Paraguai"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Irão"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Cabo Verde"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Argélia",
+          "third": "Áustria"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Tio Didi",
+      "champion": "Portugal",
+      "final4": [
+        "Brasil",
+        "França",
+        "Espanha",
+        "Argentina"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "Chéquia"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Austrália",
+          "third": null
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Nova Zelândia"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": null
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Vasco Diniz",
+      "champion": "Portugal",
+      "final4": [
+        "Alemanha",
+        "Espanha",
+        "Inglaterra",
+        "Portugal"
+      ],
+      "groups": {
+        "A": {
+          "first": "Chéquia",
+          "second": "México",
+          "third": "Coreia do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Canadá",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Escócia",
+          "third": "Marrocos"
+        },
+        "D": {
+          "first": "Turquia",
+          "second": "EUA",
+          "third": "Austrália"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Costa do Marfim",
+          "third": "Equador"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Nova Zelândia"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": null
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": null
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Áustria",
+          "third": "Argélia"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": null
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": null
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    },
+    {
+      "player": "Zé Diniz",
+      "champion": "Portugal",
+      "final4": [
+        "Portugal",
+        "Inglaterra",
+        "França",
+        "Espanha"
+      ],
+      "groups": {
+        "A": {
+          "first": "México",
+          "second": "Coreia do Sul",
+          "third": "África do Sul"
+        },
+        "B": {
+          "first": "Suíça",
+          "second": "Catar",
+          "third": "Bósnia-Herzegovina"
+        },
+        "C": {
+          "first": "Brasil",
+          "second": "Marrocos",
+          "third": "Escócia"
+        },
+        "D": {
+          "first": "EUA",
+          "second": "Paraguai",
+          "third": "Turquia"
+        },
+        "E": {
+          "first": "Alemanha",
+          "second": "Equador",
+          "third": "Costa do Marfim"
+        },
+        "F": {
+          "first": "Holanda",
+          "second": "Japão",
+          "third": "Suécia"
+        },
+        "G": {
+          "first": "Bélgica",
+          "second": "Egito",
+          "third": "Nova Zelândia"
+        },
+        "H": {
+          "first": "Espanha",
+          "second": "Uruguai",
+          "third": "Arábia Saudita"
+        },
+        "I": {
+          "first": "França",
+          "second": "Noruega",
+          "third": "Senegal"
+        },
+        "J": {
+          "first": "Argentina",
+          "second": "Argélia",
+          "third": "Áustria"
+        },
+        "K": {
+          "first": "Portugal",
+          "second": "Colômbia",
+          "third": "Congo"
+        },
+        "L": {
+          "first": "Inglaterra",
+          "second": "Croácia",
+          "third": "Gana"
+        }
+      },
+      "locked": true,
+      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "pin": null,
+      "seed": true
+    }
+  ]
+}
