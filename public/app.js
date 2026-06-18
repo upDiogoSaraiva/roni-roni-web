@@ -710,6 +710,7 @@ function groupResultCard(g, data) {
 
 /* ---------------- MATA-MATA (bracket + apostas) ---------------- */
 const METHOD_LABEL = { TR: 'Tempo regulamentar', PROL: 'Prolongamento', PEN: 'Penáltis' };
+const METHOD_SHORT = { TR: 't. reg.', PROL: 'prol.', PEN: 'pen.' };
 const METHODS = ['TR', 'PROL', 'PEN'];
 function slotTeam(side) { return side.team ? teamChip(side.team) : el('span', { class: 'muted', style: { fontSize: '12px' } }, side.label); }
 function slotTeamMini(side, opts) { return side.team ? teamMini(side.team, opts) : el('span', { class: 'muted', style: { fontSize: '11px' } }, side.label); }
@@ -718,11 +719,12 @@ function roundLabel(id) { return (STATE.koRounds.find((r) => r.id === id) || {})
 function bracketMatchRow(m) {
   const homeWin = m.winner && m.winner === m.home.team;
   const awayWin = m.winner && m.winner === m.away.team;
+  const mid = m.played
+    ? el('span', { class: 'ko-method' }, m.method ? METHOD_SHORT[m.method] : '✓')
+    : el('span', { class: 'ko-score num tbd' }, 'vs');
   return el('div', { class: 'ko-row' },
     el('div', { class: 'ko-team h' + (homeWin ? ' win' : '') }, el('span', { class: 'num jn' }, m.id), slotTeamMini(m.home, { reverse: true })),
-    el('div', { class: 'ko-mid' },
-      el('span', { class: 'ko-score num' + (m.played ? '' : ' tbd') }, m.played ? `${m.homeGoals}–${m.awayGoals}` : 'vs'),
-      m.played && m.method ? el('span', { class: 'ko-method' }, METHOD_LABEL[m.method]) : null),
+    el('div', { class: 'ko-mid' }, mid),
     el('div', { class: 'ko-team a' + (awayWin ? ' win' : '') }, slotTeamMini(m.away)));
 }
 
@@ -995,11 +997,7 @@ function koResultEditor(mid, m) {
     el('div', { class: 'ko-team h' }, slotTeam(m.home)), el('div', { class: 'ko-mid' }, 'vs'), el('div', { class: 'ko-team a' }, slotTeam(m.away))));
   if (teams.length < 2) { card.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', margin: '6px 0 0' } }, 'Aguarda os emparelhamentos (fim dos grupos).')); return card; }
 
-  const state = { winner: m.winner || null, method: m.method || null, hg: m.homeGoals ?? '', ag: m.awayGoals ?? '' };
-  const hg = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: state.hg, 'aria-label': 'golos casa', oninput: (e) => (state.hg = e.target.value) });
-  const ag = el('input', { class: 'num', type: 'number', min: '0', inputmode: 'numeric', value: state.ag, 'aria-label': 'golos fora', oninput: (e) => (state.ag = e.target.value) });
-  card.appendChild(el('div', { class: 'gscore', style: { margin: '8px 0' } }, m.home.team, ' ', hg, el('span', { class: 'muted' }, ':'), ag, ' ', m.away.team));
-
+  const state = { winner: m.winner || null, method: m.method || null };
   const winWrap = el('div', { class: 'ko-pick' });
   const methWrap = el('div', { class: 'ko-seg' });
   const repaint = () => {
@@ -1018,7 +1016,7 @@ function koResultEditor(mid, m) {
   async function save() {
     if (!state.winner) return toast('Escolhe o vencedor.', true);
     try {
-      await api('/api/admin/knockout', { method: 'POST', body: { match: mid, home: m.home.team, away: m.away.team, homeGoals: state.hg === '' ? null : Number(state.hg), awayGoals: state.ag === '' ? null : Number(state.ag), winner: state.winner, method: state.method } });
+      await api('/api/admin/knockout', { method: 'POST', body: { match: mid, home: m.home.team, away: m.away.team, homeGoals: null, awayGoals: null, winner: state.winner, method: state.method } });
       toast(`Jogo ${mid} gravado.`);
       render();
     } catch (e) { toast(e.message, true); }
