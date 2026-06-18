@@ -208,7 +208,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'resultados', 'admin'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -229,6 +229,7 @@ async function render() {
   try {
     if (r === 'geral') await pageGeral();
     else if (r === 'apostar') await pageApostar();
+    else if (r === 'premios') await pagePremios();
     else if (r === 'resultados') await pageResultados();
     else if (r === 'admin') await pageAdmin();
   } catch (e) {
@@ -372,6 +373,65 @@ function sheetDetail(bet, score) {
   }
   box.appendChild(grid);
   return box;
+}
+
+/* ---------------- PÁGINA: PRÉMIOS ---------------- */
+const PRIZE_MEDAL = ['#F2B441', '#B9B3A6', '#C58A57']; // 1.º 2.º 3.º
+async function pagePremios() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Prémios'),
+    el('p', {}, 'Entrada de 10€ por jogador. Quem está a ganhar cada prémio neste momento.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(5));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const lb = data.leaderboard;
+
+  // Tendência: quem acertou mais vencedores no mata-mata
+  let tend = null;
+  let maxW = 0;
+  for (const r of lb) {
+    const w = r.score.correctWinners || 0;
+    if (w > maxW) { maxW = w; tend = r; }
+  }
+  const last = lb[lb.length - 1];
+  const pts = (h) => h.score.total + ' pts';
+
+  host.appendChild(el('div', { class: 'pot' },
+    el('div', { class: 'kv' }, el('b', {}, 'Entrada'), el('span', { class: 'v' }, '10€')),
+    el('div', { class: 'kv' }, el('b', {}, 'Jogadores'), el('span', { class: 'v num' }, String(lb.length))),
+    el('div', { class: 'kv' }, el('b', {}, 'Em prémios'), el('span', { class: 'v' }, '260€'))));
+  if (data.provisional) {
+    host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
+      'Provisório — quem lidera cada prémio com os resultados de agora.'));
+  }
+
+  const prizes = [
+    { tag: '1.º', bg: PRIZE_MEDAL[0], name: '1.º lugar', value: '125€', holder: lb[0], metric: pts },
+    { tag: '2.º', bg: PRIZE_MEDAL[1], name: '2.º lugar', value: '70€', holder: lb[1], metric: pts },
+    { tag: '3.º', bg: PRIZE_MEDAL[2], name: '3.º lugar', value: '40€', holder: lb[2], metric: pts },
+    { tag: 'T', bg: 'var(--brand)', light: true, name: 'Tendência', value: '15€', sub: 'Mais vencedores certos no mata-mata', holder: maxW > 0 ? tend : null, metric: () => maxW + ' jogos certos' },
+    { tag: 'D', bg: 'var(--pending)', light: true, name: 'Desculpa', value: '10€', sub: 'Menos pontos no fim', holder: last, metric: pts },
+  ];
+
+  const card = el('div', { class: 'card' });
+  for (const p of prizes) {
+    const main = el('div', { class: 'prize-main' },
+      el('div', { class: 'prize-name' }, p.name),
+      p.sub ? el('div', { class: 'prize-sub' }, p.sub) : null);
+    if (p.holder) {
+      main.appendChild(el('div', { class: 'prize-holder' }, monogram(p.holder.player),
+        el('span', { class: 'nm' }, p.holder.player), el('span', { class: 'metric' }, '· ' + p.metric(p.holder))));
+    } else {
+      main.appendChild(el('div', { class: 'prize-tbd' }, 'Por decidir'));
+    }
+    card.appendChild(el('div', { class: 'prize' },
+      el('div', { class: 'prize-badge num', style: { background: p.bg, color: p.light ? '#fff' : '#1b1712' } }, p.tag),
+      main, el('div', { class: 'prize-value' }, p.value)));
+  }
+  host.appendChild(card);
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '12px' } },
+    'Tendência e Desculpa exigem ter apostado em todos os jogos.'));
 }
 
 /* ---------------- PÁGINA: APOSTAR (form multi-passo) ---------------- */
