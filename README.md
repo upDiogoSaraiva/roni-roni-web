@@ -79,7 +79,7 @@ ordem:
    `{ "groups": { "A": [{ "home": "...", "away": "...", "homeGoals": 0, "awayGoals": 0 }] } }`.
 2. A API pública da ESPN (`fifa.world`), que não precisa de chave. É a fonte por omissão, tanto para
    os grupos como para o mata-mata, e cruza as seleções pelo código FIFA.
-3. `data/results_source.json`, um ficheiro local, caso a fonte online esteja em baixo.
+3. `data/results_source.json`, um ficheiro local, caso a fonte online esteja indisponível.
 
 Só entram jogos terminados. O mesmo trabalho dá-se pela linha de comandos com
 `node scripts/fetch_results.mjs`.
