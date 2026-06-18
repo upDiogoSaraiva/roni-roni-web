@@ -729,7 +729,7 @@ function bracketMatchRow(m) {
 async function bracketSection(host) {
   host.appendChild(el('div', { class: 'section-label' }, 'Mata-mata · cruzamento'));
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', marginTop: '-4px' } },
-    'Estrutura oficial do Mundial 2026. As equipas resolvem-se quando a fase de grupos terminar.'));
+    'Provisório — se a fase de grupos acabasse agora, seriam estes os jogos (8 melhores 3.os incluídos). Atualiza a cada resultado.'));
   const data = await api('/api/bracket');
   for (const r of data.rounds) {
     const card = el('div', { class: 'card', style: { padding: '8px 0', marginTop: '8px' } });

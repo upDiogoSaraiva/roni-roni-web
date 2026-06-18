@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { standingsForGroup, computeWorldState, scoreBet } from './scoring.mjs';
+import { readFileSync } from 'node:fs';
+import { standingsForGroup, computeWorldState, scoreBet, allStandings } from './scoring.mjs';
+import { assignThirds } from './bracket.mjs';
 
 // Grupo simples: 1 jornada, define classificação provisória.
 const groups = {
@@ -169,4 +171,18 @@ test('mata-mata: campeão (8) e Final 4 (3 cada)', () => {
   const d = scoreBet(bet, koWorld(), () => null);
   assert.equal(d.champion, 8);
   assert.equal(d.final4, 6); // Eco e Golf são semifinalistas; Zulu/Yankee não
+});
+
+test('atribuição dos 8 melhores 3.os respeita os grupos elegíveis (matching Anexo C)', () => {
+  const seed = JSON.parse(readFileSync(new URL('../data/seed.json', import.meta.url)));
+  const bracket = JSON.parse(readFileSync(new URL('../data/bracket.json', import.meta.url)));
+  const standings = allStandings(seed.groups, seed.results.groups);
+  const assign = assignThirds(bracket, standings);
+  assert.equal(Object.keys(assign).length, 8); // 8 slots todos preenchidos
+  const usedGroups = new Set();
+  for (const [mid, a] of Object.entries(assign)) {
+    assert.ok(bracket.matches[mid].away.groups.includes(a.group), `grupo ${a.group} não é elegível no jogo ${mid}`);
+    assert.ok(!usedGroups.has(a.group), 'grupo repetido');
+    usedGroups.add(a.group);
+  }
 });
