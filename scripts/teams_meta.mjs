@@ -51,7 +51,7 @@ const TEAM_ISO = {
   'Áustria': ['AT', 'AUT'],
   'Jordânia': ['JO', 'JOR'],
   'Portugal': ['PT', 'POR'],
-  'Congo': ['CG', 'CGO'],
+  'Congo': ['CD', 'COD'], // RD Congo (participante real do Mundial 2026; ESPN: COD)
   'Uzbequistão': ['UZ', 'UZB'],
   'Colômbia': ['CO', 'COL'],
   'Inglaterra': ['GB', 'ENG'],

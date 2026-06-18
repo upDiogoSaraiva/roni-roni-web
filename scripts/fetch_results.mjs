@@ -14,13 +14,15 @@ const seed = read('data/seed.json');
 const groups = seed.groups;
 const teamGroup = {};
 for (const [g, ts] of Object.entries(groups)) for (const t of ts) teamGroup[t] = g;
+const codeToTeam = {};
+for (const [name, meta] of Object.entries(seed.teams)) codeToTeam[meta.code] = name;
 
 const storePath = join(root, 'data/store.json');
 const store = existsSync(storePath)
   ? JSON.parse(readFileSync(storePath, 'utf8'))
   : { windowOpen: seed.windowOpen !== false, results: structuredClone(seed.results), bets: structuredClone(seed.bets) };
 
-const { groups: src, source } = await loadResultsSource();
+const { groups: src, source } = await loadResultsSource({ codeToTeam, teamGroup: (t) => teamGroup[t] || null });
 let imported = 0;
 const errors = [];
 for (const [g, matches] of Object.entries(src)) {

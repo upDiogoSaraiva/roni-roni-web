@@ -21,13 +21,17 @@ ou qualquer output de motor de decisão. Repositório separado e autónomo.
 
 ### Buscar resultados (fetch)
 O botão *Buscar resultados* (Admin) corre `loadResultsSource()` e sincroniza a fase de grupos a
-partir de uma fonte, por ordem:
+partir de uma fonte real, por ordem:
 1. `RESULTS_SOURCE_URL` — um feed JSON `{ "groups": { "A": [{home,away,homeGoals,awayGoals,matchday}] } }`;
-2. `data/results_source.json` — ficheiro local que o organizador mantém (por defeito, os resultados
-   reais conhecidos, J1).
+2. **ESPN ao vivo** (por defeito) — `site.api.espn.com/.../soccer/fifa.world/scoreboard`, **sem chave**.
+   Os jogos vêm com nomes em inglês e juntam-se às seleções do pool pelo **código FIFA**
+   (abbreviation ESPN == `teams_meta.code`), imune a diacríticos (`Türkiye`→`Turquia`,
+   `Ivory Coast`→`Costa do Marfim`). O grupo é determinado pelo `groups.json` (o mata-mata é
+   excluído pela verificação "mesmo grupo");
+3. `data/results_source.json` — fallback local, caso a ESPN esteja indisponível.
 
-Não inventa resultados — só importa o que a fonte fornece. Atualizar a fonte (ou apontar o URL a um
-feed real) e clicar *Buscar resultados* traz os jogos novos e recalcula a classificação.
+Não inventa resultados — só importa jogos **terminados** da fonte real. Clicar *Buscar resultados*
+traz os jogos novos e recalcula a classificação (com indicador de movimento).
 CLI equivalente: `node scripts/fetch_results.mjs` (escreve em `data/store.json`).
 
 ## Stack

@@ -26,6 +26,9 @@ const META = seed.meta;
 const groupOf = {};
 for (const [g, ts] of Object.entries(GROUPS)) for (const t of ts) groupOf[t] = g;
 const teamGroup = (t) => groupOf[t] || null;
+// código FIFA (ESPN abbreviation) -> nome PT, para a fonte ao vivo
+const codeToTeam = {};
+for (const [name, meta] of Object.entries(TEAMS)) codeToTeam[meta.code] = name;
 
 // --- estado mutável (apostas, resultados, janela) em store.json ---
 function loadStore() {
@@ -299,7 +302,7 @@ async function api(req, res, path) {
     // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
     if (path === '/api/admin/fetch' && method === 'POST') {
       let loaded;
-      try { loaded = await loadResultsSource(); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      try { loaded = await loadResultsSource({ codeToTeam, teamGroup }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];
