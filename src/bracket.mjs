@@ -46,6 +46,11 @@ function groupDecided(standings, group) {
   // grupo decidido quando cada equipa jogou os 3 jogos (4 equipas, 6 jogos)
   return (standings[group] || []).every((r) => r.played >= 3);
 }
+// fase de grupos terminada = todos os 12 grupos decididos
+export function groupStageComplete(standings) {
+  const gs = Object.keys(standings);
+  return gs.length > 0 && gs.every((g) => groupDecided(standings, g));
+}
 
 const POS_LABEL = { winner: '1.º', runnerup: '2.º' };
 
@@ -61,7 +66,7 @@ function resolveSlot(slot, ctx, matchId) {
     case 'third': {
       const a = ctx.thirds?.[matchId];
       const label = `3.º de [${slot.groups.join('/')}]`;
-      if (a?.team) return { team: a.team, label, decided: false, provisional: true };
+      if (a?.team) return { team: a.team, label, decided: ctx.complete, provisional: !ctx.complete };
       return { team: null, label, decided: false };
     }
     case 'winnerOf': {
@@ -82,7 +87,7 @@ function resolveSlot(slot, ctx, matchId) {
 // Resolve todos os jogos do bracket. knockoutResults: { id: { home, away, homeGoals, awayGoals, winner, method } }
 // Os emparelhamentos reais (home/away) de knockoutResults têm prioridade sobre a dedução por slot.
 export function resolveBracket(bracket, standings, knockoutResults = {}) {
-  const ctx = { standings, results: knockoutResults, thirds: assignThirds(bracket, standings) };
+  const ctx = { standings, results: knockoutResults, thirds: assignThirds(bracket, standings), complete: groupStageComplete(standings) };
   const out = {};
   for (const [id, m] of Object.entries(bracket.matches)) {
     const stored = knockoutResults[id] || {};

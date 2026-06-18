@@ -8,7 +8,7 @@ import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { computeWorldState, leaderboard } from './src/scoring.mjs';
 import { loadResultsSource, fetchEspnKnockout } from './src/results_source.mjs';
-import { resolveBracket } from './src/bracket.mjs';
+import { resolveBracket, groupStageComplete } from './src/bracket.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
@@ -188,6 +188,7 @@ async function api(req, res, path) {
       matches: BRACKET.matches,
       resolved: resolveBracket(BRACKET, w.standings, store.knockouts),
       windows: store.windows,
+      groupStageComplete: groupStageComplete(w.standings),
     });
   }
 

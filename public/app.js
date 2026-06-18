@@ -728,9 +728,12 @@ function bracketMatchRow(m) {
 
 async function bracketSection(host) {
   host.appendChild(el('div', { class: 'section-label' }, 'Mata-mata · cruzamento'));
-  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', marginTop: '-4px' } },
-    'Provisório — se a fase de grupos acabasse agora, seriam estes os jogos (8 melhores 3.os incluídos). Atualiza a cada resultado.'));
+  const noteEl = el('p', { class: 'muted', style: { fontSize: '12px', marginTop: '-4px' } }, 'A carregar…');
+  host.appendChild(noteEl);
   const data = await api('/api/bracket');
+  noteEl.textContent = data.groupStageComplete
+    ? 'Fase de grupos terminada — estes são os jogos do mata-mata.'
+    : 'Provisório — se a fase de grupos acabasse agora, seriam estes os jogos (8 melhores 3.os incluídos). Atualiza a cada resultado.';
   for (const r of data.rounds) {
     const card = el('div', { class: 'card', style: { padding: '8px 0', marginTop: '8px' } });
     card.appendChild(el('div', { class: 'ko-round' }, r.label, STATE.windows[r.id] ? el('span', { class: 'pill open', style: { marginLeft: '8px' } }, el('span', { class: 'dot' }), 'apostas abertas') : null));
