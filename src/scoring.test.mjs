@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { standingsForGroup, computeWorldState, scoreBet, allStandings } from './scoring.mjs';
+import { standingsForGroup, computeWorldState, scoreBet, allStandings, clinchStatus } from './scoring.mjs';
 import { assignThirds } from './bracket.mjs';
 
 // Grupo simples: 1 jornada, define classificação provisória.
@@ -48,6 +48,22 @@ test('desempate por confronto direto (Mundial 2026), não por diferença de golo
   assert.ok(quim.gd > porto.gd); // Quim tem melhor DG geral (+5 vs +2)...
   assert.equal(porto.rank, 1); // ...mas Porto fica em 1.º porque ganhou o confronto direto
   assert.equal(quim.rank, 2);
+});
+
+test('clinching: 1.º garantido e eliminado, calculados com os jogos que faltam', () => {
+  // A vence tudo (9 pts, terminou); D perde tudo (0 pts, terminou); B e C ainda jogam entre si.
+  const games = [
+    { home: 'A', away: 'B', homeGoals: 1, awayGoals: 0 },
+    { home: 'A', away: 'C', homeGoals: 1, awayGoals: 0 },
+    { home: 'A', away: 'D', homeGoals: 1, awayGoals: 0 },
+    { home: 'B', away: 'D', homeGoals: 1, awayGoals: 0 },
+    { home: 'C', away: 'D', homeGoals: 1, awayGoals: 0 },
+  ];
+  const c = clinchStatus(['A', 'B', 'C', 'D'], games);
+  assert.equal(c.A, 'winner'); // 9 pts, ninguém o apanha
+  assert.equal(c.D, 'eliminated'); // 0 pts e já jogou tudo -> sempre último
+  assert.equal(c.B, null); // joga com C: pode ser 2.º ou 3.º
+  assert.equal(c.C, null);
 });
 
 test('grupo perfeito = 4 pts (2 apuradas + 2 posições)', () => {

@@ -711,6 +711,10 @@ async function pageResultados() {
     el('div', { class: 'kv' }, el('b', {}, 'Apuram'), el('span', { class: 'num' }, '32'))));
 
   host.appendChild(el('div', { class: 'section-label' }, 'Por grupo'));
+  host.appendChild(el('div', { class: 'clinch-legend' },
+    el('span', {}, el('span', { class: 'clinch win' }, '1.º'), 'lugar garantido'),
+    el('span', {}, el('span', { class: 'clinch ok' }, 'Apurada'), 'top 2 garantido'),
+    el('span', {}, el('span', { class: 'clinch out' }, 'Eliminada'), 'fora do top 2')));
   const cols = el('div', { class: 'grp-cols' });
   host.appendChild(cols);
   for (const g of STATE.groupOrder) {
@@ -731,6 +735,12 @@ async function pageResultados() {
 
   await bracketSection(host);
 }
+function clinchChip(status) {
+  if (status === 'winner') return el('span', { class: 'clinch win', title: '1.º lugar garantido' }, '1.º');
+  if (status === 'qualified') return el('span', { class: 'clinch ok', title: 'Apuramento garantido (top 2)' }, 'Apurada');
+  if (status === 'eliminated') return el('span', { class: 'clinch out', title: 'Já não pode chegar ao top 2' }, 'Eliminada');
+  return null;
+}
 function groupResultCard(g, data) {
   const card = el('div', { class: 'card grp-card' });
   card.appendChild(el('h3', {}, el('span', { class: 'tag num' }, g), 'Grupo ' + g));
@@ -745,7 +755,7 @@ function groupResultCard(g, data) {
     const qcls = r.rank === 1 ? 'q1' : r.rank === 2 ? 'q2' : r.rank === 3 ? 'q3' : '';
     tb.appendChild(el('tr', { class: qcls },
       el('td', {}, r.rank),
-      el('td', { class: 'team-cell' }, el('span', { class: 'qbar' }), teamChip(r.team)),
+      el('td', { class: 'team-cell' }, el('div', { class: 'tc' }, el('span', { class: 'qbar' }), teamChip(r.team), clinchChip(r.clinch))),
       el('td', { class: 'num' }, r.played),
       el('td', { class: 'num' }, (r.gd > 0 ? '+' : '') + r.gd),
       el('td', { class: 'num pts' }, r.points)));
