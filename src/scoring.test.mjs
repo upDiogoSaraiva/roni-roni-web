@@ -32,6 +32,24 @@ test('classificação 3/1/0 e ordenação por pontos/DG/GM', () => {
   assert.equal(s[3].rank, 4);
 });
 
+test('desempate por confronto direto (Mundial 2026), não por diferença de golos', () => {
+  const teams = ['Porto', 'Quim', 'Rui', 'Sa'];
+  const games = [
+    { home: 'Porto', away: 'Quim', homeGoals: 1, awayGoals: 0 }, // Porto ganha o confronto direto
+    { home: 'Porto', away: 'Sa', homeGoals: 1, awayGoals: 0 },
+    { home: 'Quim', away: 'Rui', homeGoals: 5, awayGoals: 0 },
+    { home: 'Quim', away: 'Sa', homeGoals: 1, awayGoals: 0 },
+  ];
+  const s = standingsForGroup(teams, games);
+  const porto = s.find((r) => r.team === 'Porto');
+  const quim = s.find((r) => r.team === 'Quim');
+  assert.equal(porto.points, 6);
+  assert.equal(quim.points, 6);
+  assert.ok(quim.gd > porto.gd); // Quim tem melhor DG geral (+5 vs +2)...
+  assert.equal(porto.rank, 1); // ...mas Porto fica em 1.º porque ganhou o confronto direto
+  assert.equal(quim.rank, 2);
+});
+
 test('grupo perfeito = 4 pts (2 apuradas + 2 posições)', () => {
   const world = computeWorldState(groups, results);
   const bet = { groups: { A: { first: 'Alfa', second: 'Bravo', third: null } } };

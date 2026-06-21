@@ -15,13 +15,68 @@
 const CHAMPION_POINTS = 8;
 const FINAL4_POINTS = 3;
 
-// Desempate de classificação de grupo: pontos, diferença de golos, golos marcados e,
-// como critério final transparente, ordem alfabética (estável e explicável num protótipo).
+// Critério "geral" (sem confronto direto): pontos, diferença de golos, golos marcados e, como
+// último critério transparente, ordem alfabética. Usado nos 8 melhores 3.os (que não jogaram
+// entre si) e como recurso final dentro de um grupo. (Fair play e ranking FIFA não os temos.)
 function compareStanding(a, b) {
   if (b.points !== a.points) return b.points - a.points;
   if (b.gd !== a.gd) return b.gd - a.gd;
   if (b.gf !== a.gf) return b.gf - a.gf;
   return a.team.localeCompare(b.team, 'pt');
+}
+
+// Desempate dentro de um grupo pelo critério do Mundial 2026 (Art. 13): entre equipas
+// empatadas em pontos, vale primeiro o CONFRONTO DIRETO (pontos, depois DG, depois golos, só
+// nos jogos entre elas) e só depois os critérios gerais. Aplica-se recursivamente ao subconjunto
+// que continuar empatado.
+function headToHead(rows, games) {
+  if (rows.length <= 1) return rows;
+  const set = new Set(rows.map((r) => r.team));
+  const mini = new Map(rows.map((r) => [r.team, { team: r.team, p: 0, gd: 0, gf: 0 }]));
+  for (const g of games) {
+    if (g.homeGoals == null || g.awayGoals == null) continue;
+    if (!set.has(g.home) || !set.has(g.away)) continue; // só jogos entre os empatados
+    const h = mini.get(g.home);
+    const a = mini.get(g.away);
+    h.gf += g.homeGoals; a.gf += g.awayGoals;
+    h.gd += g.homeGoals - g.awayGoals; a.gd += g.awayGoals - g.homeGoals;
+    if (g.homeGoals > g.awayGoals) h.p += 3;
+    else if (g.homeGoals < g.awayGoals) a.p += 3;
+    else { h.p += 1; a.p += 1; }
+  }
+  const sameMini = (x, y) => {
+    const mx = mini.get(x.team); const my = mini.get(y.team);
+    return mx.p === my.p && mx.gd === my.gd && mx.gf === my.gf;
+  };
+  const sorted = [...rows].sort((x, y) => {
+    const mx = mini.get(x.team); const my = mini.get(y.team);
+    return my.p - mx.p || my.gd - mx.gd || my.gf - mx.gf;
+  });
+  const out = [];
+  for (let i = 0; i < sorted.length; ) {
+    let j = i;
+    while (j + 1 < sorted.length && sameMini(sorted[i], sorted[j + 1])) j++;
+    const block = sorted.slice(i, j + 1);
+    if (block.length === 1) out.push(block[0]);
+    else if (block.length === rows.length) out.push(...[...block].sort(compareStanding)); // confronto não separou
+    else out.push(...headToHead(block, games)); // re-aplica ao subconjunto ainda empatado
+    i = j + 1;
+  }
+  return out;
+}
+
+// Ordena um grupo: por pontos e, dentro de cada empate em pontos, por confronto direto.
+function rankGroup(rows, games) {
+  const byPoints = [...rows].sort((a, b) => b.points - a.points);
+  const out = [];
+  for (let i = 0; i < byPoints.length; ) {
+    let j = i;
+    while (j + 1 < byPoints.length && byPoints[j + 1].points === byPoints[i].points) j++;
+    const block = byPoints.slice(i, j + 1);
+    out.push(...(block.length === 1 ? block : headToHead(block, games)));
+    i = j + 1;
+  }
+  return out;
 }
 
 // Classificação de UM grupo a partir dos jogos já inseridos (3/1/0).
@@ -43,9 +98,9 @@ export function standingsForGroup(teams, games) {
   }
   const list = [...rows.values()];
   for (const r of list) r.gd = r.gf - r.ga;
-  list.sort(compareStanding);
-  list.forEach((r, i) => (r.rank = i + 1));
-  return list;
+  const ranked = rankGroup(list, games);
+  ranked.forEach((r, i) => (r.rank = i + 1));
+  return ranked;
 }
 
 // Classificação de todos os grupos.
