@@ -1109,7 +1109,8 @@ function blankDraft() {
 let draft = null;
 let stepIdx = 0;
 function formSteps() {
-  const steps = ['ident', 'champion', 'final4', ...STATE.groupOrder.map((g) => 'g:' + g), 'thirds'];
+  const steps = ['ident', 'champion', 'final4', ...STATE.groupOrder.map((g) => 'g:' + g)];
+  if ((STATE.competition?.format?.bestThirds ?? 8) > 0) steps.push('thirds');
   if (STATE.competition?.markets?.length) steps.push('markets');
   steps.push('review');
   return steps;
@@ -1263,10 +1264,11 @@ function renderGroupStep(body, g) {
 }
 
 function renderThirds(body) {
+  const N = STATE.competition?.format?.bestThirds ?? 8;
   const n = countThirds();
-  body.appendChild(stepHeader('Passo final', '8 melhores 3.os', `${n}/8 escolhidos`));
+  body.appendChild(stepHeader('Passo final', `${N} melhores 3.os`, `${n}/${N} escolhidos`));
   body.appendChild(el('p', { class: 'muted', style: { marginTop: '-8px', marginBottom: '16px' } },
-    'Escolhe exatamente 8 seleções que ficam em 3.º e apuram. Toca para escolher o 3.º de cada grupo.'));
+    `Escolhe exatamente ${N} seleções que ficam em 3.º e apuram. Toca para escolher o 3.º de cada grupo.`));
   for (const g of STATE.groupOrder) {
     const p = draft.groups[g];
     const candidates = STATE.groups[g].filter((t) => t !== p.first && t !== p.second);
@@ -1280,7 +1282,7 @@ function renderThirds(body) {
         'aria-pressed': active ? 'true' : 'false',
         onclick: () => {
           if (p.third === t) p.third = null;
-          else { if (!p.third && countThirds() >= 8) return toast('Já tens 8 terceiros. Tira um para trocar.', true); p.third = t; }
+          else { if (!p.third && countThirds() >= N) return toast(`Já tens ${N} terceiros. Tira um para trocar.`, true); p.third = t; }
           paintForm();
         },
       }, flag(t), ' ', t, active && icon('check')));
@@ -1289,7 +1291,7 @@ function renderThirds(body) {
     body.appendChild(card);
   }
   body.appendChild(el('div', { style: { height: '12px' } }));
-  body.appendChild(navButtons({ onNext: () => { if (countThirds() !== 8) return toast(`Escolhe exatamente 8 (tens ${countThirds()}).`, true); goNext(); },
+  body.appendChild(navButtons({ onNext: () => { if (countThirds() !== N) return toast(`Escolhe exatamente ${N} (tens ${countThirds()}).`, true); goNext(); },
     nextLabel: 'Rever aposta' }));
 }
 
@@ -1368,8 +1370,9 @@ function validateDraft() {
     const p = draft.groups[g];
     if (!p.first || !p.second) e.push(`Grupo ${g}: falta 1.º/2.º.`);
   }
+  const N = STATE.competition?.format?.bestThirds ?? 8;
   const n = countThirds();
-  if (n !== 8) e.push(`Tens ${n} terceiros (precisas de 8).`);
+  if (n !== N) e.push(`Tens ${n} terceiros (precisas de ${N}).`);
   return e;
 }
 async function submitDraft() {
@@ -1655,6 +1658,59 @@ async function adminCompetitions(host) {
     el('div', { class: 'field' }, el('label', {}, 'Classificação (CSV)'), csv),
     el('button', { class: 'btn btn-primary btn-block', onclick: doImport }, icon('plus'), 'Importar edição')));
 
+  // criar competição NOVA (fase de grupos)
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '16px 0 6px' } },
+    'Criar competição nova — uma linha por grupo: "A: Equipa1, Equipa2, Equipa3, Equipa4".'));
+  const cName = el('input', { class: 'input', placeholder: 'Nome', value: 'Torneio Roni Roni' });
+  const cEd = el('input', { class: 'input', placeholder: 'Edição (ex.: Euro 2028)' });
+  const cGroups = el('textarea', { class: 'input', rows: '6', placeholder: 'A: Portugal, Espanha, Itália, França\nB: Inglaterra, Alemanha, Croácia, Países Baixos', style: { resize: 'vertical' } });
+  const num = (v) => el('input', { class: 'input num', type: 'number', value: String(v) });
+  const cQual = num(2); const cThirds = num(0); const cGames = num(3);
+  const cQ = num(1); const cP = num(1); const cChamp = num(8); const cF4 = num(3);
+  const presets = {
+    'Mundial 2026': { qualify: 1, position: 1, champion: 8, final4: 3, bestThirds: 8, qualifiersPerGroup: 2 },
+    'Euro (sem 3.os)': { qualify: 1, position: 1, champion: 6, final4: 3, bestThirds: 0, qualifiersPerGroup: 2 },
+  };
+  const presetSel = el('select', { class: 'select', onchange: (e) => { const p = presets[e.target.value]; if (!p) return; cQ.value = p.qualify; cP.value = p.position; cChamp.value = p.champion; cF4.value = p.final4; cThirds.value = p.bestThirds; cQual.value = p.qualifiersPerGroup; } },
+    el('option', { value: '' }, 'Preset de pontuação…'), ...Object.keys(presets).map((k) => el('option', { value: k }, k)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
+    el('div', { class: 'field' }, el('label', {}, 'Nome'), cName),
+    el('div', { class: 'field' }, el('label', {}, 'Edição'), cEd),
+    el('div', { class: 'field' }, el('label', {}, 'Grupos e equipas'), cGroups),
+    el('div', { class: 'field' }, el('label', {}, 'Preset'), presetSel),
+    el('div', { class: 'builder-grid' },
+      el('div', { class: 'field' }, el('label', {}, 'Apuram/grupo'), cQual),
+      el('div', { class: 'field' }, el('label', {}, 'Melhores 3.os'), cThirds),
+      el('div', { class: 'field' }, el('label', {}, 'Jornadas'), cGames)),
+    el('div', { class: 'builder-grid' },
+      el('div', { class: 'field' }, el('label', {}, 'Apuramento'), cQ),
+      el('div', { class: 'field' }, el('label', {}, 'Posição'), cP),
+      el('div', { class: 'field' }, el('label', {}, 'Campeão'), cChamp),
+      el('div', { class: 'field' }, el('label', {}, 'Final 4'), cF4)),
+    el('button', { class: 'btn btn-primary btn-block', onclick: doCreate }, icon('plus'), 'Criar competição')));
+
+  async function doCreate() {
+    const groups = {};
+    for (const line of cGroups.value.split('\n').map((l) => l.trim()).filter(Boolean)) {
+      const i = line.indexOf(':');
+      if (i < 0) continue;
+      const g = line.slice(0, i).trim().toUpperCase();
+      const teams = line.slice(i + 1).split(',').map((t) => t.trim()).filter(Boolean);
+      if (g && teams.length) groups[g] = teams;
+    }
+    if (!cEd.value.trim()) return toast('Indica a edição.', true);
+    if (!Object.keys(groups).length) return toast('Define os grupos (ex.: "A: Eq1, Eq2").', true);
+    try {
+      const r = await api('/api/admin/create', { method: 'POST', body: {
+        name: cName.value, edition: cEd.value, groups,
+        format: { qualifiersPerGroup: cQual.value, bestThirds: cThirds.value, groupGames: cGames.value },
+        scoring: { qualify: cQ.value, position: cP.value, champion: cChamp.value, final4: cF4.value },
+      } });
+      toast(`Criada: ${cEd.value} (${r.groups} grupos, ${r.teams} equipas).`);
+      render();
+    } catch (e) { toast(e.message, true); }
+  }
+
   async function doImport() {
     const rows = csv.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
       const i = l.lastIndexOf(',');
@@ -1746,7 +1802,8 @@ async function pageAdmin() {
     const r = bracket.rounds.find((x) => x.id === rid);
     for (const mid of r.matches) koHost.appendChild(koResultEditor(String(mid), bracket.resolved[String(mid)]));
   }
-  paintKo(STATE.koRounds[0].id);
+  if (STATE.koRounds.length) paintKo(STATE.koRounds[0].id);
+  else koHost.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px' } }, 'Esta competição não tem mata-mata.'));
 
   // resolução dos mercados extra (vencedor de cada mercado configurado)
   if ((STATE.competition.markets || []).length) {

@@ -157,7 +157,8 @@ function validateBet(b) {
       thirds++;
     }
   }
-  if (thirds !== 8) errors.push(`Tens de escolher exatamente 8 terceiros (tens ${thirds}).`);
+  const needThirds = COMP.format?.bestThirds ?? 8;
+  if (thirds !== needThirds) errors.push(`Tens de escolher exatamente ${needThirds} terceiros (tens ${thirds}).`);
   return errors;
 }
 
@@ -554,6 +555,55 @@ async function api(req, res, path) {
       registry.competitions.push({ id, name, edition, status: 'archived', kind: 'archive' });
       saveRegistry();
       return json(res, 200, { ok: true, id, players: finalStandings.length });
+    }
+
+    // criar uma competição NOVA (fase de grupos): nome, edição, grupos+equipas, formato, pontuação
+    if (path === '/api/admin/create' && method === 'POST') {
+      const body = await readBody(req);
+      const name = (body.name || 'Torneio Roni Roni').trim();
+      const edition = (body.edition || '').trim();
+      if (!edition) return json(res, 400, { error: 'Indica a edição.' });
+      const groups = body.groups && typeof body.groups === 'object' ? body.groups : null;
+      const groupIds = groups ? Object.keys(groups) : [];
+      if (!groupIds.length) return json(res, 400, { error: 'Define pelo menos um grupo com equipas.' });
+      for (const g of groupIds) if (!Array.isArray(groups[g]) || groups[g].length < 2) return json(res, 400, { error: `Grupo ${g} precisa de pelo menos 2 equipas.` });
+      const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const base = slug(body.id || edition) || 'edicao';
+      let id = base; let n = 2;
+      while (registry.competitions.some((c) => c.id === id)) id = `${base}-${n++}`;
+      // meta das equipas: código de 3 letras (sem bandeira para seleções novas)
+      const teams = {}; const used = new Set();
+      for (const g of groupIds) for (const t of groups[g]) {
+        const cod = t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'XXX';
+        let c = cod; let k = 1;
+        while (used.has(c)) c = (cod.slice(0, 2) + k++).toUpperCase();
+        used.add(c); teams[t] = { code: c, flagFile: null };
+      }
+      const fmt = body.format || {};
+      const format = { qualifiersPerGroup: Number(fmt.qualifiersPerGroup) || 2, bestThirds: Number(fmt.bestThirds) || 0, groupGames: Number(fmt.groupGames) || 3 };
+      const sc = body.scoring || {};
+      const scoring = { qualify: Number(sc.qualify) || 1, position: Number(sc.position) || 1, champion: Number(sc.champion) || 0, final4: Number(sc.final4) || 0 };
+      const prizes = Array.isArray(body.prizes) && body.prizes.length ? body.prizes : [
+        { key: '1', tag: '1.º', name: '1.º lugar', value: 0, kind: 'rank', rank: 1 },
+        { key: '2', tag: '2.º', name: '2.º lugar', value: 0, kind: 'rank', rank: 2 },
+        { key: '3', tag: '3.º', name: '3.º lugar', value: 0, kind: 'rank', rank: 3 },
+      ];
+      const competition = { id, name, edition, tagline: edition, format, scoring, entry: Number(body.entry) || 0, prizes, markets: [] };
+      const seed = {
+        meta: { tournament: name, players: 0, note: 'Conteúdo neutro: apostas, resultados e pontos.' },
+        groups, groupOrder: groupIds, teams,
+        results: { groups: Object.fromEntries(groupIds.map((g) => [g, []])) }, windowOpen: true, bets: [],
+      };
+      const dir = compDir(id);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'competition.json'), JSON.stringify(competition, null, 2));
+      writeFileSync(join(dir, 'groups.json'), JSON.stringify(groups, null, 2));
+      writeFileSync(join(dir, 'bracket.json'), JSON.stringify({ rounds: [], matches: {} }, null, 2));
+      writeFileSync(join(dir, 'seed.json'), JSON.stringify(seed, null, 2));
+      writeFileSync(join(dir, 'results_source.json'), JSON.stringify({ groups: {} }, null, 2));
+      registry.competitions.push({ id, name, edition, status: 'created' });
+      saveRegistry();
+      return json(res, 200, { ok: true, id, teams: Object.keys(teams).length, groups: groupIds.length });
     }
 
     if (path === '/api/admin/window' && method === 'POST') {

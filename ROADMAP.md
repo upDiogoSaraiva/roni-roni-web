@@ -16,7 +16,9 @@ Plano por fases:
 - **Fase B — identidade** ✅ (token de dispositivo sem password: reivindicar + ligar com código).
 - **Fase C — carreiras & Hall da Fama** ✅ (página Hall da Fama: campeões por edição, tabela de
   todos os tempos com títulos/pódios/pontos, recordes; agregação entre edições via `/api/halloffame`).
-- **Fase D — o jogo é teu** (boosts, aposta por jogo + underdog, UI dos mercados, construtor).
+- **Fase D — o jogo é teu** ✅ na maioria: UI dos mercados extra ✅, joker de grupo ✅, construtor de
+  competições + presets ✅. Futuro: aposta por jogo + bónus de underdog (precisa de seeding), boosts
+  escudo/triplo, geração automática de bracket no construtor.
 
 ## Já feito (base)
 - Pool do Mundial 2026: apostar (campeão, Final 4, grupos, 8 melhores 3.os), classificação ao vivo,
@@ -33,7 +35,9 @@ Plano por fases:
 ## Fase 3 — construtor de competições + import
 - [x] **Import** de edições passadas (classificação final) para o histórico (admin → Competições).
 - [x] Admin troca a competição ativa.
-- [ ] Admin **cria competição** ao vivo: nome, grupos, equipas, formato, regras (UI do construtor).
+- [x] Admin **cria competição** ao vivo: nome, grupos, equipas, formato e pontuação (UI do construtor).
+      Cria competições de fase de grupos; o nº de 3.os adapta-se ao `format.bestThirds`. (Mata-mata
+      automático/bracket fica por gerar — futuro.)
 
 ## Mercados de aposta (configuráveis por competição)
 - [x] Posições de grupo (1.º/2.º) + N melhores 3.os (base atual).
@@ -52,9 +56,9 @@ Plano por fases:
 - [ ] Limites configuráveis por fase (quantos boosts, em que rondas).
 
 ## Sistemas de pontuação (presets)
-- [ ] Preset "Mundial 2026" (atual).
+- [x] Presets "Mundial 2026" e "Euro (sem 3.os)" no construtor.
 - [ ] Preset "clássico Roni" (apostar em todos os jogos de grupo + underdog + jokers de grupo).
-- [ ] Pontos totalmente editáveis no construtor.
+- [x] Pontos editáveis no construtor (apuramento/posição/campeão/Final 4).
 
 ## Utilizadores — Fase B ✅
 - [x] Identidade por **token de dispositivo, sem password**: reivindicar o nome (gera código de 6
