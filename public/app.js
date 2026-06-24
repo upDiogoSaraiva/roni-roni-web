@@ -217,7 +217,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -227,7 +227,7 @@ function navigate(route) { location.hash = '#/' + route; }
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
   ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
-  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'],
+  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'],
 ];
 function engageNav(active) {
   const row = el('div', { class: 'engage-nav' });
@@ -262,6 +262,7 @@ async function render() {
     else if (r === 'reveal') await pageReveal();
     else if (r === 'h2h') await pageH2H();
     else if (r === 'cartao') await pageCartao();
+    else if (r === 'halloffame') await pageHallOfFame();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -871,6 +872,50 @@ async function pageCartao() {
     } catch (e) { /* partilha cancelada pelo utilizador */ }
   }
   paint();
+}
+
+/* ---------------- PÁGINA: HALL DA FAMA ---------------- */
+async function pageHallOfFame() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Hall da Fama'),
+    el('p', {}, 'O palmarés do grupo — títulos, pódios e recordes de todas as edições.')));
+  MAIN.appendChild(engageNav('halloffame'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(6));
+  const data = await api('/api/halloffame');
+  clear(host);
+  if (!data.table.length) { host.appendChild(emptyState('Ainda sem história', 'Aparece aqui quando houver edições.', 'trophy')); return; }
+
+  const rec = data.records.topScore;
+  host.appendChild(el('div', { class: 'pot' },
+    el('div', { class: 'kv' }, el('b', {}, 'Edições'), el('span', { class: 'v num' }, String(data.editions))),
+    rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null));
+
+  host.appendChild(el('div', { class: 'section-label' }, 'Campeões por edição'));
+  const champCard = el('div', { class: 'card' });
+  for (const c of data.champions) {
+    champCard.appendChild(el('div', { class: 'lb-row', style: { gridTemplateColumns: '1fr auto' } },
+      el('div', { class: 'lb-player' }, monogram(c.player),
+        el('div', {}, el('div', { class: 'nm' }, '🏆 ' + c.player), el('div', { class: 'sub' }, c.edition))),
+      el('span', { class: 'num', style: { color: 'var(--text-soft)' } }, c.total + ' pts')));
+  }
+  host.appendChild(champCard);
+
+  host.appendChild(el('div', { class: 'section-label' }, 'Tabela de todos os tempos'));
+  const card = el('div', { class: 'card' });
+  card.appendChild(el('div', { class: 'hof-head' }, el('span', {}, '#'), el('span', {}, 'Jogador'),
+    el('span', { class: 'c' }, '🏆'), el('span', { class: 'c' }, 'Pódios'), el('span', { class: 'c' }, 'Pts')));
+  data.table.forEach((p, i) => {
+    card.appendChild(el('div', { class: 'hof-row' },
+      el('span', { class: 'num' }, i + 1),
+      el('div', { class: 'lb-player' }, monogram(p.player),
+        el('div', { style: { minWidth: '0' } }, el('div', { class: 'nm' }, p.player),
+          el('div', { class: 'sub' }, `${p.editions} edição(ões) · melhor ${p.bestRank}.º`))),
+      el('span', { class: 'num c' }, p.titles || '—'),
+      el('span', { class: 'num c' }, p.podiums || '—'),
+      el('span', { class: 'num c' }, p.points)));
+  });
+  host.appendChild(card);
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */

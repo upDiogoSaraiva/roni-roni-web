@@ -159,6 +159,13 @@ button { font: inherit; cursor: pointer; }
 /* ---------- identidade ---------- */
 .id-row { display: flex; align-items: center; gap: 12px; }
 
+/* ---------- hall da fama ---------- */
+.hof-head, .hof-row { display: grid; grid-template-columns: 26px 1fr 40px 56px 50px; align-items: center; gap: 8px; padding: 8px 14px; }
+.hof-head { color: var(--text-soft); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--hairline); }
+.hof-row { border-top: 1px solid var(--hairline); }
+.hof-row:first-of-type { border-top: none; }
+.hof-head .c, .hof-row .c { text-align: center; }
+
 /* ---------- gráfico de evolução ---------- */
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }

@@ -13,8 +13,9 @@ neutro, determinístico e partilhável no WhatsApp. Decisões: alcance = pool do
 Plano por fases:
 - **Fase A — drama da edição atual** ✅ CONCLUÍDA (sem contas): evolução por jornada (+ hover),
   simulador "e se?", reveal das apostas, recaps por jornada, frente a frente, cartões para WhatsApp.
-- **Fase B — identidade** (token mágico, persistente entre dispositivos/edições).
-- **Fase C — carreiras & Hall da Fama** (agregação entre edições, all-time, rivalidades).
+- **Fase B — identidade** ✅ (token de dispositivo sem password: reivindicar + ligar com código).
+- **Fase C — carreiras & Hall da Fama** ✅ (página Hall da Fama: campeões por edição, tabela de
+  todos os tempos com títulos/pódios/pontos, recordes; agregação entre edições via `/api/halloffame`).
 - **Fase D — o jogo é teu** (boosts, aposta por jogo + underdog, UI dos mercados, construtor).
 
 ## Já feito (base)

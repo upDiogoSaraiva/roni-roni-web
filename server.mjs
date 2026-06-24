@@ -304,6 +304,30 @@ async function api(req, res, path) {
     return json(res, 200, { player, code: player ? (identities.byPlayer[player]?.code || null) : null });
   }
 
+  // hall da fama — agregação entre TODAS as edições do registo (títulos, pódios, pontos, recordes)
+  if (path === '/api/halloffame' && method === 'GET') {
+    const players = {};
+    const champions = [];
+    let topScore = null;
+    for (const c of registry.competitions) {
+      let sum;
+      try { sum = competitionSummary(c.id); } catch { continue; }
+      const lb = sum.leaderboard;
+      if (!lb.length) continue;
+      champions.push({ id: c.id, edition: sum.competition.edition, player: lb[0].player, total: lb[0].score.total });
+      for (const r of lb) {
+        const p = players[r.player] || (players[r.player] = { player: r.player, editions: 0, titles: 0, podiums: 0, points: 0, bestRank: 99 });
+        p.editions++; p.points += r.score.total; p.bestRank = Math.min(p.bestRank, r.rank);
+        if (r.rank === 1) p.titles++;
+        if (r.rank <= 3) p.podiums++;
+        if (!topScore || r.score.total > topScore.total) topScore = { player: r.player, total: r.score.total, edition: sum.competition.edition };
+      }
+    }
+    const table = Object.values(players).map((p) => ({ ...p, avgPoints: Math.round(p.points / p.editions) }))
+      .sort((a, b) => b.titles - a.titles || b.points - a.points || a.bestRank - b.bestRank);
+    return json(res, 200, { table, champions, records: { topScore }, editions: champions.length });
+  }
+
   if (path === '/api/results' && method === 'GET') {
     const w = world();
     // pontos de POSIÇÃO distribuídos por grupo + total de pontos no leaderboard
