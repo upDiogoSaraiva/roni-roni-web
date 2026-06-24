@@ -25,7 +25,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Selo de "melhor jornada"** — quem mais subiu em cada jornada ganha um selo nessa jornada.
 
 ### Social / competição
-- [💡] **Rivalidades** — par de jogadores com mais trocas de posição entre si ao longo das jornadas.
+- [✅] **Rivalidades** — pares que mais trocaram de posição entre si ao longo das jornadas (na Evolução).
 - [💡] **Liga de quartos** — sub-grupos (ex.: por apelido/escolha) com mini-tabela.
 - [💡] **Mural de reações** — emojis por jogador (sem texto livre? rever neutralidade/segurança).
 - [💡] **Partilhar a tabela** como imagem (cartão de leaderboard para o WhatsApp).
@@ -61,3 +61,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Count-up dos pontos** (Ronda 3, ângulo polish/microinterações) — os pontos da tabela contam de 0
   até ao valor ao abrir. Fonte: microinterações de fantasy apps. Porquê: dá vida e reforça o número
   que importa; respeita `prefers-reduced-motion`.
+- **Rivalidades** (Ronda 4, ângulo social/picardia) — na Evolução, os pares que mais trocaram de
+  posição (desempate: mais próximos agora). Fonte: head-to-head records de social sportsbooks.
+  Porquê: alimenta a picardia do grupo; derivado das posições por jornada (`/api/timeline`), neutro.

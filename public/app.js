@@ -496,6 +496,16 @@ async function pageEvolucao() {
     host.appendChild(rc);
   }
 
+  const rivals = buildRivalries(data);
+  if (rivals.length) {
+    host.appendChild(el('div', { class: 'section-label' }, 'Rivalidades'));
+    const rc = el('div', { class: 'card' });
+    for (const r of rivals) rc.appendChild(el('div', { class: 'lb-row', style: { gridTemplateColumns: '1fr auto' } },
+      el('div', { class: 'lb-player' }, el('span', { class: 'nm' }, `${r.a}  ↔  ${r.b}`)),
+      el('span', { class: 'muted', style: { fontSize: '12px' } }, r.swaps ? `${r.swaps} troca(s) de posição` : `separados por ${r.gap} lugar(es)`)));
+    host.appendChild(rc);
+  }
+
   function paint() { clear(chartCard); chartCard.appendChild(buildEvolutionChart(data, players, me)); }
   paint();
 }
@@ -585,6 +595,28 @@ function buildRecaps(data) {
     lines.push({ title: `J${prev}→J${cur}`, text: parts.join('; ') + '.' });
   }
   return lines;
+}
+
+// rivalidades: pares que mais trocaram de posição entre si (desempate: mais próximos agora)
+function buildRivalries(data) {
+  const mds = data.matchdays;
+  const players = data.players.filter((p) => p.points.length === mds.length);
+  if (players.length < 2 || mds.length < 2) return [];
+  const rankAt = (p, md) => (p.points.find((pt) => pt.md === md) || {}).rank;
+  const pairs = [];
+  for (let i = 0; i < players.length; i++) for (let j = i + 1; j < players.length; j++) {
+    const a = players[i], b = players[j];
+    let swaps = 0;
+    for (let k = 1; k < mds.length; k++) {
+      const prev = rankAt(a, mds[k - 1]) - rankAt(b, mds[k - 1]);
+      const cur = rankAt(a, mds[k]) - rankAt(b, mds[k]);
+      if (prev !== 0 && cur !== 0 && Math.sign(prev) !== Math.sign(cur)) swaps++;
+    }
+    const gap = Math.abs(rankAt(a, mds[mds.length - 1]) - rankAt(b, mds[mds.length - 1]));
+    pairs.push({ a: a.player, b: b.player, swaps, gap });
+  }
+  pairs.sort((x, y) => y.swaps - x.swaps || x.gap - y.gap);
+  return pairs.slice(0, 3);
 }
 
 /* ---------------- PÁGINA: SIMULAR ("e se?") ---------------- */
