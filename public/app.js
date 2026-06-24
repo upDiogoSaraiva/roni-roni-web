@@ -359,8 +359,9 @@ async function pageGeral() {
   // cartão pessoal: a minha posição de relance (quando identificado / escolhido)
   const myRow = myName && data.leaderboard.find((r) => r.player === myName);
   if (myRow) {
-    const toLeader = data.leaderboard[0].score.total - myRow.score.total;
-    const sub = myRow.rank === 1 ? 'Estás na liderança!' : `a ${toLeader} ponto(s) do 1.º · ${myRow.rank}.º de ${data.leaderboard.length}`;
+    const myIdx = data.leaderboard.findIndex((r) => r.player === myName);
+    const above = myIdx > 0 ? data.leaderboard[myIdx - 1] : null;
+    const sub = !above ? 'Estás na liderança!' : `Apanhar ${above.player} · +${above.score.total - myRow.score.total} pts · ${myRow.rank}.º de ${data.leaderboard.length}`;
     const avg = Math.round(data.leaderboard.reduce((a, r) => a + r.score.total, 0) / data.leaderboard.length);
     const vsAvg = myRow.score.total - avg;
     const avgTxt = vsAvg === 0 ? 'em linha com a média do grupo' : `${vsAvg > 0 ? '+' + vsAvg : vsAvg} pts vs média do grupo`;

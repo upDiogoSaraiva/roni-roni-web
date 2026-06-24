@@ -25,6 +25,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Selo de "melhor jornada"** — quem mais subiu em cada jornada ganha um selo nessa jornada.
 
 ### Social / competição
+- [✅] **Nemesis / próximo alvo** — o cartão hero mostra quem apanhar a seguir (jogador logo à frente).
 - [✅] **Rivalidades** — pares que mais trocaram de posição entre si ao longo das jornadas (na Evolução).
 - [💡] **Liga de quartos** — sub-grupos (ex.: por apelido/escolha) com mini-tabela.
 - [💡] **Mural de reações** — emojis por jogador (sem texto livre? rever neutralidade/segurança).
@@ -113,3 +114,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Transição de página** (Ronda 21, ângulo polish) — fade+slide subtil ao mudar de vista (`.pg-in`),
   re-disparada em cada `render()`; respeita reduced-motion. Fonte: microinterações modernas. Porquê:
   sensação de fluidez. Neutro.
+- **Nemesis / próximo alvo** (Ronda 22, ângulo social) — inspiração: features "nemesis" de apps de
+  fitness/competição (fonte: artigos de retenção de leaderboards 2026). O hero mostra quem apanhar a
+  seguir (jogador logo à frente) + a distância. Porquê: alvo concreto motiva mais que o 1.º distante.
