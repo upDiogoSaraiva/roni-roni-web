@@ -37,7 +37,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
 
 ### Qualidade de vida / mobile
-- [💡] **Contagem decrescente** para o próximo prazo de apostas / próxima jornada.
+- [✅] **Contagem decrescente** para o fim da fase de grupos (na Geral, a partir das datas da competição).
 - [💡] **Pesquisa global** (jogadores + seleções) no topo.
 - [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
 - [✅] **Partilha por link** de uma folha de jogador (rota `#/folha/<nome>` + copiar link).
@@ -100,3 +100,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Vencedor por métrica no H2H** (Ronda 17, ângulo dados) — no Frente a frente, a métrica melhor de
   cada linha (posição/pontos/apuramento/posições) fica realçada. Fonte: comparadores lado-a-lado.
   Porquê: lê-se num instante quem ganha cada categoria. Neutro.
+- **Contagem decrescente** (Ronda 18, ângulo QoL) — aviso na Geral com os dias que faltam para o fim
+  da fase de grupos (datas da competição expostas em `/api/state`). Fonte: countdowns de eventos.
+  Porquê: cria urgência/antecipação. Neutro (apenas uma data).

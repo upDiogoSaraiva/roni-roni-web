@@ -325,6 +325,16 @@ function movementEl(m) {
   if (m < 0) return el('span', { class: 'mv down', title: `desceu ${-m}`, 'aria-label': `desceu ${-m} posições` }, icon('down'));
   return el('span', { class: 'mv flat', 'aria-hidden': 'true' }); // espaçador discreto, sem alteração
 }
+// texto da contagem decrescente para o fim da fase de grupos (datas em "AAAAMMDD-AAAAMMDD")
+function groupStageCountdown() {
+  const dates = STATE.competition?.source?.groupStageDates;
+  const end = dates && dates.split('-')[1];
+  if (!end || end.length !== 8) return null;
+  const d = new Date(+end.slice(0, 4), +end.slice(4, 6) - 1, +end.slice(6, 8), 23, 59);
+  const days = Math.ceil((d - new Date()) / 86400000);
+  if (Number.isNaN(days) || days < 0) return null;
+  return days === 0 ? 'Último dia da fase de grupos' : `Faltam ${days} dia(s) para o fim da fase de grupos`;
+}
 let lbSort = { key: 'rank', dir: 1 };
 async function pageGeral() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Classificação geral'),
@@ -340,6 +350,10 @@ async function pageGeral() {
   let query = '';
   const expanded = new Set();
   let firstLbPaint = true;
+
+  // contagem decrescente para o fim da fase de grupos (a partir das datas da competição)
+  const cd = groupStageCountdown();
+  if (cd) host.appendChild(el('div', { class: 'countdown' }, cd));
 
   // cartão pessoal: a minha posição de relance (quando identificado / escolhido)
   const myRow = myName && data.leaderboard.find((r) => r.player === myName);
