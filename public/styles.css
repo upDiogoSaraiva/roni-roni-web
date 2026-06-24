@@ -152,6 +152,10 @@ button { font: inherit; cursor: pointer; }
 .h2h-a, .h2h-b { text-align: center; font-size: 13px; }
 .h2h-row.eq .h2h-a, .h2h-row.eq .h2h-b { color: var(--ok); }
 
+/* ---------- cartão partilhável ---------- */
+.card-preview { max-width: 340px; margin: 14px auto 0; }
+.card-svg { display: block; width: 100%; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
+
 /* ---------- gráfico de evolução ---------- */
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }

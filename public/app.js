@@ -215,7 +215,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -259,6 +259,7 @@ async function render() {
     else if (r === 'simular') await pageSimular();
     else if (r === 'reveal') await pageReveal();
     else if (r === 'h2h') await pageH2H();
+    else if (r === 'cartao') await pageCartao();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -780,6 +781,87 @@ async function pageH2H() {
     card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
     for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));
     body.appendChild(card);
+  }
+  paint();
+}
+
+/* ---------------- PÁGINA: CARTÃO (partilhável no WhatsApp) ---------------- */
+// cartão quadrado 1080×1080 só com formas e texto (sem imagens externas -> canvas não fica "tainted").
+// Cores fixas da marca (clara) de propósito: a imagem exportada não deve depender do tema do leitor.
+function buildCardNode(player, row, count, bet) {
+  const S = 1080, cx = S / 2;
+  const F = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+  const svg = svgEl('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${S} ${S}`, class: 'card-svg', width: '100%' });
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: S, height: S, fill: '#f6f1e8' }));
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: S, height: 156, fill: '#e5482a' }));
+  svg.appendChild(svgEl('text', { x: 60, y: 96, fill: '#fcf3ee', 'font-size': 56, 'font-weight': 700, 'font-family': F }, 'RONI RONI'));
+  svg.appendChild(svgEl('text', { x: 62, y: 138, fill: '#fcf3ee', 'font-size': 27, 'font-family': F, opacity: 0.9 }, 'Pool de seleções · 2026'));
+  svg.appendChild(svgEl('circle', { cx, cy: 372, r: 96, fill: monoColor(player) }));
+  svg.appendChild(svgEl('text', { x: cx, y: 402, 'text-anchor': 'middle', fill: '#fff', 'font-size': 82, 'font-weight': 700, 'font-family': F }, initials(player)));
+  svg.appendChild(svgEl('text', { x: cx, y: 552, 'text-anchor': 'middle', fill: '#1b1712', 'font-size': 60, 'font-weight': 700, 'font-family': F }, player));
+  svg.appendChild(svgEl('text', { x: cx, y: 792, 'text-anchor': 'middle', fill: '#e5482a', 'font-size': 230, 'font-weight': 700, 'font-family': F }, row.rank + 'º'));
+  svg.appendChild(svgEl('text', { x: cx, y: 856, 'text-anchor': 'middle', fill: '#6b6256', 'font-size': 40, 'font-family': F }, `de ${count} · ${row.score.total} pontos`));
+  if (bet?.champion) svg.appendChild(svgEl('text', { x: cx, y: 956, 'text-anchor': 'middle', fill: '#1b1712', 'font-size': 36, 'font-family': F }, 'Campeão: ' + bet.champion));
+  svg.appendChild(svgEl('text', { x: cx, y: 1028, 'text-anchor': 'middle', fill: '#8a8170', 'font-size': 28, 'font-family': F }, 'Torneio Roni Roni 2026'));
+  return svg;
+}
+async function cardToPng(svgNode) {
+  const clone = svgNode.cloneNode(true);
+  clone.setAttribute('width', '1080');
+  clone.setAttribute('height', '1080');
+  const xml = new XMLSerializer().serializeToString(clone);
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  const img = new Image();
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('falha a desenhar o cartão')); img.src = url; });
+  const canvas = document.createElement('canvas');
+  canvas.width = 1080; canvas.height = 1080;
+  canvas.getContext('2d').drawImage(img, 0, 0, 1080, 1080);
+  return await new Promise((res) => canvas.toBlob(res, 'image/png'));
+}
+async function pageCartao() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Cartão'),
+    el('p', {}, 'O teu cartão para mandar no grupo do WhatsApp.')));
+  MAIN.appendChild(engageNav('cartao'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const lb = data.leaderboard;
+  const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
+  const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
+  const meName = localStorage.getItem('roni-me');
+  let me = meName && byPlayer[meName] ? meName : names[0];
+
+  const sel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { me = e.target.value; localStorage.setItem('roni-me', me); paint(); } },
+    ...names.map((n) => el('option', { value: n, selected: n === me }, n)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Cartão de quem'), sel)));
+
+  const preview = el('div', { class: 'card-preview' });
+  host.append(preview);
+  const dl = el('button', { class: 'btn btn-primary', onclick: () => downloadCard() }, icon('arrow'), 'Descarregar PNG');
+  const sh = el('button', { class: 'btn btn-ghost', onclick: () => shareCard() }, 'Partilhar');
+  host.append(el('div', { class: 'row-actions', style: { marginTop: '12px' } }, sh, dl));
+
+  function paint() { clear(preview); preview.appendChild(buildCardNode(me, byPlayer[me], lb.length, data.bets[me])); }
+  async function downloadCard() {
+    try {
+      const blob = await cardToPng(preview.querySelector('svg'));
+      const url = URL.createObjectURL(blob);
+      const a = el('a', { href: url, download: `roni-${me}.png` });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { toast(e.message, true); }
+  }
+  async function shareCard() {
+    try {
+      const blob = await cardToPng(preview.querySelector('svg'));
+      const file = new File([blob], `roni-${me}.png`, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Roni Roni', text: `${me} — ${byPlayer[me].rank}.º no Torneio Roni Roni` });
+      } else { toast('Partilha direta indisponível aqui — a descarregar.'); downloadCard(); }
+    } catch (e) { /* partilha cancelada pelo utilizador */ }
   }
   paint();
 }
