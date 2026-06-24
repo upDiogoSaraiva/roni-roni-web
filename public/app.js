@@ -386,6 +386,7 @@ function sheetDetail(bet, score) {
     if (score.knockout) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Mata-mata'), el('span', { class: 'num', style: { color: 'var(--brand)' } }, '+' + score.knockout)));
     if (score.champion) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Campeão'), el('span', { class: 'num' }, '+' + score.champion)));
     if (score.final4) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Final 4'), el('span', { class: 'num' }, '+' + score.final4)));
+    if (score.markets) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Extras'), el('span', { class: 'num' }, '+' + score.markets)));
     kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total)));
     box.appendChild(el('div', { class: 'sheet-top' }, ...kvs));
   }
@@ -1103,12 +1104,15 @@ async function pagePessoal() {
 function blankDraft() {
   const groups = {};
   for (const g of STATE.groupOrder) groups[g] = { first: null, second: null, third: null };
-  return { player: '', pin: '', editing: false, champion: null, final4: [null, null, null, null], groups };
+  return { player: '', pin: '', editing: false, champion: null, final4: [null, null, null, null], groups, markets: {} };
 }
 let draft = null;
 let stepIdx = 0;
 function formSteps() {
-  return ['ident', 'champion', 'final4', ...STATE.groupOrder.map((g) => 'g:' + g), 'thirds', 'review'];
+  const steps = ['ident', 'champion', 'final4', ...STATE.groupOrder.map((g) => 'g:' + g), 'thirds'];
+  if (STATE.competition?.markets?.length) steps.push('markets');
+  steps.push('review');
+  return steps;
 }
 function countThirds() { return STATE.groupOrder.filter((g) => draft.groups[g].third).length; }
 
@@ -1157,6 +1161,7 @@ function paintForm() {
   if (step === 'final4') return renderFinal4(body);
   if (step.startsWith('g:')) return renderGroupStep(body, step.slice(2));
   if (step === 'thirds') return renderThirds(body);
+  if (step === 'markets') return renderMarkets(body);
   if (step === 'review') return renderReview(body);
 }
 
@@ -1202,6 +1207,7 @@ async function loadExisting(player) {
     draft.champion = bet.champion;
     draft.final4 = [...bet.final4, null, null, null, null].slice(0, 4);
     for (const g of STATE.groupOrder) draft.groups[g] = { first: bet.groups[g]?.first || null, second: bet.groups[g]?.second || null, third: bet.groups[g]?.third || null };
+    draft.markets = { ...(bet.markets || {}) };
     if (bet.hasPin) {
       const pin = prompt('Esta aposta tem PIN. Introduz o PIN para editar:');
       draft.pin = (pin || '').replace(/\D/g, '');
@@ -1286,6 +1292,23 @@ function renderThirds(body) {
     nextLabel: 'Rever aposta' }));
 }
 
+function renderMarkets(body) {
+  const markets = STATE.competition.markets || [];
+  body.appendChild(stepHeader('Extras', 'Mercados extra'));
+  body.appendChild(el('p', { class: 'muted', style: { marginTop: '-8px', marginBottom: '16px' } },
+    'Apostas opcionais. Cada acerto vale os pontos indicados.'));
+  for (const m of markets) {
+    body.appendChild(el('div', { class: 'field' },
+      el('label', {}, `${m.name} · ${m.points || 0} pts`),
+      m.sub ? el('div', { class: 'hint', style: { marginTop: '-4px', marginBottom: '6px' } }, m.sub) : null,
+      m.options?.length
+        ? el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { draft.markets[m.id] = e.target.value || undefined; } },
+          el('option', { value: '' }, '— escolher —'), ...m.options.map((o) => el('option', { value: o, selected: draft.markets[m.id] === o }, o)))
+        : combobox({ value: draft.markets[m.id], options: allTeams(), placeholder: 'Escolher seleção…', onChange: (t) => { draft.markets[m.id] = t; } })));
+  }
+  body.appendChild(navButtons({ onNext: goNext, nextLabel: 'Rever aposta' }));
+}
+
 function renderReview(body) {
   body.appendChild(stepHeader('Revisão', 'Confere antes de submeter'));
   const errors = validateDraft();
@@ -1314,6 +1337,13 @@ function renderReview(body) {
   body.appendChild(el('div', { class: 'card', style: { padding: '16px', marginTop: '12px' } },
     el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Grupos · 8 terceiros'), grid));
 
+  const mk = STATE.competition?.markets || [];
+  if (mk.length && mk.some((m) => draft.markets[m.id])) {
+    body.appendChild(el('div', { class: 'card', style: { padding: '16px', marginTop: '12px' } },
+      el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Mercados extra'),
+      ...mk.filter((m) => draft.markets[m.id]).map((m) => el('div', { class: 'sheet-line' }, el('span', { class: 'pos' }, m.name), teamChip(draft.markets[m.id])))));
+  }
+
   body.appendChild(navButtons({
     onNext: submitDraft, nextLabel: draft.editing ? 'Guardar alterações' : 'Confirmar e submeter',
     nextDisabled: errors.length > 0,
@@ -1337,7 +1367,7 @@ function validateDraft() {
 async function submitDraft() {
   const body = {
     player: draft.player.trim(), pin: draft.pin || undefined,
-    champion: draft.champion, final4: draft.final4.filter(Boolean), groups: draft.groups,
+    champion: draft.champion, final4: draft.final4.filter(Boolean), groups: draft.groups, markets: draft.markets,
   };
   try {
     const res = await api('/api/bet', { method: 'POST', body });
@@ -1709,6 +1739,28 @@ async function pageAdmin() {
     for (const mid of r.matches) koHost.appendChild(koResultEditor(String(mid), bracket.resolved[String(mid)]));
   }
   paintKo(STATE.koRounds[0].id);
+
+  // resolução dos mercados extra (vencedor de cada mercado configurado)
+  if ((STATE.competition.markets || []).length) {
+    host.appendChild(el('div', { class: 'section-label' }, 'Mercados extra · resolução'));
+    const mcard = el('div', { class: 'card', style: { padding: '14px' } });
+    for (const m of STATE.competition.markets) {
+      const cur = (STATE.marketResults || {})[m.id] || null;
+      const save = async (winner) => {
+        try {
+          await api('/api/admin/market', { method: 'POST', body: { id: m.id, winner: winner || null } });
+          STATE.marketResults = { ...(STATE.marketResults || {}), [m.id]: winner || undefined };
+          toast(winner ? `${m.name}: ${winner}` : `${m.name} por decidir`);
+        } catch (e) { toast(e.message, true); }
+      };
+      const picker = m.options?.length
+        ? el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => save(e.target.value) },
+          el('option', { value: '' }, '— por decidir —'), ...m.options.map((o) => el('option', { value: o, selected: cur === o }, o)))
+        : combobox({ value: cur, options: allTeams(), placeholder: 'Vencedor…', onChange: save });
+      mcard.appendChild(el('div', { class: 'field' }, el('label', {}, `${m.name} · ${m.points || 0} pts`), picker));
+    }
+    host.appendChild(mcard);
+  }
 
   // grelha de apostas
   host.appendChild(el('div', { class: 'section-label' }, 'Apostas de todos'));

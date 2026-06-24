@@ -227,6 +227,7 @@ async function api(req, res, path) {
       competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes, markets: COMP.markets || [] },
       windowOpen: store.windows.grupos,
       windows: store.windows,
+      marketResults: store.marketResults,
       koRounds: BRACKET.rounds.map((r) => ({ id: r.id, label: r.label, joker: !!r.joker, winPts: r.winPts, methodPts: r.methodPts, matches: r.matches })),
       players: store.bets.map((b) => ({ player: b.player, seed: !!b.seed, hasPin: !!b.pin })),
     });

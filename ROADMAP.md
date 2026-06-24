@@ -39,9 +39,9 @@ Plano por fases:
 - [x] Posições de grupo (1.º/2.º) + N melhores 3.os (base atual).
 - [x] Outright: campeão, Final 4.
 - [x] Mata-mata por ronda: vencedor + fase (TR/Prol/Pen) + jokers.
-- [x] **Mercados extra** (motor + API + testes): melhor marcador, melhor jogador, melhor jovem,
-      "melhor pior equipa" e quaisquer outros — definidos na config, resolvidos pelo admin.
-      Falta a UI de aposta (passo "Extras") e de resolução no admin.
+- [x] **Mercados extra** (motor + API + testes + **UI** ✅): definidos na config (ex.: surpresa do
+      torneio, maior desilusão), passo "Extras" na aposta e resolução no admin. Cada acerto vale os
+      pontos do mercado (testado: +3 ao resolver corretamente).
 - [ ] Resultado de cada jogo de grupo, com **bónus de underdog**.
 
 ## Boosts (configuráveis, estilo joker)

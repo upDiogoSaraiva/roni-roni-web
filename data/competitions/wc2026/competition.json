@@ -26,5 +26,9 @@
     { "key": "3", "tag": "3.º", "name": "3.º lugar", "value": 40, "kind": "rank", "rank": 3 },
     { "key": "tendencia", "tag": "T", "name": "Tendência", "value": 15, "kind": "tendencia", "sub": "Mais vencedores certos no mata-mata" },
     { "key": "desculpa", "tag": "D", "name": "Desculpa", "value": 10, "kind": "last", "sub": "Menos pontos no fim" }
+  ],
+  "markets": [
+    { "id": "surpresa", "name": "Surpresa do torneio", "sub": "A seleção que mais surpreende", "points": 3 },
+    { "id": "desilusao", "name": "Maior desilusão", "sub": "A seleção que mais fica aquém", "points": 3 }
   ]
 }
