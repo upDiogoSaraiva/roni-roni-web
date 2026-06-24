@@ -346,12 +346,16 @@ async function pageGeral() {
   if (myRow) {
     const toLeader = data.leaderboard[0].score.total - myRow.score.total;
     const sub = myRow.rank === 1 ? 'Estás na liderança!' : `a ${toLeader} ponto(s) do 1.º · ${myRow.rank}.º de ${data.leaderboard.length}`;
+    const avg = Math.round(data.leaderboard.reduce((a, r) => a + r.score.total, 0) / data.leaderboard.length);
+    const vsAvg = myRow.score.total - avg;
+    const avgTxt = vsAvg === 0 ? 'em linha com a média do grupo' : `${vsAvg > 0 ? '+' + vsAvg : vsAvg} pts vs média do grupo`;
     const spark = rankSparkline(tl && tl.players.find((p) => p.player === myName), tl ? tl.count : data.leaderboard.length);
     host.appendChild(el('div', { class: 'card hero' },
       monogram(myRow.player),
       el('div', { style: { flex: '1', minWidth: '0' } },
         el('div', { class: 'hero-rank num' }, myRow.rank + '.º'),
         el('div', { class: 'hero-sub' }, sub),
+        el('div', { class: 'hero-sub' }, avgTxt),
         spark || null),
       el('div', { class: 'hero-pts' }, movementEl(myRow.movement || 0), el('span', { class: 'num' }, myRow.score.total))));
   }

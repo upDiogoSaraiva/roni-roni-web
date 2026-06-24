@@ -95,3 +95,5 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   sua folha direto no chat. Neutro.
 - **Streak de pódio** (Ronda 15, ângulo gamificação) — jornadas seguidas no top 3, na Conquistas
   (do `/api/timeline`). Fonte: streaks de fantasy apps. Porquê: recompensa a consistência. Neutro.
+- **Comparação vs média** (Ronda 16, ângulo dados/QoL) — o cartão hero mostra os pontos do jogador
+  face à média do grupo. Fonte: benchmarking de dashboards. Porquê: contextualiza a prestação. Neutro.
