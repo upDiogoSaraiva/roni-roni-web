@@ -196,6 +196,10 @@ button { font: inherit; cursor: pointer; }
 /* ---------- contagem decrescente ---------- */
 .countdown { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand-ink); border-radius: var(--r-ctrl); padding: 9px 14px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
 
+/* ---------- magnitude do movimento ---------- */
+.mv { display: inline-flex; align-items: center; gap: 1px; }
+.mv-n { font-size: 11px; line-height: 1; font-family: var(--font-num); }
+
 /* ---------- realce do líder na tabela ---------- */
 .lb-row.leader { background: color-mix(in srgb, var(--gold) 9%, transparent); }
 

@@ -47,6 +47,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Sparkline do percurso** no cartão pessoal hero (posição por jornada em miniatura).
 - [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
 - [✅] **Realce do líder** — coroa 👑 + fundo dourado subtil na linha do 1.º.
+- [✅] **Magnitude do movimento** — a seta de subiu/desceu passa a mostrar quantas posições.
 - [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
 - [✅] **Transições de página** suaves (fade+slide ao mudar de vista; respeita reduced-motion).
 
@@ -120,3 +121,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Campeão da jornada** (Ronda 23, ângulo social/dados) — quem mais pontos ganhou na última jornada,
   nos destaques da Evolução. Inspiração: "janela que renova" (semanal) das apps de competição.
   Porquê: dá uma vitória de curto prazo a quem não lidera. Neutro.
+- **Magnitude do movimento** (Ronda 24, ângulo polish/dados) — a seta de movimento na tabela mostra
+  quantas posições subiu/desceu. Fonte: leaderboards com delta explícito. Porquê: informação útil
+  sem custo. Neutro.

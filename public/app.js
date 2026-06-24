@@ -322,8 +322,8 @@ function medal(rank) {
   return svg;
 }
 function movementEl(m) {
-  if (m > 0) return el('span', { class: 'mv up', title: `subiu ${m}`, 'aria-label': `subiu ${m} posições` }, icon('up'));
-  if (m < 0) return el('span', { class: 'mv down', title: `desceu ${-m}`, 'aria-label': `desceu ${-m} posições` }, icon('down'));
+  if (m > 0) return el('span', { class: 'mv up', title: `subiu ${m}`, 'aria-label': `subiu ${m} posições` }, icon('up'), el('span', { class: 'mv-n' }, String(m)));
+  if (m < 0) return el('span', { class: 'mv down', title: `desceu ${-m}`, 'aria-label': `desceu ${-m} posições` }, icon('down'), el('span', { class: 'mv-n' }, String(-m)));
   return el('span', { class: 'mv flat', 'aria-hidden': 'true' }); // espaçador discreto, sem alteração
 }
 // texto da contagem decrescente para o fim da fase de grupos (datas em "AAAAMMDD-AAAAMMDD")
