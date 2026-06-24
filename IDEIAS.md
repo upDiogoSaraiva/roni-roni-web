@@ -41,6 +41,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Contagem decrescente** para o fim da fase de grupos (na Geral, a partir das datas da competição).
 - [💡] **Pesquisa global** (jogadores + seleções) no topo.
 - [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
+- [✅] **Copiar o meu resumo** — botão no hero que copia um texto curto da minha situação para o WhatsApp.
 - [✅] **Partilha por link** de uma folha de jogador (rota `#/folha/<nome>` + copiar link).
 
 ### Polish visual / microinterações
@@ -124,3 +125,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Magnitude do movimento** (Ronda 24, ângulo polish/dados) — a seta de movimento na tabela mostra
   quantas posições subiu/desceu. Fonte: leaderboards com delta explícito. Porquê: informação útil
   sem custo. Neutro.
+- **Copiar o meu resumo** (Ronda 25, ângulo distribuição) — botão no hero que copia um texto curto
+  ("Estou em X.º de Y com Z pontos") para colar no WhatsApp. Fonte: partilha por texto. Porquê:
+  partilha sem fricção, complementa o cartão-imagem. Neutro.

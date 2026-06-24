@@ -374,6 +374,11 @@ async function pageGeral() {
         el('div', { class: 'hero-sub' }, avgTxt),
         spark || null),
       el('div', { class: 'hero-pts' }, movementEl(myRow.movement || 0), el('span', { class: 'num' }, myRow.score.total))));
+    host.appendChild(el('button', { class: 'btn btn-ghost', style: { marginBottom: '12px' },
+      onclick: async () => {
+        const t = `Estou em ${myRow.rank}.º de ${data.leaderboard.length} no Torneio Roni Roni com ${myRow.score.total} pontos.`;
+        try { await navigator.clipboard.writeText(t); toast('Resumo copiado!'); } catch { toast('Copia manualmente, por favor.', true); }
+      } }, 'Copiar o meu resumo'));
   }
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
