@@ -55,7 +55,8 @@ function readCompetition(id) {
   else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
   if (!st.windows) { st.windows = { grupos: s.windowOpen !== false }; for (const r of koRounds) st.windows[r] = false; }
   if (!st.knockouts) st.knockouts = {};
-  for (const b of st.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; }
+  if (!st.marketResults) st.marketResults = {}; // vencedores dos mercados extra (melhor marcador, etc.)
+  for (const b of st.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; if (!b.markets) b.markets = {}; }
   return {
     id, seed: s, GROUPS: s.groups, GROUP_ORDER: s.groupOrder, TEAMS: s.teams, META: s.meta,
     BRACKET: bracket, COMP: comp, KO_ROUNDS: koRounds, matchRound: mRound,
@@ -152,7 +153,7 @@ function validateBet(b) {
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts }, COMP);
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, COMP);
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -186,6 +187,7 @@ function publicBet(b) {
     groups: b.groups,
     knockouts: b.knockouts || {},
     jokers: b.jokers || [],
+    markets: b.markets || {},
     seed: !!b.seed,
     hasPin: !!b.pin,
     submittedAt: b.submittedAt || null,
@@ -212,7 +214,7 @@ async function api(req, res, path) {
       groupOrder: GROUP_ORDER,
       teams: TEAMS,
       meta: META,
-      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes },
+      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes, markets: COMP.markets || [] },
       windowOpen: store.windows.grupos,
       windows: store.windows,
       koRounds: BRACKET.rounds.map((r) => ({ id: r.id, label: r.label, joker: !!r.joker, winPts: r.winPts, methodPts: r.methodPts, matches: r.matches })),
@@ -324,6 +326,7 @@ async function api(req, res, path) {
       existing.champion = body.champion;
       existing.final4 = body.final4;
       existing.groups = normalizeGroups(body.groups);
+      if (body.markets) existing.markets = sanitizeMarkets(body.markets);
       existing.submittedAt = new Date().toISOString();
       if (body.pin) existing.pin = String(body.pin);
       existing.seed = false;
@@ -337,6 +340,7 @@ async function api(req, res, path) {
       champion: body.champion,
       final4: body.final4,
       groups: normalizeGroups(body.groups),
+      markets: sanitizeMarkets(body.markets),
       pin: body.pin ? String(body.pin) : null,
       submittedAt: new Date().toISOString(),
       seed: false,
@@ -443,6 +447,17 @@ async function api(req, res, path) {
       return json(res, 200, { windows: store.windows });
     }
 
+    // resolver um mercado extra (ex.: melhor marcador) — guarda o vencedor
+    if (path === '/api/admin/market' && method === 'POST') {
+      const body = await readBody(req);
+      if (!(COMP.markets || []).some((m) => m.id === body.id)) return json(res, 400, { error: 'Mercado desconhecido.' });
+      snapshotRanks();
+      if (body.winner) store.marketResults[body.id] = String(body.winner);
+      else delete store.marketResults[body.id];
+      saveStore();
+      return json(res, 200, { ok: true });
+    }
+
     // resultado de um jogo do mata-mata (vencedor + fase)
     if (path === '/api/admin/knockout' && method === 'POST') {
       const body = await readBody(req);
@@ -547,6 +562,12 @@ function normalizeGroups(groups) {
     const p = (groups || {})[g] || {};
     out[g] = { first: p.first || null, second: p.second || null, third: p.third || null };
   }
+  return out;
+}
+// mantém só picks de mercados que a competição define
+function sanitizeMarkets(m) {
+  const out = {};
+  for (const mk of COMP.markets || []) if (m && typeof m[mk.id] === 'string' && m[mk.id].trim()) out[mk.id] = m[mk.id].trim();
   return out;
 }
 
