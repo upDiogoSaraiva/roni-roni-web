@@ -50,7 +50,8 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Transições de página** suaves.
 
 ### Acessibilidade
-- [✅] Respeito por `prefers-reduced-motion` (global) + `aria-label` na nav de chips. [💡] falta modo alto contraste.
+- [✅] Respeito por `prefers-reduced-motion` (global) + `aria-label` na nav de chips.
+- [✅] **Modo alto contraste** — toggle no header (reforça texto/contornos sobre qualquer tema).
 - [✅] **Navegação por teclado** nos chips (setas ←/→ movem o foco entre vistas).
 
 ## Implementadas (rasto)
@@ -103,3 +104,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Contagem decrescente** (Ronda 18, ângulo QoL) — aviso na Geral com os dias que faltam para o fim
   da fase de grupos (datas da competição expostas em `/api/state`). Fonte: countdowns de eventos.
   Porquê: cria urgência/antecipação. Neutro (apenas uma data).
+- **Modo alto contraste** (Ronda 19, ângulo acessibilidade) — toggle no header que reforça texto e
+  contornos sobre qualquer tema (`data-hc`), persistido. Fonte: boas práticas WCAG. Porquê: legível
+  para quem precisa de mais contraste. Neutro.

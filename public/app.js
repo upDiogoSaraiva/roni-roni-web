@@ -2277,6 +2277,13 @@ function applyTheme(t) {
 $('#theme-toggle').addEventListener('click', () => {
   applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 });
+// modo alto contraste (acessibilidade) — reforça texto e contornos
+function applyContrast(on) {
+  document.documentElement.dataset.hc = on ? '1' : '';
+  localStorage.setItem('roni-hc', on ? '1' : '0');
+  $('#contrast-toggle')?.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+$('#contrast-toggle')?.addEventListener('click', () => applyContrast(document.documentElement.dataset.hc !== '1'));
 
 /* ---------------- window pill ---------------- */
 function paintWindowPill() {
@@ -2290,6 +2297,7 @@ function paintWindowPill() {
 /* ---------------- boot ---------------- */
 async function boot() {
   applyTheme(localStorage.getItem('roni-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  applyContrast(localStorage.getItem('roni-hc') === '1');
   try {
     const st = await api('/api/state');
     Object.assign(STATE, st);
