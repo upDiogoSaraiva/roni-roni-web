@@ -125,6 +125,7 @@ button { font: inherit; cursor: pointer; }
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }
 .ev-xlab, .ev-ylab { fill: var(--text-soft); font-size: 11px; font-family: var(--font-num); }
+.ev-line, .ev-dot, .ev-end { pointer-events: none; }
 .ev-line { fill: none; stroke: var(--text-soft); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.16; }
 .ev-line.leader { stroke: var(--gold); stroke-width: 2.2; opacity: 0.9; }
 .ev-line.me { stroke: var(--brand); stroke-width: 2.8; opacity: 1; }
@@ -134,6 +135,16 @@ button { font: inherit; cursor: pointer; }
 .ev-end { font-size: 11px; font-weight: 600; font-family: var(--font-ui); }
 .ev-end.leader { fill: var(--gold); }
 .ev-end.me { fill: var(--brand); }
+/* área larga e invisível por cima de cada linha, para facilitar o hover */
+.ev-hit { fill: none; stroke: transparent; stroke-width: 12; stroke-linejoin: round; pointer-events: stroke; cursor: pointer; }
+/* pontos e rótulo só aparecem nas linhas persistentes (líder / eu) … */
+.ev-series .ev-dot, .ev-series .ev-end { display: none; }
+.ev-series.leader .ev-dot, .ev-series.leader .ev-end,
+.ev-series.me .ev-dot, .ev-series.me .ev-end { display: block; }
+/* … ou na linha sob o rato: realça em tinta neutra (distinta do ouro/ember) e revela o nome */
+.ev-series.hover .ev-line { stroke: var(--text); stroke-width: 2.6; opacity: 1; }
+.ev-series.hover .ev-dot { display: block; stroke: var(--text); }
+.ev-series.hover .ev-end { display: block; fill: var(--text); }
 
 /* ---------- tabbar ---------- */
 .tabbar {

@@ -426,7 +426,7 @@ async function pageEvolucao() {
   const chartCard = el('div', { class: 'card', style: { padding: '14px 10px 10px', marginTop: '12px', overflow: 'hidden' } });
   host.appendChild(chartCard);
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '10px' } },
-    'Posição recalculada como se a fase de grupos terminasse no fim de cada jornada (provisório).'));
+    'Passa o rato por uma linha para ver o jogador. Posição recalculada como se a fase de grupos terminasse no fim de cada jornada (provisório).'));
 
   function paint() { clear(chartCard); chartCard.appendChild(buildEvolutionChart(data, players, me)); }
   paint();
@@ -462,26 +462,28 @@ function buildEvolutionChart(data, players, me) {
   const lineFor = (p) => p.points.map((pt) => `${X(pt.md)},${Y(pt.rank)}`).join(' ');
   const leader = players.find((p) => p.points[p.points.length - 1].rank === 1);
 
-  // 1) todas as linhas, esbatidas
-  const back = svgEl('g', { class: 'ev-back' });
-  for (const p of players) {
-    if (p.player === me) continue;
-    back.appendChild(svgEl('polyline', { class: 'ev-line', points: lineFor(p) }));
-  }
-  svg.appendChild(back);
-
-  // 2) destaques por cima: líder (ouro) e eu (brand)
-  function highlight(p, cls) {
-    const g = svgEl('g', { class: 'ev-hl ' + cls });
+  // uma série por jogador: linha visível + pontos + rótulo + área larga invisível para o hover.
+  // por defeito as linhas estão esbatidas; líder (ouro) e eu (brand) ficam sempre realçados;
+  // passar o rato por qualquer linha realça-a, mostra o nome e trá-la para a frente.
+  const layer = svgEl('g', { class: 'ev-series-layer' });
+  function series(p) {
+    const cls = p.player === me ? 'me' : (leader && p.player === leader.player ? 'leader' : '');
+    const g = svgEl('g', { class: 'ev-series' + (cls ? ' ' + cls : '') });
     g.appendChild(svgEl('polyline', { class: 'ev-line ' + cls, points: lineFor(p) }));
     for (const pt of p.points) g.appendChild(svgEl('circle', { class: 'ev-dot ' + cls, cx: X(pt.md), cy: Y(pt.rank), r: 3.2 }));
     const last = p.points[p.points.length - 1];
     g.appendChild(svgEl('text', { class: 'ev-end ' + cls, x: X(last.md) + 8, y: Y(last.rank) + 4 }, `${shortName(p.player)} · ${last.rank}.º`));
-    svg.appendChild(g);
+    g.appendChild(svgEl('polyline', { class: 'ev-hit', points: lineFor(p) }));
+    g.addEventListener('mouseenter', () => { g.classList.add('hover'); svg.appendChild(g); });
+    g.addEventListener('mouseleave', () => { g.classList.remove('hover'); });
+    return g;
   }
-  if (leader && leader.player !== me) highlight(leader, 'leader');
+  // desenha primeiro as linhas normais; líder e eu por cima (persistentes)
+  for (const p of players) if (p.player !== me && !(leader && p.player === leader.player)) layer.appendChild(series(p));
+  if (leader && leader.player !== me) layer.appendChild(series(leader));
   const meP = players.find((p) => p.player === me);
-  if (meP) highlight(meP, 'me');
+  if (meP) layer.appendChild(series(meP));
+  svg.appendChild(layer);
 
   return svg;
 }
