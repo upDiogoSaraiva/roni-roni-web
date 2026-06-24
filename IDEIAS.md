@@ -20,7 +20,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ### Gamificação
 - [✅] **Conquistas / Badges** — distintivos determinísticos por jogador (trio perfeito, faro de
   apuramento, contra a corrente, em ascensão, pódio…). *Porquê:* estatuto e colecionismo fazem voltar.
-- [💡] **Streak de pódio** — quantas jornadas seguidas no top 3 (do `/api/timeline`).
+- [✅] **Streak de pódio** — jornadas seguidas no top 3 (na Conquistas, do `/api/timeline`).
 - [✅] **Nível/XP do jogador** — título por pontos + barra de progresso (Conquistas).
 - [💡] **Selo de "melhor jornada"** — quem mais subiu em cada jornada ganha um selo nessa jornada.
 
@@ -93,3 +93,5 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Folha partilhável por link** (Ronda 14, ângulo QoL/distribuição) — rota `#/folha/<nome>` com a
   folha e pontos do jogador + copiar link. Fonte: deep-links de partilha. Porquê: mandar a alguém a
   sua folha direto no chat. Neutro.
+- **Streak de pódio** (Ronda 15, ângulo gamificação) — jornadas seguidas no top 3, na Conquistas
+  (do `/api/timeline`). Fonte: streaks de fantasy apps. Porquê: recompensa a consistência. Neutro.

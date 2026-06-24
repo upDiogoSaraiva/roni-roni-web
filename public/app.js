@@ -1075,6 +1075,13 @@ function computeBadges(row, bet, ctx) {
   add('🎲', 'Aposta única', 'Ninguém escolheu o mesmo campeão que tu', !!bet?.champion && backers === 1);
   return out;
 }
+// jornadas consecutivas (a contar do fim) em que o jogador esteve no top 3
+function podiumStreak(series) {
+  if (!series) return 0;
+  let s = 0;
+  for (let i = series.points.length - 1; i >= 0; i--) { if (series.points[i].rank <= 3) s++; else break; }
+  return s;
+}
 // nível/título do jogador a partir dos pontos (determinístico, neutro)
 function playerLevel(total) {
   const tiers = [{ min: 0, name: 'Estreante' }, { min: 20, name: 'Habituado' }, { min: 35, name: 'Veterano' }, { min: 45, name: 'Mestre' }, { min: 55, name: 'Lenda' }];
@@ -1091,7 +1098,7 @@ async function pageConquistas() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(4));
-  const data = await api('/api/leaderboard');
+  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard;
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
@@ -1119,8 +1126,10 @@ async function pageConquistas() {
       el('div', { class: 'reveal-bar-wrap', style: { marginTop: '8px' } }, el('div', { class: 'reveal-bar', style: { width: lvl.pct + '%' } }))));
     const badges = computeBadges(byPlayer[me], data.bets[me], ctx);
     const earned = badges.filter((b) => b.earned).length;
+    const streak = podiumStreak(tl && tl.players.find((p) => p.player === me));
     body.appendChild(el('div', { class: 'pot', style: { marginBottom: '12px' } },
-      el('div', { class: 'kv' }, el('b', {}, 'Conquistas'), el('span', { class: 'v num' }, `${earned}/${badges.length}`))));
+      el('div', { class: 'kv' }, el('b', {}, 'Conquistas'), el('span', { class: 'v num' }, `${earned}/${badges.length}`)),
+      streak > 1 ? el('div', { class: 'kv' }, el('b', {}, 'Pódio seguido'), el('span', { class: 'v num' }, `${streak} jornadas`)) : null));
     const grid = el('div', { class: 'badge-grid' });
     for (const b of badges) {
       grid.appendChild(el('div', { class: 'badge-card' + (b.earned ? ' earned' : ' locked') },
