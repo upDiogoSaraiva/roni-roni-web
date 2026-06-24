@@ -51,7 +51,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 
 ### Acessibilidade
 - [✅] Respeito por `prefers-reduced-motion` (global) + `aria-label` na nav de chips. [💡] falta modo alto contraste.
-- [💡] **Navegação por teclado** completa nos chips e listas.
+- [✅] **Navegação por teclado** nos chips (setas ←/→ movem o foco entre vistas).
 
 ## Implementadas (rasto)
 - **Conquistas / Badges** (Ronda 1, ângulo gamificação) — ver commit. Fonte: fantasy apps (badges/achievements).
@@ -88,3 +88,5 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Mais escolhidas para apurar** (Ronda 12, ângulo dados) — no Reveal, seleções mais escolhidas como
   1.º/2.º em todos os grupos. Fonte: heatmaps de consenso. Porquê: mostra o "chalk" coletivo do
   apuramento de relance. Neutro.
+- **Navegação por teclado nos chips** (Ronda 13, ângulo acessibilidade) — setas ←/→ movem o foco entre
+  as vistas. Fonte: padrões ARIA de navegação. Porquê: usável sem rato. Neutro.

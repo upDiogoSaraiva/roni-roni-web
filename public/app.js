@@ -255,7 +255,15 @@ const ENGAGE = [
   ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
-  const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas' });
+  const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas',
+    onkeydown: (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const btns = [...row.querySelectorAll('.chip-nav')];
+      const i = btns.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      btns[(i + (e.key === 'ArrowRight' ? 1 : -1) + btns.length) % btns.length].focus();
+    } });
   for (const [route, label] of ENGAGE) {
     if (!ROUTES.includes(route)) continue;
     row.appendChild(el('button', { type: 'button', class: 'chip-nav' + (route === active ? ' on' : ''), onclick: () => navigate(route) }, label));
