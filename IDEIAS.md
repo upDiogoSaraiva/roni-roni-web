@@ -40,7 +40,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Contagem decrescente** para o próximo prazo de apostas / próxima jornada.
 - [💡] **Pesquisa global** (jogadores + seleções) no topo.
 - [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
-- [💡] **Partilha por link** de uma folha de jogador.
+- [✅] **Partilha por link** de uma folha de jogador (rota `#/folha/<nome>` + copiar link).
 
 ### Polish visual / microinterações
 - [✅] **Sparkline do percurso** no cartão pessoal hero (posição por jornada em miniatura).
@@ -90,3 +90,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   apuramento de relance. Neutro.
 - **Navegação por teclado nos chips** (Ronda 13, ângulo acessibilidade) — setas ←/→ movem o foco entre
   as vistas. Fonte: padrões ARIA de navegação. Porquê: usável sem rato. Neutro.
+- **Folha partilhável por link** (Ronda 14, ângulo QoL/distribuição) — rota `#/folha/<nome>` com a
+  folha e pontos do jogador + copiar link. Fonte: deep-links de partilha. Porquê: mandar a alguém a
+  sua folha direto no chat. Neutro.

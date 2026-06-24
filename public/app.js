@@ -242,7 +242,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -297,6 +297,7 @@ async function render() {
     else if (r === 'cartao') await pageCartao();
     else if (r === 'halloffame') await pageHallOfFame();
     else if (r === 'conquistas') await pageConquistas();
+    else if (r === 'folha') await pageFolha();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -1030,6 +1031,27 @@ async function pageCartao() {
     } catch (e) { /* partilha cancelada pelo utilizador */ }
   }
   paint();
+}
+
+/* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
+async function pageFolha() {
+  const player = decodeURIComponent(location.hash.split('/')[2] || '');
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Folha de ' + (player || 'jogador')),
+    el('p', {}, 'A folha e os pontos deste jogador.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const row = data.leaderboard.find((r) => r.player === player);
+  if (!row) { host.appendChild(emptyState('Jogador não encontrado', 'Verifica o nome no link.', 'search')); return; }
+  host.appendChild(el('div', { class: 'pot' },
+    el('div', { class: 'kv' }, el('b', {}, 'Posição'), el('span', { class: 'v num' }, row.rank + '.º')),
+    el('div', { class: 'kv' }, el('b', {}, 'Pontos'), el('span', { class: 'v num' }, row.score.total))));
+  host.appendChild(el('button', { class: 'btn btn-ghost', style: { margin: '10px 0' },
+    onclick: async () => { try { await navigator.clipboard.writeText(location.href); toast('Link copiado!'); } catch { toast('Copia o link da barra do browser.', true); } } },
+    'Copiar link da folha'));
+  host.appendChild(sheetDetail(data.bets[player], row.score));
 }
 
 /* ---------------- PÁGINA: CONQUISTAS (badges) ---------------- */
