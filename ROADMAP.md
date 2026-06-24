@@ -11,8 +11,8 @@ neutro, determinístico e partilhável no WhatsApp. Decisões: alcance = pool do
 (não multi-grupo, não genérico); identidade = token mágico sem password; primeiro = camada social.
 
 Plano por fases:
-- **Fase A — drama da edição atual** (sem contas): evolução por jornada, simulador "e se?", reveal
-  das apostas, recaps por jornada, H2H da época, cartões SVG para WhatsApp.
+- **Fase A — drama da edição atual** ✅ CONCLUÍDA (sem contas): evolução por jornada (+ hover),
+  simulador "e se?", reveal das apostas, recaps por jornada, frente a frente, cartões para WhatsApp.
 - **Fase B — identidade** (token mágico, persistente entre dispositivos/edições).
 - **Fase C — carreiras & Hall da Fama** (agregação entre edições, all-time, rivalidades).
 - **Fase D — o jogo é teu** (boosts, aposta por jogo + underdog, UI dos mercados, construtor).
@@ -60,9 +60,9 @@ Plano por fases:
 
 ## Ideias minhas (extra)
 - [x] Gráfico da posição ao longo das jornadas (página **Evolução**, replay por jornada).
-- [ ] Comparar dois jogadores lado a lado (head-to-head).
+- [x] Comparar dois jogadores lado a lado (página **Frente a frente**).
 - [x] Simulador "e se?" — página **E se?**, projeta a classificação dos jogos que faltam.
-- [ ] Cartão de jogador partilhável (imagem) para o WhatsApp.
+- [x] Cartão de jogador partilhável (PNG) para o WhatsApp (página **Cartão**).
 - [ ] Estatísticas: mais "chalk" vs mais contrário ao campo; média de pontos; melhor aposta.
 - [ ] Contagem decrescente para o próximo prazo de apostas.
 - [ ] Transparência do desempate ("porque está esta equipa à frente").
