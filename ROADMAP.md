@@ -17,16 +17,18 @@ flexíveis. Trabalho no ramo `platform`; o `main` mantém a app ao vivo do Mundi
 - [x] Página **Pessoal** ("A minha época"): a folha e os pontos de um jogador, e o seu historial entre edições.
 
 ## Fase 3 — construtor de competições + import
-- [ ] Admin **cria competição**: nome, grupos, equipas, formato, e as regras (ver mercados/boosts).
-- [ ] **Import de Excel/CSV** de edições passadas para o histórico (apostas + resultados → arquivo).
+- [x] **Import** de edições passadas (classificação final) para o histórico (admin → Competições).
+- [x] Admin troca a competição ativa.
+- [ ] Admin **cria competição** ao vivo: nome, grupos, equipas, formato, regras (UI do construtor).
 
 ## Mercados de aposta (configuráveis por competição)
-- [ ] Posições de grupo (1.º/2.º) + N melhores 3.os.
-- [ ] Resultado de cada jogo de grupo, com **bónus de underdog** (acertar a vitória do mais fraco vale +1).
-- [ ] Outright: campeão, Final 4 (semifinalistas).
-- [ ] Mata-mata por ronda: vencedor + fase (TR/Prol/Pen).
-- [ ] Prémios individuais: **melhor marcador**, **melhor jogador**, **melhor jovem**.
-- [ ] **"Melhor pior equipa"**: a que vai mais longe estando fora do top 30 do ranking FIFA.
+- [x] Posições de grupo (1.º/2.º) + N melhores 3.os (base atual).
+- [x] Outright: campeão, Final 4.
+- [x] Mata-mata por ronda: vencedor + fase (TR/Prol/Pen) + jokers.
+- [x] **Mercados extra** (motor + API + testes): melhor marcador, melhor jogador, melhor jovem,
+      "melhor pior equipa" e quaisquer outros — definidos na config, resolvidos pelo admin.
+      Falta a UI de aposta (passo "Extras") e de resolução no admin.
+- [ ] Resultado de cada jogo de grupo, com **bónus de underdog**.
 
 ## Boosts (configuráveis, estilo joker)
 - [ ] Joker: duplica os pontos de um jogo (já existe no mata-mata; trazer também aos grupos).
