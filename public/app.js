@@ -215,7 +215,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -258,6 +258,7 @@ async function render() {
     else if (r === 'evolucao') await pageEvolucao();
     else if (r === 'simular') await pageSimular();
     else if (r === 'reveal') await pageReveal();
+    else if (r === 'h2h') await pageH2H();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -715,6 +716,72 @@ async function pageReveal() {
         el('span', { class: 'muted', style: { marginLeft: 'auto', fontSize: '12px' } }, `${c[0].n}/${total}`))));
   }
   host.appendChild(grid);
+}
+
+/* ---------------- PÁGINA: FRENTE A FRENTE (H2H) ---------------- */
+function h2hTrio(bet, g) {
+  const p = bet.groups?.[g] || {};
+  return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '—';
+}
+function h2hRow(label, a, b, eq) {
+  return el('div', { class: 'h2h-row' + (eq ? ' eq' : '') },
+    el('span', { class: 'h2h-lbl' }, label),
+    el('span', { class: 'h2h-a num' }, a),
+    el('span', { class: 'h2h-b num' }, b));
+}
+async function pageH2H() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Frente a frente'),
+    el('p', {}, 'Compara dois jogadores lado a lado — quem lidera e onde diferem.')));
+  MAIN.appendChild(engageNav('h2h'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(6));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const lb = data.leaderboard;
+  const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
+  const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
+  const meName = localStorage.getItem('roni-me');
+  let A = meName && byPlayer[meName] ? meName : names[0];
+  let B = (lb.find((r) => r.player !== A) || {}).player || names[0];
+
+  const selWrap = el('div', { class: 'h2h-selects' });
+  const body = el('div', {});
+  const mkSel = (val, onChange) => el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => onChange(e.target.value) },
+    ...names.map((n) => el('option', { value: n, selected: n === val }, n)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, selWrap));
+  host.append(body);
+
+  function paint() {
+    clear(selWrap);
+    selWrap.appendChild(mkSel(A, (v) => { A = v; paint(); }));
+    selWrap.appendChild(el('span', { class: 'h2h-vs num' }, 'vs'));
+    selWrap.appendChild(mkSel(B, (v) => { B = v; paint(); }));
+    clear(body);
+    const ra = byPlayer[A], rb = byPlayer[B], ba = data.bets[A], bb = data.bets[B];
+    if (!ra || !rb || !ba || !bb) { body.appendChild(emptyState('Escolhe dois jogadores', '', 'search')); return; }
+
+    body.appendChild(el('div', { class: 'h2h-head' }, el('div', {}),
+      el('div', { class: 'h2h-pl' }, monogram(A), el('div', { class: 'nm' }, A), el('div', { class: 'sub num' }, ra.rank + '.º · ' + ra.score.total + ' pts')),
+      el('div', { class: 'h2h-pl' }, monogram(B), el('div', { class: 'nm' }, B), el('div', { class: 'sub num' }, rb.rank + '.º · ' + rb.score.total + ' pts'))));
+
+    const diff = ra.score.total - rb.score.total;
+    const lead = diff === 0 ? 'Empatados em pontos.' : `${diff > 0 ? A : B} lidera por ${Math.abs(diff)} ponto(s).`;
+    let sameG = 0;
+    for (const g of STATE.groupOrder) if (h2hTrio(ba, g) === h2hTrio(bb, g)) sameG++;
+    body.appendChild(el('p', { class: 'muted', style: { textAlign: 'center', margin: '4px 0 12px' } },
+      `${lead} Coincidem em ${sameG}/${STATE.groupOrder.length} grupos${ba.champion === bb.champion ? ' e no campeão' : ''}.`));
+
+    const card = el('div', { class: 'card', style: { padding: '4px 0' } });
+    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false));
+    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false));
+    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false));
+    card.appendChild(h2hRow('Campeão', codeOf(ba.champion), codeOf(bb.champion), ba.champion === bb.champion));
+    card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
+    for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));
+    body.appendChild(card);
+  }
+  paint();
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */
