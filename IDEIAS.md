@@ -73,3 +73,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Movimento reduzido + semântica** (Ronda 7, ângulo acessibilidade) — `@media (prefers-reduced-motion)`
   global desliga animações/transições; `aria-label` na nav de chips. Fonte: boas práticas de UX/a11y.
   Porquê: inclusivo e respeita preferências do sistema, sem custo para os restantes.
+- **Estatísticas da época** (Ronda 8, ângulo dados) — no Reveal: média de pontos do grupo e extremos
+  (mais/menos pontos). Fonte: dashboards desportivos. Porquê: contextualiza a tabela ("estou acima
+  ou abaixo da média?"). Derivado do leaderboard, neutro.

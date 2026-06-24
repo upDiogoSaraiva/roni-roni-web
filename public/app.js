@@ -780,7 +780,7 @@ async function pageReveal() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
-  const { bets } = await api('/api/bets');
+  const [{ bets }, lbData] = await Promise.all([api('/api/bets'), api('/api/leaderboard')]);
   clear(host);
   if (!bets.length) { host.appendChild(emptyState('Sem apostas', 'Ainda não há folhas submetidas.', 'search')); return; }
   const total = bets.length;
@@ -792,6 +792,18 @@ async function pageReveal() {
   host.appendChild(el('div', { class: 'pot' },
     el('div', { class: 'kv' }, el('b', {}, 'Campeão favorito'), el('span', { class: 'v' }, `${champ[0].team} · ${champ[0].n}/${total}`)),
     champLone ? el('div', { class: 'kv' }, el('b', {}, 'Aposta solitária'), el('span', { class: 'v' }, `${champLone.team}`)) : null));
+
+  // estatísticas da época (média e extremos de pontos)
+  const lb = lbData.leaderboard;
+  if (lb.length) {
+    const avg = Math.round(lb.reduce((a, r) => a + r.score.total, 0) / lb.length);
+    const top = lb[0], bottom = lb[lb.length - 1];
+    host.appendChild(el('div', { class: 'section-label' }, 'Estatísticas da época'));
+    host.appendChild(el('div', { class: 'pot' },
+      el('div', { class: 'kv' }, el('b', {}, 'Média do grupo'), el('span', { class: 'v num' }, String(avg))),
+      el('div', { class: 'kv' }, el('b', {}, 'Mais pontos'), el('span', { class: 'v' }, `${top.player} · ${top.score.total}`)),
+      el('div', { class: 'kv' }, el('b', {}, 'Menos pontos'), el('span', { class: 'v' }, `${bottom.player} · ${bottom.score.total}`))));
+  }
 
   host.appendChild(el('div', { class: 'section-label' }, 'Campeão · quem escolheu cada seleção'));
   host.appendChild(barCard(champ));
