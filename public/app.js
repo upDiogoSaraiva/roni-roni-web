@@ -321,7 +321,8 @@ async function pageGeral() {
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
-  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput)));
+  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput),
+    el('button', { class: 'btn btn-ghost', style: { whiteSpace: 'nowrap' }, onclick: () => shareTable(data.leaderboard) }, 'Partilhar')));
 
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
@@ -884,18 +885,52 @@ function buildCardNode(player, row, count, bet) {
   svg.appendChild(svgEl('text', { x: cx, y: 1028, 'text-anchor': 'middle', fill: '#8a8170', 'font-size': 28, 'font-family': F }, 'Torneio Roni Roni 2026'));
   return svg;
 }
-async function cardToPng(svgNode) {
+async function cardToPng(svgNode, w = 1080, h = 1080) {
   const clone = svgNode.cloneNode(true);
-  clone.setAttribute('width', '1080');
-  clone.setAttribute('height', '1080');
+  clone.setAttribute('width', String(w));
+  clone.setAttribute('height', String(h));
   const xml = new XMLSerializer().serializeToString(clone);
   const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   const img = new Image();
   await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('falha a desenhar o cartão')); img.src = url; });
   const canvas = document.createElement('canvas');
-  canvas.width = 1080; canvas.height = 1080;
-  canvas.getContext('2d').drawImage(img, 0, 0, 1080, 1080);
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
   return await new Promise((res) => canvas.toBlob(res, 'image/png'));
+}
+// cartão da classificação (top 10) para partilhar — SVG retrato 1080×1350, só formas e texto
+function buildTableCardNode(lb) {
+  const W = 1080, H = 1350, F = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+  const svg = svgEl('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${W} ${H}`, width: '100%' });
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: '#f6f1e8' }));
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: 170, fill: '#e5482a' }));
+  svg.appendChild(svgEl('text', { x: 60, y: 104, fill: '#fcf3ee', 'font-size': 58, 'font-weight': 700, 'font-family': F }, 'RONI RONI'));
+  svg.appendChild(svgEl('text', { x: 62, y: 148, fill: '#fcf3ee', 'font-size': 28, 'font-family': F, opacity: 0.9 }, 'Classificação · ' + (STATE.competition?.edition || '')));
+  let y = 240;
+  lb.slice(0, 10).forEach((r, i, arr) => {
+    const nm = r.player.length > 22 ? r.player.slice(0, 21) + '…' : r.player;
+    svg.appendChild(svgEl('text', { x: 92, y: y + 34, fill: '#6b6256', 'font-size': 38, 'font-weight': 700, 'font-family': F, 'text-anchor': 'middle' }, r.rank));
+    svg.appendChild(svgEl('text', { x: 150, y: y + 34, fill: '#1b1712', 'font-size': 40, 'font-family': F }, nm));
+    svg.appendChild(svgEl('text', { x: W - 60, y: y + 34, fill: '#e5482a', 'font-size': 40, 'font-weight': 700, 'font-family': F, 'text-anchor': 'end' }, r.score.total));
+    if (i < arr.length - 1) svg.appendChild(svgEl('line', { x1: 60, y1: y + 58, x2: W - 60, y2: y + 58, stroke: '#e7decf', 'stroke-width': 1 }));
+    y += 104;
+  });
+  svg.appendChild(svgEl('text', { x: W / 2, y: H - 40, 'text-anchor': 'middle', fill: '#8a8170', 'font-size': 26, 'font-family': F }, 'Torneio Roni Roni 2026'));
+  return svg;
+}
+async function shareTable(lb) {
+  try {
+    const blob = await cardToPng(buildTableCardNode(lb), 1080, 1350);
+    const file = new File([blob], 'roni-tabela.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Roni Roni', text: 'Classificação do Torneio Roni Roni' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = el('a', { href: url, download: 'roni-tabela.png' });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  } catch (e) { toast(e.message, true); }
 }
 async function pageCartao() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Cartão'),

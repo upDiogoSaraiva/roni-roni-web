@@ -28,7 +28,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Rivalidades** — pares que mais trocaram de posição entre si ao longo das jornadas (na Evolução).
 - [💡] **Liga de quartos** — sub-grupos (ex.: por apelido/escolha) com mini-tabela.
 - [💡] **Mural de reações** — emojis por jogador (sem texto livre? rever neutralidade/segurança).
-- [💡] **Partilhar a tabela** como imagem (cartão de leaderboard para o WhatsApp).
+- [✅] **Partilhar a tabela** como imagem (cartão de leaderboard top 10 para o WhatsApp).
 
 ### Dados / visualização
 - [💡] **Mapa de calor de apuramento** — por grupo, quantas vezes cada equipa foi escolhida 1.º/2.º/3.º.
@@ -64,3 +64,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Rivalidades** (Ronda 4, ângulo social/picardia) — na Evolução, os pares que mais trocaram de
   posição (desempate: mais próximos agora). Fonte: head-to-head records de social sportsbooks.
   Porquê: alimenta a picardia do grupo; derivado das posições por jornada (`/api/timeline`), neutro.
+- **Partilhar a tabela** (Ronda 5, ângulo distribuição) — botão "Partilhar" na Geral gera um cartão
+  PNG (top 10) via SVG→canvas e usa a partilha nativa (ou descarrega). Fonte: cultura de partilha no
+  WhatsApp dos grupos. Porquê: traz gente de volta à app a partir do chat; reusa o pipeline do cartão.
