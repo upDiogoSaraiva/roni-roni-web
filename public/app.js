@@ -1041,6 +1041,15 @@ function computeBadges(row, bet, ctx) {
   add('🎲', 'Aposta única', 'Ninguém escolheu o mesmo campeão que tu', !!bet?.champion && backers === 1);
   return out;
 }
+// nível/título do jogador a partir dos pontos (determinístico, neutro)
+function playerLevel(total) {
+  const tiers = [{ min: 0, name: 'Estreante' }, { min: 20, name: 'Habituado' }, { min: 35, name: 'Veterano' }, { min: 45, name: 'Mestre' }, { min: 55, name: 'Lenda' }];
+  let i = 0;
+  for (let k = 0; k < tiers.length; k++) if (total >= tiers[k].min) i = k;
+  const cur = tiers[i], next = tiers[i + 1];
+  const pct = next ? Math.max(0, Math.min(100, Math.round(((total - cur.min) / (next.min - cur.min)) * 100))) : 100;
+  return { name: cur.name, level: i + 1, pct, next: next ? next.name : null, toNext: next ? next.min - total : 0 };
+}
 async function pageConquistas() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Conquistas'),
     el('p', {}, 'Distintivos que ganhas pelas tuas escolhas e pelo teu lugar na tabela.')));
@@ -1068,6 +1077,12 @@ async function pageConquistas() {
 
   function paint() {
     clear(body);
+    const lvl = playerLevel(byPlayer[me].score.total);
+    body.appendChild(el('div', { class: 'card', style: { padding: '14px', marginBottom: '12px' } },
+      el('div', { class: 'lvl-top' },
+        el('span', { class: 'lvl-name' }, `Nível ${lvl.level} · ${lvl.name}`),
+        el('span', { class: 'muted', style: { fontSize: '12px' } }, lvl.next ? `${lvl.toNext} pts para ${lvl.next}` : 'nível máximo')),
+      el('div', { class: 'reveal-bar-wrap', style: { marginTop: '8px' } }, el('div', { class: 'reveal-bar', style: { width: lvl.pct + '%' } }))));
     const badges = computeBadges(byPlayer[me], data.bets[me], ctx);
     const earned = badges.filter((b) => b.earned).length;
     body.appendChild(el('div', { class: 'pot', style: { marginBottom: '12px' } },

@@ -21,7 +21,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Conquistas / Badges** — distintivos determinísticos por jogador (trio perfeito, faro de
   apuramento, contra a corrente, em ascensão, pódio…). *Porquê:* estatuto e colecionismo fazem voltar.
 - [💡] **Streak de pódio** — quantas jornadas seguidas no top 3 (do `/api/timeline`).
-- [💡] **Nível/XP do jogador** — derivado dos pontos; barra de progresso e título ("Veterano").
+- [✅] **Nível/XP do jogador** — título por pontos + barra de progresso (Conquistas).
 - [💡] **Selo de "melhor jornada"** — quem mais subiu em cada jornada ganha um selo nessa jornada.
 
 ### Social / competição
@@ -82,3 +82,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   relance sem abrir a página de Evolução. Neutro.
 - **Realce do líder** (Ronda 10, ângulo polish/celebração) — coroa 👑 e fundo dourado subtil na linha
   do 1.º. Fonte: celebração de líderes em leaderboards. Porquê: dá foco e estatuto ao topo. Neutro.
+- **Nível/XP** (Ronda 11, ângulo gamificação) — título por pontos (Estreante→Lenda) + barra de
+  progresso para o nível seguinte, na Conquistas. Fonte: tiers/XP de fantasy apps. Porquê: progressão
+  dá sensação de evolução. Neutro.

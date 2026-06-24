@@ -172,6 +172,10 @@ button { font: inherit; cursor: pointer; }
 .builder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px 12px; }
 .builder-grid .field { margin: 0; }
 
+/* ---------- nível do jogador ---------- */
+.lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+
 /* ---------- conquistas (badges) ---------- */
 .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
 .badge-card { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 12px; background: var(--surface); text-align: center; }
