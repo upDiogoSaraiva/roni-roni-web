@@ -1171,14 +1171,17 @@ async function pageHallOfFame() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
-  const data = await api('/api/halloffame');
+  const [data, tl] = await Promise.all([api('/api/halloffame'), api('/api/timeline').catch(() => null)]);
   clear(host);
   if (!data.table.length) { host.appendChild(emptyState('Ainda sem história', 'Aparece aqui quando houver edições.', 'trophy')); return; }
 
+  let jump = null;
+  if (tl) for (const p of tl.players) for (let k = 1; k < p.points.length; k++) { const d = p.points[k].total - p.points[k - 1].total; if (!jump || d > jump.d) jump = { player: p.player, d, md: p.points[k].md }; }
   const rec = data.records.topScore;
   host.appendChild(el('div', { class: 'pot' },
     el('div', { class: 'kv' }, el('b', {}, 'Edições'), el('span', { class: 'v num' }, String(data.editions))),
-    rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null));
+    rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null,
+    jump && jump.d > 0 ? el('div', { class: 'kv' }, el('b', {}, 'Maior salto'), el('span', { class: 'v' }, `${jump.player} · +${jump.d} (J${jump.md})`)) : null));
 
   host.appendChild(el('div', { class: 'section-label' }, 'Campeões por edição'));
   const champCard = el('div', { class: 'card' });

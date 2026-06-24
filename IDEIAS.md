@@ -33,7 +33,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ### Dados / visualização
 - [✅] **Mais escolhidas para apurar** (Reveal) — seleções mais escolhidas como 1.º/2.º em todos os grupos. [💡] falta versão por-grupo (heatmap).
 - [✅] **"De onde vêm os meus pontos"** — barra empilhada (apuramento/posição/campeão/Final 4/mata-mata/extras) na folha que abre no leaderboard.
-- [💡] **Linha do tempo de recordes** — maior subida/queda de sempre, melhor jornada do grupo.
+- [✅] **Recorde "maior salto"** no Hall da Fama (maior ganho de pontos numa jornada). [💡] falta linha do tempo completa.
 - [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
 
 ### Qualidade de vida / mobile
@@ -107,3 +107,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Modo alto contraste** (Ronda 19, ângulo acessibilidade) — toggle no header que reforça texto e
   contornos sobre qualquer tema (`data-hc`), persistido. Fonte: boas práticas WCAG. Porquê: legível
   para quem precisa de mais contraste. Neutro.
+- **Recorde "maior salto"** (Ronda 20, ângulo dados/recordes) — no Hall da Fama, o maior ganho de
+  pontos numa única jornada (do `/api/timeline`). Fonte: linhas de recordes desportivos. Porquê:
+  memória e picardia. Neutro.
