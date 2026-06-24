@@ -43,6 +43,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Partilha por link** de uma folha de jogador.
 
 ### Polish visual / microinterações
+- [✅] **Sparkline do percurso** no cartão pessoal hero (posição por jornada em miniatura).
 - [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
 - [💡] **Confete/realce** discreto no líder.
 - [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
@@ -76,3 +77,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Estatísticas da época** (Ronda 8, ângulo dados) — no Reveal: média de pontos do grupo e extremos
   (mais/menos pontos). Fonte: dashboards desportivos. Porquê: contextualiza a tabela ("estou acima
   ou abaixo da média?"). Derivado do leaderboard, neutro.
+- **Sparkline do percurso** (Ronda 9, ângulo microviz/dados) — mini-gráfico da posição por jornada no
+  cartão pessoal hero, do `/api/timeline`. Fonte: sparklines de dashboards. Porquê: o teu percurso de
+  relance sem abrir a página de Evolução. Neutro.

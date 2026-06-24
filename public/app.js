@@ -73,6 +73,19 @@ function svgEl(tag, attrs = {}, ...kids) {
   for (const k of kids.flat()) { if (k == null || k === false) continue; node.appendChild(k.nodeType ? k : document.createTextNode(String(k))); }
   return node;
 }
+// mini-gráfico (sparkline) da posição de um jogador ao longo das jornadas
+function rankSparkline(series, count) {
+  if (!series || series.points.length < 2) return null;
+  const W = 132, H = 30, pad = 4, n = series.points.length;
+  const X = (i) => pad + (i / (n - 1)) * (W - 2 * pad);
+  const Y = (rank) => pad + ((rank - 1) / Math.max(1, count - 1)) * (H - 2 * pad);
+  const pts = series.points.map((p, i) => `${X(i)},${Y(p.rank)}`).join(' ');
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: 'spark', 'aria-hidden': 'true' });
+  svg.appendChild(svgEl('polyline', { points: pts, fill: 'none', stroke: 'var(--brand)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  const last = series.points[n - 1];
+  svg.appendChild(svgEl('circle', { cx: X(n - 1), cy: Y(last.rank), r: 3, fill: 'var(--brand)' }));
+  return svg;
+}
 // animação count-up de um número (respeita prefers-reduced-motion)
 function countUp(elm, to, ms = 650) {
   to = Number(to) || 0;
@@ -311,7 +324,7 @@ async function pageGeral() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList());
-  const data = await api('/api/leaderboard');
+  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
   clear(host);
 
   const myName = localStorage.getItem('roni-me');
@@ -324,11 +337,13 @@ async function pageGeral() {
   if (myRow) {
     const toLeader = data.leaderboard[0].score.total - myRow.score.total;
     const sub = myRow.rank === 1 ? 'Estás na liderança!' : `a ${toLeader} ponto(s) do 1.º · ${myRow.rank}.º de ${data.leaderboard.length}`;
+    const spark = rankSparkline(tl && tl.players.find((p) => p.player === myName), tl ? tl.count : data.leaderboard.length);
     host.appendChild(el('div', { class: 'card hero' },
       monogram(myRow.player),
       el('div', { style: { flex: '1', minWidth: '0' } },
         el('div', { class: 'hero-rank num' }, myRow.rank + '.º'),
-        el('div', { class: 'hero-sub' }, sub)),
+        el('div', { class: 'hero-sub' }, sub),
+        spark || null),
       el('div', { class: 'hero-pts' }, movementEl(myRow.movement || 0), el('span', { class: 'num' }, myRow.score.total))));
   }
 

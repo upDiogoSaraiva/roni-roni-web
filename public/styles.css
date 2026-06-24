@@ -186,6 +186,7 @@ button { font: inherit; cursor: pointer; }
 .hero-rank { font-size: 30px; font-weight: 700; font-family: var(--font-display); line-height: 1; }
 .hero-sub { color: var(--text-soft); font-size: 13px; margin-top: 3px; }
 .hero-pts { display: flex; align-items: center; gap: 6px; font-size: 26px; font-weight: 700; color: var(--brand); }
+.spark { display: block; margin-top: 8px; opacity: 0.85; }
 
 /* ---------- composição de pontos (barra empilhada) ---------- */
 .pbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--surface-2); }
