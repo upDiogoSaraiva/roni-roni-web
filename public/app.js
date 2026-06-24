@@ -861,12 +861,14 @@ function h2hTrio(bet, g) {
   const p = bet.groups?.[g] || {};
   return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '—';
 }
-function h2hRow(label, a, b, eq) {
+function h2hRow(label, a, b, eq, win) {
   return el('div', { class: 'h2h-row' + (eq ? ' eq' : '') },
     el('span', { class: 'h2h-lbl' }, label),
-    el('span', { class: 'h2h-a num' }, a),
-    el('span', { class: 'h2h-b num' }, b));
+    el('span', { class: 'h2h-a num' + (win === 'a' ? ' win' : '') }, a),
+    el('span', { class: 'h2h-b num' + (win === 'b' ? ' win' : '') }, b));
 }
+// quem ganha uma métrica: 'a'|'b'|null (hi=true → maior é melhor)
+function h2hWin(x, y, hi = true) { return x === y ? null : ((hi ? x > y : x < y) ? 'a' : 'b'); }
 async function pageH2H() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Frente a frente'),
     el('p', {}, 'Compara dois jogadores lado a lado — quem lidera e onde diferem.')));
@@ -911,9 +913,10 @@ async function pageH2H() {
       `${lead} Coincidem em ${sameG}/${STATE.groupOrder.length} grupos${ba.champion === bb.champion ? ' e no campeão' : ''}.`));
 
     const card = el('div', { class: 'card', style: { padding: '4px 0' } });
-    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false));
-    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false));
-    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false));
+    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false, h2hWin(ra.rank, rb.rank, false)));
+    card.appendChild(h2hRow('Pontos', ra.score.total, rb.score.total, false, h2hWin(ra.score.total, rb.score.total)));
+    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false, h2hWin(ra.score.qualification, rb.score.qualification)));
+    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false, h2hWin(ra.score.position, rb.score.position)));
     card.appendChild(h2hRow('Campeão', codeOf(ba.champion), codeOf(bb.champion), ba.champion === bb.champion));
     card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
     for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));

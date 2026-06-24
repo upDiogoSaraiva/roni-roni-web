@@ -97,3 +97,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   (do `/api/timeline`). Fonte: streaks de fantasy apps. Porquê: recompensa a consistência. Neutro.
 - **Comparação vs média** (Ronda 16, ângulo dados/QoL) — o cartão hero mostra os pontos do jogador
   face à média do grupo. Fonte: benchmarking de dashboards. Porquê: contextualiza a prestação. Neutro.
+- **Vencedor por métrica no H2H** (Ronda 17, ângulo dados) — no Frente a frente, a métrica melhor de
+  cada linha (posição/pontos/apuramento/posições) fica realçada. Fonte: comparadores lado-a-lado.
+  Porquê: lê-se num instante quem ganha cada categoria. Neutro.
