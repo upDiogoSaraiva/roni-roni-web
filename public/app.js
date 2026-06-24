@@ -281,6 +281,7 @@ async function render() {
   setActiveTab();
   clear(MAIN);
   MAIN.scrollTop = 0;
+  MAIN.classList.remove('pg-in'); void MAIN.offsetWidth; MAIN.classList.add('pg-in'); // re-dispara a transição
   const r = currentRoute();
   try {
     if (r === 'geral') await pageGeral();

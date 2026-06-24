@@ -47,7 +47,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
 - [✅] **Realce do líder** — coroa 👑 + fundo dourado subtil na linha do 1.º.
 - [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
-- [💡] **Transições de página** suaves.
+- [✅] **Transições de página** suaves (fade+slide ao mudar de vista; respeita reduced-motion).
 
 ### Acessibilidade
 - [✅] Respeito por `prefers-reduced-motion` (global) + `aria-label` na nav de chips.
@@ -110,3 +110,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Recorde "maior salto"** (Ronda 20, ângulo dados/recordes) — no Hall da Fama, o maior ganho de
   pontos numa única jornada (do `/api/timeline`). Fonte: linhas de recordes desportivos. Porquê:
   memória e picardia. Neutro.
+- **Transição de página** (Ronda 21, ângulo polish) — fade+slide subtil ao mudar de vista (`.pg-in`),
+  re-disparada em cada `render()`; respeita reduced-motion. Fonte: microinterações modernas. Porquê:
+  sensação de fluidez. Neutro.

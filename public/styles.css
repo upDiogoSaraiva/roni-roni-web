@@ -189,6 +189,10 @@ button { font: inherit; cursor: pointer; }
 .badge-name { font-weight: 700; font-size: 13.5px; margin-top: 8px; }
 .badge-desc { color: var(--text-soft); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
 
+/* ---------- transição de entrada de página ---------- */
+@keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.pg-in { animation: pageIn 0.24s ease; }
+
 /* ---------- contagem decrescente ---------- */
 .countdown { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand-ink); border-radius: var(--r-ctrl); padding: 9px 14px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
 
