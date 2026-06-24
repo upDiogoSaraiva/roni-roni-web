@@ -133,6 +133,12 @@ button { font: inherit; cursor: pointer; }
 .reveal-bar { height: 100%; background: var(--brand); border-radius: 6px; min-width: 3px; }
 .reveal-n { text-align: right; color: var(--text-soft); font-size: 13px; }
 
+/* ---------- recaps por jornada ---------- */
+.recap { display: grid; grid-template-columns: 58px 1fr; gap: 10px; align-items: baseline; padding: 9px 14px; border-top: 1px solid var(--hairline); }
+.recap:first-child { border-top: none; }
+.recap-j { color: var(--brand); font-size: 12px; font-weight: 600; }
+.recap p { margin: 0; font-size: 13.5px; line-height: 1.4; }
+
 /* ---------- gráfico de evolução ---------- */
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }

@@ -444,6 +444,14 @@ async function pageEvolucao() {
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '10px' } },
     'Passa o rato por uma linha para ver o jogador. Posição recalculada como se a fase de grupos terminasse no fim de cada jornada (provisório).'));
 
+  const recaps = buildRecaps(data);
+  if (recaps.length) {
+    host.appendChild(el('div', { class: 'section-label' }, 'História da época'));
+    const rc = el('div', { class: 'card', style: { padding: '4px 0' } });
+    for (const r of recaps) rc.appendChild(el('div', { class: 'recap' }, el('span', { class: 'recap-j num' }, r.title), el('p', {}, r.text)));
+    host.appendChild(rc);
+  }
+
   function paint() { clear(chartCard); chartCard.appendChild(buildEvolutionChart(data, players, me)); }
   paint();
 }
@@ -502,6 +510,32 @@ function buildEvolutionChart(data, players, me) {
   svg.appendChild(layer);
 
   return svg;
+}
+
+// recap textual determinístico de cada transição de jornada, a partir dos deltas de posição
+function buildRecaps(data) {
+  const mds = data.matchdays;
+  if (mds.length < 2) return [];
+  const rankAt = (p, md) => (p.points.find((pt) => pt.md === md) || {}).rank;
+  const lines = [];
+  for (let i = 1; i < mds.length; i++) {
+    const prev = mds[i - 1], cur = mds[i];
+    let climber = null, faller = null, leader = null;
+    for (const p of data.players) {
+      const rp = rankAt(p, prev), rc = rankAt(p, cur);
+      if (rp == null || rc == null) continue;
+      const d = rp - rc; // >0 subiu de posição
+      if (!climber || d > climber.d) climber = { player: p.player, d };
+      if (!faller || d < faller.d) faller = { player: p.player, d };
+      if (rc === 1) leader = { player: p.player, prev: rp };
+    }
+    const parts = [];
+    if (leader) parts.push(leader.prev === 1 ? `${leader.player} manteve a liderança` : `${leader.player} assumiu a liderança (era ${leader.prev}.º)`);
+    if (climber && climber.d > 0) parts.push(`${climber.player} foi quem mais subiu (+${climber.d})`);
+    if (faller && faller.d < 0) parts.push(`${faller.player} quem mais caiu (${faller.d})`);
+    lines.push({ title: `J${prev}→J${cur}`, text: parts.join('; ') + '.' });
+  }
+  return lines;
 }
 
 /* ---------------- PÁGINA: SIMULAR ("e se?") ---------------- */
