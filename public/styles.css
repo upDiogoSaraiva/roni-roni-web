@@ -121,6 +121,18 @@ button { font: inherit; cursor: pointer; }
 }
 .section-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--brand); }
 
+/* ---------- nav de chips (páginas de drama) ---------- */
+.engage-nav { display: flex; gap: var(--s2); overflow-x: auto; margin: 0 0 var(--s5); padding-bottom: 2px; scrollbar-width: none; }
+.engage-nav::-webkit-scrollbar { display: none; }
+.chip-nav { flex: none; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; }
+.chip-nav.on { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+
+/* ---------- reveal (barras de consenso) ---------- */
+.reveal-row { display: grid; grid-template-columns: minmax(108px, 38%) 1fr 30px; align-items: center; gap: 10px; padding: 5px 0; }
+.reveal-bar-wrap { background: var(--surface-2); border-radius: 6px; height: 10px; overflow: hidden; }
+.reveal-bar { height: 100%; background: var(--brand); border-radius: 6px; min-width: 3px; }
+.reveal-n { text-align: right; color: var(--text-soft); font-size: 13px; }
+
 /* ---------- gráfico de evolução ---------- */
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }

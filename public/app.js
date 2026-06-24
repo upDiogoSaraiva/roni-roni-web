@@ -215,12 +215,26 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
 }
 function navigate(route) { location.hash = '#/' + route; }
+
+// barra de chips que une as páginas de "drama" (mostra só as já existentes)
+const ENGAGE = [
+  ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
+  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'],
+];
+function engageNav(active) {
+  const row = el('div', { class: 'engage-nav' });
+  for (const [route, label] of ENGAGE) {
+    if (!ROUTES.includes(route)) continue;
+    row.appendChild(el('button', { type: 'button', class: 'chip-nav' + (route === active ? ' on' : ''), onclick: () => navigate(route) }, label));
+  }
+  return row;
+}
 function setActiveTab() {
   const r = currentRoute();
   document.querySelectorAll('.tab').forEach((t) => {
@@ -243,6 +257,7 @@ async function render() {
     else if (r === 'pessoal') await pagePessoal();
     else if (r === 'evolucao') await pageEvolucao();
     else if (r === 'simular') await pageSimular();
+    else if (r === 'reveal') await pageReveal();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -274,6 +289,7 @@ let lbSort = { key: 'rank', dir: 1 };
 async function pageGeral() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Classificação geral'),
     el('p', {}, 'Pontos ao vivo sobre os resultados reais. Toca num jogador para ver a folha.')));
+  MAIN.appendChild(engageNav('geral'));
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList());
@@ -286,8 +302,7 @@ async function pageGeral() {
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
-  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput),
-    el('button', { class: 'btn btn-ghost', style: { whiteSpace: 'nowrap' }, onclick: () => navigate('simular') }, 'E se?')));
+  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput)));
 
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
@@ -391,6 +406,7 @@ function sheetDetail(bet, score) {
 async function pageEvolucao() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Evolução'),
     el('p', {}, 'Como mexeu a classificação, jornada a jornada. Escolhe-te para destacares o teu percurso.')));
+  MAIN.appendChild(engageNav('evolucao'));
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(4));
@@ -493,6 +509,7 @@ const WHATIF_SCORE = { H: [2, 0], D: [1, 1], A: [0, 2] }; // casa / empate / for
 async function pageSimular() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'E se?'),
     el('p', {}, 'Escolhe como acabam os jogos que faltam e vê a classificação projetada.')));
+  MAIN.appendChild(engageNav('simular'));
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
@@ -606,6 +623,64 @@ function renderProjection(resHost, data, me, chosen) {
       el('div', { class: 'lb-pts' }, movementEl(r.movement || 0), el('span', { class: 'v num' }, r.score.total))));
   });
   resHost.appendChild(card);
+}
+
+/* ---------------- PÁGINA: REVEAL (apostas do grupo) ---------------- */
+// conta ocorrências de nomes -> [{team, n}] ordenado desc
+function countPicks(list) {
+  const m = new Map();
+  for (const t of list) { if (!t) continue; m.set(t, (m.get(t) || 0) + 1); }
+  return [...m.entries()].map(([team, n]) => ({ team, n })).sort((a, b) => b.n - a.n || a.team.localeCompare(b.team, 'pt'));
+}
+// cartão com barras horizontais (seleção + barra proporcional + contagem)
+function barCard(rows, max) {
+  const card = el('div', { class: 'card', style: { padding: '10px 14px' } });
+  const top = max || (rows.length ? rows[0].n : 1);
+  for (const r of rows) {
+    card.appendChild(el('div', { class: 'reveal-row' },
+      el('div', { class: 'reveal-team' }, teamChip(r.team)),
+      el('div', { class: 'reveal-bar-wrap' }, el('div', { class: 'reveal-bar', style: { width: Math.round((r.n / top) * 100) + '%' } })),
+      el('span', { class: 'num reveal-n' }, r.n)));
+  }
+  return card;
+}
+async function pageReveal() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Reveal'),
+    el('p', {}, 'Como o grupo apostou — o consenso e a coragem de cada um.')));
+  MAIN.appendChild(engageNav('reveal'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(6));
+  const { bets } = await api('/api/bets');
+  clear(host);
+  if (!bets.length) { host.appendChild(emptyState('Sem apostas', 'Ainda não há folhas submetidas.', 'search')); return; }
+  const total = bets.length;
+
+  const champ = countPicks(bets.map((b) => b.champion));
+  const final4 = countPicks(bets.flatMap((b) => b.final4 || []));
+  const champLone = [...champ].reverse().find((c) => c.n === 1);
+
+  host.appendChild(el('div', { class: 'pot' },
+    el('div', { class: 'kv' }, el('b', {}, 'Campeão favorito'), el('span', { class: 'v' }, `${champ[0].team} · ${champ[0].n}/${total}`)),
+    champLone ? el('div', { class: 'kv' }, el('b', {}, 'Aposta solitária'), el('span', { class: 'v' }, `${champLone.team}`)) : null));
+
+  host.appendChild(el('div', { class: 'section-label' }, 'Campeão · quem escolheu cada seleção'));
+  host.appendChild(barCard(champ));
+
+  host.appendChild(el('div', { class: 'section-label' }, 'Final 4 · seleções mais escolhidas'));
+  host.appendChild(barCard(final4.slice(0, 10)));
+
+  host.appendChild(el('div', { class: 'section-label' }, 'Vencedor de cada grupo · consenso'));
+  const grid = el('div', { class: 'sheet-grid' });
+  for (const g of STATE.groupOrder) {
+    const c = countPicks(bets.map((b) => b.groups?.[g]?.first));
+    if (!c.length) continue;
+    grid.appendChild(el('div', { class: 'sheet-grp' },
+      el('div', { class: 'g' }, 'GRUPO ' + g),
+      el('div', { class: 'sheet-line' }, teamChip(c[0].team),
+        el('span', { class: 'muted', style: { marginLeft: 'auto', fontSize: '12px' } }, `${c[0].n}/${total}`))));
+  }
+  host.appendChild(grid);
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */
