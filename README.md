@@ -104,6 +104,21 @@ roni-roni-web/
 
 As decisões de design da interface estão em [`DESIGN_WEB.md`](DESIGN_WEB.md).
 
+## Configurar uma competição
+
+O que é específico de cada edição vive em três ficheiros, e o motor lê tudo a partir deles:
+
+- [`data/competition.json`](data/competition.json): nome e edição, formato (`qualifiersPerGroup`,
+  `bestThirds`, `groupGames`), pontos (`champion`, `final4`), fonte de resultados
+  (`espnLeague` e datas) e os prémios (entrada e valores).
+- `data/groups.json`: as seleções por grupo.
+- `data/bracket.json`: o cruzamento do mata-mata (o número de slots de 3.º define quantos terceiros
+  apuram).
+
+Para uma edição nova (por exemplo o Euro 2028: 6 grupos, 4 melhores 3.os, fonte `uefa.euro`) basta
+trocar estes três ficheiros. Os nomes/códigos das seleções estão em
+[`scripts/teams_meta.mjs`](scripts/teams_meta.mjs).
+
 ## Testes
 
 ```bash

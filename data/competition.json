@@ -1,0 +1,30 @@
+{
+  "id": "wc2026",
+  "name": "Torneio Roni Roni",
+  "edition": "Mundial 2026",
+  "tagline": "Pool de seleções · 2026",
+  "format": {
+    "qualifiersPerGroup": 2,
+    "bestThirds": 8,
+    "groupGames": 3
+  },
+  "scoring": {
+    "qualify": 1,
+    "position": 1,
+    "champion": 8,
+    "final4": 3
+  },
+  "source": {
+    "espnLeague": "fifa.world",
+    "groupStageDates": "20260611-20260627",
+    "knockoutDates": "20260628-20260720"
+  },
+  "entry": 10,
+  "prizes": [
+    { "key": "1", "tag": "1.º", "name": "1.º lugar", "value": 125, "kind": "rank", "rank": 1 },
+    { "key": "2", "tag": "2.º", "name": "2.º lugar", "value": 70, "kind": "rank", "rank": 2 },
+    { "key": "3", "tag": "3.º", "name": "3.º lugar", "value": 40, "kind": "rank", "rank": 3 },
+    { "key": "tendencia", "tag": "T", "name": "Tendência", "value": 15, "kind": "tendencia", "sub": "Mais vencedores certos no mata-mata" },
+    { "key": "desculpa", "tag": "D", "name": "Desculpa", "value": 10, "kind": "last", "sub": "Menos pontos no fim" }
+  ]
+}

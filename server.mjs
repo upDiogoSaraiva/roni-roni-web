@@ -25,6 +25,8 @@ const GROUP_ORDER = seed.groupOrder;
 const TEAMS = seed.teams;
 const META = seed.meta;
 const BRACKET = JSON.parse(readFileSync(join(root, 'data/bracket.json'), 'utf8'));
+// configuração da competição (formato, pontos, fonte, prémios) — tudo num só ficheiro por edição
+const COMP = JSON.parse(readFileSync(join(root, 'data/competition.json'), 'utf8'));
 const KO_ROUNDS = BRACKET.rounds.map((r) => r.id); // r32..final
 const matchRound = {};
 for (const [id, m] of Object.entries(BRACKET.matches)) matchRound[id] = m.round;
@@ -114,7 +116,7 @@ function validateBet(b) {
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts });
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts }, COMP);
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -174,6 +176,7 @@ async function api(req, res, path) {
       groupOrder: GROUP_ORDER,
       teams: TEAMS,
       meta: META,
+      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes },
       windowOpen: store.windows.grupos,
       windows: store.windows,
       koRounds: BRACKET.rounds.map((r) => ({ id: r.id, label: r.label, joker: !!r.joker, winPts: r.winPts, methodPts: r.methodPts, matches: r.matches })),
@@ -401,7 +404,7 @@ async function api(req, res, path) {
     // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
     if (path === '/api/admin/fetch' && method === 'POST') {
       let loaded;
-      try { loaded = await loadResultsSource({ codeToTeam, teamGroup }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: COMP.source }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];
@@ -414,7 +417,7 @@ async function api(req, res, path) {
       let koImported = 0;
       try {
         const standings = world().standings;
-        const ko = await fetchEspnKnockout({ codeToTeam, teamGroup, bracket: BRACKET, standings });
+        const ko = await fetchEspnKnockout({ codeToTeam, teamGroup, bracket: BRACKET, standings, source: COMP.source });
         for (const [mid, m] of Object.entries(ko)) { store.knockouts[mid] = { ...(store.knockouts[mid] || {}), ...m }; koImported++; }
       } catch (e) { errors.push('mata-mata: ' + e.message); }
       saveStore();

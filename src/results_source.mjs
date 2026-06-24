@@ -11,9 +11,9 @@ import { resolveBracket } from './bracket.mjs';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let lastLiveError = null;
 
-// fase de grupos do Mundial 2026 (12-27 jun). O filtro "mesmo grupo" exclui o mata-mata.
-const ESPN_DATES = '20260611-20260627';
-const ESPN_URL = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${ESPN_DATES}`;
+// Fonte ESPN por competição (liga + datas), com os valores do Mundial 2026 por defeito.
+const DEFAULT_SOURCE = { espnLeague: 'fifa.world', groupStageDates: '20260611-20260627', knockoutDates: '20260628-20260720' };
+const espnUrl = (src, dates) => `https://site.api.espn.com/apis/site/v2/sports/soccer/${(src || DEFAULT_SOURCE).espnLeague}/scoreboard?dates=${dates}`;
 
 // aceita o formato normalizado e o formato "estado" do pool
 function normalize(raw) {
@@ -28,9 +28,10 @@ function normalize(raw) {
 }
 
 // Junta por CÓDIGO FIFA (ESPN abbreviation == teams_meta.code) — imune a diacríticos/aliases.
-// ctx = { codeToTeam: {COD:'Congo',...}, teamGroup: (nome)=>grupo }
-export async function fetchEspnGroupResults({ codeToTeam, teamGroup }) {
-  const res = await fetch(ESPN_URL, { headers: { accept: 'application/json' } });
+// ctx = { codeToTeam: {COD:'Congo',...}, teamGroup: (nome)=>grupo, source: {espnLeague, groupStageDates} }
+export async function fetchEspnGroupResults({ codeToTeam, teamGroup, source }) {
+  const src = source || DEFAULT_SOURCE;
+  const res = await fetch(espnUrl(src, src.groupStageDates), { headers: { accept: 'application/json' } });
   if (!res.ok) throw new Error(`ESPN respondeu ${res.status}`);
   const data = await res.json();
   const byGroup = {};
@@ -62,7 +63,6 @@ export async function fetchEspnGroupResults({ codeToTeam, teamGroup }) {
 }
 
 // ---- mata-mata ao vivo (ESPN) ----
-const ESPN_KO_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260720';
 
 // deteta a fase em que o jogo acabou: penáltis, prolongamento ou tempo regulamentar
 function detectMethod(status, competitors) {
@@ -90,8 +90,9 @@ function bestMatchFor(bracket, resolved, assigned, teams) {
 }
 
 // Busca os jogos do mata-mata terminados e mapeia-os aos IDs do bracket. ctx inclui standings.
-export async function fetchEspnKnockout({ codeToTeam, teamGroup, bracket, standings }) {
-  const res = await fetch(ESPN_KO_URL, { headers: { accept: 'application/json' } });
+export async function fetchEspnKnockout({ codeToTeam, teamGroup, bracket, standings, source }) {
+  const src = source || DEFAULT_SOURCE;
+  const res = await fetch(espnUrl(src, src.knockoutDates), { headers: { accept: 'application/json' } });
   if (!res.ok) throw new Error(`ESPN respondeu ${res.status}`);
   const data = await res.json();
   const events = [];

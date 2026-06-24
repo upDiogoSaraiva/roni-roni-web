@@ -378,8 +378,9 @@ function sheetDetail(bet, score) {
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */
 const PRIZE_MEDAL = ['#F2B441', '#B9B3A6', '#C58A57']; // 1.º 2.º 3.º
 async function pagePremios() {
+  const comp = STATE.competition || { entry: 0, prizes: [] };
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Prémios'),
-    el('p', {}, 'Entrada de 10€ por jogador. Quem está a ganhar cada prémio neste momento.')));
+    el('p', {}, `Entrada de ${comp.entry}€ por jogador. Quem está a ganhar cada prémio neste momento.`)));
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(5));
@@ -396,23 +397,23 @@ async function pagePremios() {
   }
   const last = lb[lb.length - 1];
   const pts = (h) => h.score.total + ' pts';
+  const totalPrizes = comp.prizes.reduce((s, p) => s + p.value, 0);
 
   host.appendChild(el('div', { class: 'pot' },
-    el('div', { class: 'kv' }, el('b', {}, 'Entrada'), el('span', { class: 'v' }, '10€')),
+    el('div', { class: 'kv' }, el('b', {}, 'Entrada'), el('span', { class: 'v' }, comp.entry + '€')),
     el('div', { class: 'kv' }, el('b', {}, 'Jogadores'), el('span', { class: 'v num' }, String(lb.length))),
-    el('div', { class: 'kv' }, el('b', {}, 'Em prémios'), el('span', { class: 'v' }, '260€'))));
+    el('div', { class: 'kv' }, el('b', {}, 'Em prémios'), el('span', { class: 'v' }, totalPrizes + '€'))));
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
       'Provisório — quem lidera cada prémio com os resultados de agora.'));
   }
 
-  const prizes = [
-    { tag: '1.º', bg: PRIZE_MEDAL[0], name: '1.º lugar', value: '125€', holder: lb[0], metric: pts },
-    { tag: '2.º', bg: PRIZE_MEDAL[1], name: '2.º lugar', value: '70€', holder: lb[1], metric: pts },
-    { tag: '3.º', bg: PRIZE_MEDAL[2], name: '3.º lugar', value: '40€', holder: lb[2], metric: pts },
-    { tag: 'T', bg: 'var(--brand)', light: true, name: 'Tendência', value: '15€', sub: 'Mais vencedores certos no mata-mata', holder: maxW > 0 ? tend : null, metric: () => maxW + ' jogos certos' },
-    { tag: 'D', bg: 'var(--pending)', light: true, name: 'Desculpa', value: '10€', sub: 'Menos pontos no fim', holder: last, metric: pts },
-  ];
+  // resolve o titular de cada prémio a partir do tipo definido na config da competição
+  const prizes = comp.prizes.map((p) => {
+    if (p.kind === 'rank') return { tag: p.tag, bg: PRIZE_MEDAL[p.rank - 1] || 'var(--pending)', name: p.name, value: p.value + '€', sub: p.sub, holder: lb[p.rank - 1], metric: pts };
+    if (p.kind === 'tendencia') return { tag: p.tag, bg: 'var(--brand)', light: true, name: p.name, value: p.value + '€', sub: p.sub, holder: maxW > 0 ? tend : null, metric: () => maxW + ' jogos certos' };
+    return { tag: p.tag, bg: 'var(--pending)', light: true, name: p.name, value: p.value + '€', sub: p.sub, holder: last, metric: pts }; // 'last'
+  });
 
   const card = el('div', { class: 'card' });
   for (const p of prizes) {
@@ -1177,6 +1178,7 @@ async function boot() {
     const st = await api('/api/state');
     Object.assign(STATE, st);
     paintWindowPill();
+    if (STATE.competition?.tagline) { const s = $('.brand-name small'); if (s) s.textContent = STATE.competition.tagline; }
   } catch (e) {
     MAIN.appendChild(errorState('Não foi possível ligar ao servidor.', boot));
     return;

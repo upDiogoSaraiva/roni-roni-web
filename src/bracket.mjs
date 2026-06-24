@@ -8,16 +8,16 @@ import { bestThirds } from './scoring.mjs';
 // por emparelhamento bipartido (Kuhn): cada grupo-terceiro vai para um slot que o permita.
 // Devolve { matchId: { group, team } }. Usa a classificação ATUAL — provisório "se acabasse agora".
 export function assignThirds(bracket, standings) {
-  const ranked = bestThirds(standings).ranked.filter((t) => t.qualifies); // 8 grupos qualificados
-  const qualifying = new Set(ranked.map((t) => t.group));
-  const teamByGroup = {};
-  for (const t of ranked) teamByGroup[t.group] = t.team;
-
+  // o nº de 3.os que apuram é o nº de slots de 3.º do próprio quadro (8 no Mundial, 4 no Euro)
   const slots = [];
   for (const [id, m] of Object.entries(bracket.matches)) {
     if (m.away?.type === 'third') slots.push({ id, groups: m.away.groups });
     else if (m.home?.type === 'third') slots.push({ id, groups: m.home.groups });
   }
+  const ranked = bestThirds(standings, slots.length).ranked.filter((t) => t.qualifies);
+  const qualifying = new Set(ranked.map((t) => t.group));
+  const teamByGroup = {};
+  for (const t of ranked) teamByGroup[t.group] = t.team;
   const groupToSlot = {}; // grupo -> slotId (lado direito do matching)
   function augment(slotId, eligible, seen) {
     for (const g of eligible) {
