@@ -43,7 +43,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Partilha por link** de uma folha de jogador.
 
 ### Polish visual / microinterações
-- [💡] **Contagem animada** dos pontos (count-up) ao abrir a tabela.
+- [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
 - [💡] **Confete/realce** discreto no líder.
 - [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
 - [💡] **Transições de página** suaves.
@@ -58,3 +58,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Composição dos pontos** (Ronda 2, ângulo visualização de dados) — barra empilhada na folha do
   jogador. Fonte: dashboards de fantasy ("de onde vêm os pontos"). Porquê: torna o score legível de
   relance e dá identidade ("eu vivo da posição", "eu vivo do apuramento"). Neutro.
+- **Count-up dos pontos** (Ronda 3, ângulo polish/microinterações) — os pontos da tabela contam de 0
+  até ao valor ao abrir. Fonte: microinterações de fantasy apps. Porquê: dá vida e reforça o número
+  que importa; respeita `prefers-reduced-motion`.

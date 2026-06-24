@@ -73,6 +73,18 @@ function svgEl(tag, attrs = {}, ...kids) {
   for (const k of kids.flat()) { if (k == null || k === false) continue; node.appendChild(k.nodeType ? k : document.createTextNode(String(k))); }
   return node;
 }
+// animação count-up de um número (respeita prefers-reduced-motion)
+function countUp(elm, to, ms = 650) {
+  to = Number(to) || 0;
+  if (to <= 0 || matchMedia('(prefers-reduced-motion: reduce)').matches) { elm.textContent = to; return; }
+  const start = performance.now();
+  const step = (now) => {
+    const p = Math.min(1, (now - start) / ms);
+    elm.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
 
 /* ---------------- API ---------------- */
 async function api(path, opts = {}) {
@@ -305,6 +317,7 @@ async function pageGeral() {
   const myName = localStorage.getItem('roni-me');
   let query = '';
   const expanded = new Set();
+  let firstLbPaint = true;
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
@@ -351,6 +364,10 @@ async function pageGeral() {
       card.appendChild(row);
       if (expanded.has(r.player)) card.appendChild(sheetDetail(data.bets[r.player], r.score));
     });
+    if (firstLbPaint) {
+      firstLbPaint = false;
+      for (const v of card.querySelectorAll('.lb-pts .v')) countUp(v, v.textContent);
+    }
   }
   paint();
 }
