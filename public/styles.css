@@ -438,6 +438,11 @@ button { font: inherit; cursor: pointer; }
 .pot .kv b { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-soft); font-weight: 700; margin-bottom: 3px; }
 .pot .kv .v { font-family: var(--font-num); font-size: 18px; font-weight: 500; }
 
+/* ---------- perfil ---------- */
+.profile-hd { display: flex; align-items: center; gap: 12px; margin-bottom: var(--s4); }
+.profile-hd .mono { width: 52px; height: 52px; font-size: 18px; }
+.profile-name { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
+
 @media (max-width: 400px) { .tab span { font-size: 10px; } }
 
 /* ---------- states ---------- */

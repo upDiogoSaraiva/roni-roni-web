@@ -208,7 +208,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -232,6 +232,8 @@ async function render() {
     else if (r === 'premios') await pagePremios();
     else if (r === 'resultados') await pageResultados();
     else if (r === 'admin') await pageAdmin();
+    else if (r === 'historico') await pageHistorico();
+    else if (r === 'pessoal') await pagePessoal();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -433,6 +435,86 @@ async function pagePremios() {
   host.appendChild(card);
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '12px' } },
     'Tendência e Desculpa exigem ter apostado em todos os jogos.'));
+}
+
+/* ---------------- PÁGINA: HISTÓRICO (edições) ---------------- */
+async function pageHistorico() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Histórico'),
+    el('p', {}, 'As edições do pool. Toca numa para ver a classificação.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(3));
+  const { activeId, competitions } = await api('/api/competitions');
+  clear(host);
+
+  const list = el('div', { class: 'card' });
+  for (const c of competitions) {
+    list.appendChild(el('button', { class: 'lb-row', style: { gridTemplateColumns: '1fr auto' },
+      onclick: () => openEdition(c.id) },
+      el('div', { class: 'lb-player' }, el('span', { class: 'mono', style: { background: 'var(--brand)' } }, (c.edition || c.name).slice(0, 2).toUpperCase()),
+        el('div', {}, el('div', { class: 'nm' }, c.edition), el('div', { class: 'sub' }, c.id === activeId ? 'Em curso' : 'Terminada'))),
+      el('span', { class: 'badge ' + (c.id === activeId ? 'ok' : 'seed') }, c.id === activeId ? 'Ativa' : 'Arquivada')));
+  }
+  host.appendChild(list);
+  const detail = el('div', { class: 'mt6' });
+  host.append(detail);
+
+  async function openEdition(id) {
+    clear(detail);
+    detail.appendChild(skeletonList(5));
+    const sum = await api('/api/history/' + encodeURIComponent(id));
+    clear(detail);
+    detail.appendChild(el('div', { class: 'section-label' }, sum.competition.edition + ' · classificação'));
+    const card = el('div', { class: 'card' });
+    sum.leaderboard.forEach((r) => {
+      card.appendChild(el('div', { class: 'lb-row', style: { gridTemplateColumns: '44px 1fr 64px' } },
+        el('div', { class: 'lb-pos' }, medal(r.rank) || el('span', { class: 'lb-rank num' }, r.rank)),
+        el('div', { class: 'lb-player' }, monogram(r.player), el('div', {}, el('div', { class: 'nm' }, r.player))),
+        el('div', { class: 'lb-pts' }, el('span', { class: 'v num' }, r.score.total))));
+    });
+    detail.appendChild(card);
+  }
+  if (competitions.length) openEdition(activeId);
+}
+
+/* ---------------- PÁGINA: PESSOAL (a minha época) ---------------- */
+async function pagePessoal() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'A minha época'),
+    el('p', {}, 'O teu percurso no pool, edição a edição.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  let me = localStorage.getItem('roni-me') || '';
+  const sel = el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); load(); } },
+    el('option', { value: '' }, '— escolher jogador —'),
+    ...STATE.players.map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Quem és'), sel)));
+  const body = el('div', { class: 'mt4' });
+  host.append(body);
+
+  async function load() {
+    if (!me) { clear(body); body.appendChild(emptyState('Escolhe o teu nome', 'Para veres o teu historial.', 'search')); return; }
+    clear(body);
+    body.appendChild(skeletonList(3));
+    const { editions } = await api('/api/player/' + encodeURIComponent(me));
+    clear(body);
+    body.appendChild(el('div', { class: 'profile-hd' }, monogram(me),
+      el('div', {}, el('div', { class: 'profile-name' }, me), el('div', { class: 'muted', style: { fontSize: '12.5px' } }, editions.length + ' edição(ões)'))));
+    if (!editions.length) { body.appendChild(emptyState('Sem participações', 'Ainda não há apostas tuas.', 'search')); return; }
+    const best = editions.reduce((b, e) => (e.rank < b.rank ? e : b), editions[0]);
+    body.appendChild(el('div', { class: 'pot' },
+      el('div', { class: 'kv' }, el('b', {}, 'Edições'), el('span', { class: 'v num' }, String(editions.length))),
+      el('div', { class: 'kv' }, el('b', {}, 'Melhor'), el('span', { class: 'v num' }, best.rank + '.º')),
+      el('div', { class: 'kv' }, el('b', {}, 'Atual'), el('span', { class: 'v num' }, editions[0].rank + '.º'))));
+    const card = el('div', { class: 'card' });
+    for (const e of editions) {
+      card.appendChild(el('div', { class: 'lb-row', style: { gridTemplateColumns: '1fr auto auto', gap: '12px' } },
+        el('div', { class: 'lb-player' }, el('div', {}, el('div', { class: 'nm' }, e.edition), el('div', { class: 'sub' }, e.status === 'active' ? 'Em curso' : 'Terminada'))),
+        el('span', { class: 'num', style: { color: e.rank === 1 ? 'var(--gold)' : 'var(--text-soft)' } }, e.rank + '.º de ' + e.players),
+        el('span', { class: 'num', style: { fontWeight: '500' } }, e.total + ' pts')));
+    }
+    body.appendChild(card);
+  }
+  load();
 }
 
 /* ---------------- PÁGINA: APOSTAR (form multi-passo) ---------------- */
