@@ -538,6 +538,12 @@ async function pageEvolucao() {
     const kvs = [];
     if (up.delta > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior subida'), el('span', { class: 'v' }, `${up.player} · +${up.delta}`)));
     if (down.delta < 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior queda'), el('span', { class: 'v' }, `${down.player} · ${down.delta}`)));
+    const lastK = data.matchdays.length - 1;
+    const full = players.filter((p) => p.points.length === data.matchdays.length);
+    if (full.length) {
+      const champJ = full.map((p) => ({ player: p.player, gain: p.points[lastK].total - p.points[lastK - 1].total })).reduce((b, m) => (m.gain > b.gain ? m : b));
+      if (champJ.gain > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, `Campeão da J${data.matchdays[lastK]}`), el('span', { class: 'v' }, `${champJ.player} · +${champJ.gain} pts`)));
+    }
     if (kvs.length) host.appendChild(el('div', { class: 'pot', style: { marginTop: '12px' } }, ...kvs));
   }
 

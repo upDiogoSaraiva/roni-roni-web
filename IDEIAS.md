@@ -22,7 +22,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   apuramento, contra a corrente, em ascensão, pódio…). *Porquê:* estatuto e colecionismo fazem voltar.
 - [✅] **Streak de pódio** — jornadas seguidas no top 3 (na Conquistas, do `/api/timeline`).
 - [✅] **Nível/XP do jogador** — título por pontos + barra de progresso (Conquistas).
-- [💡] **Selo de "melhor jornada"** — quem mais subiu em cada jornada ganha um selo nessa jornada.
+- [✅] **Campeão da jornada** — quem mais pontos ganhou na última jornada (destaques da Evolução).
 
 ### Social / competição
 - [✅] **Nemesis / próximo alvo** — o cartão hero mostra quem apanhar a seguir (jogador logo à frente).
@@ -117,3 +117,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Nemesis / próximo alvo** (Ronda 22, ângulo social) — inspiração: features "nemesis" de apps de
   fitness/competição (fonte: artigos de retenção de leaderboards 2026). O hero mostra quem apanhar a
   seguir (jogador logo à frente) + a distância. Porquê: alvo concreto motiva mais que o 1.º distante.
+- **Campeão da jornada** (Ronda 23, ângulo social/dados) — quem mais pontos ganhou na última jornada,
+  nos destaques da Evolução. Inspiração: "janela que renova" (semanal) das apps de competição.
+  Porquê: dá uma vitória de curto prazo a quem não lidera. Neutro.
