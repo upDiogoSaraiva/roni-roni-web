@@ -69,6 +69,23 @@ function isoToFlag(iso) {
 // Ficheiro do SVG da bandeira (em public/flags/). England/Scotland usam subdivisões.
 const SUBDIVISION_FILE = { Inglaterra: 'gb-eng', Escócia: 'gb-sct' };
 
+// Pontos do ranking FIFA (Coca-Cola Men's World Ranking, 2026-06-10). Critério de desempate
+// dos 8 melhores 3.os (Art. 13): mais pontos = melhor. Fonte: football-ranking.com.
+const FIFA_POINTS = {
+  'México': 1687.48, 'África do Sul': 1491, 'Coreia do Sul': 1591.63, 'Chéquia': 1505.74,
+  'Canadá': 1559.48, 'Bósnia-Herzegovina': 1524, 'Catar': 1456, 'Suíça': 1650.07,
+  'Brasil': 1765.86, 'Marrocos': 1755.44, 'Haiti': 1284, 'Escócia': 1503.34,
+  'EUA': 1671.24, 'Paraguai': 1505.35, 'Austrália': 1579.34, 'Turquia': 1530,
+  'Alemanha': 1735.77, 'Curaçao': 1370, 'Costa do Marfim': 1540.87, 'Equador': 1598.51,
+  'Holanda': 1751.09, 'Japão': 1661.58, 'Suécia': 1509.79, 'Tunísia': 1476.40,
+  'Bélgica': 1742.23, 'Egito': 1562.37, 'Irão': 1619.58, 'Nova Zelândia': 1226,
+  'Espanha': 1873.02, 'Cabo Verde': 1390, 'Arábia Saudita': 1490, 'Uruguai': 1673.07,
+  'França': 1869.43, 'Senegal': 1686.41, 'Iraque': 1483, 'Noruega': 1557.44,
+  'Argentina': 1876.11, 'Argélia': 1571.04, 'Áustria': 1597.41, 'Jordânia': 1392,
+  'Portugal': 1766.17, 'Congo': 1412, 'Uzbequistão': 1437, 'Colômbia': 1698.35,
+  'Inglaterra': 1827.05, 'Croácia': 1714.87, 'Gana': 1482, 'Panamá': 1539.15,
+};
+
 export function buildTeamsMeta() {
   const out = {};
   for (const [name, [iso, code]] of Object.entries(TEAM_ISO)) {
@@ -78,6 +95,7 @@ export function buildTeamsMeta() {
       code,
       flag: SUBDIVISION_FLAGS[name] || isoToFlag(iso), // emoji (fallback)
       flagFile: SUBDIVISION_FILE[name] || iso.toLowerCase(), // SVG fiável em todas as plataformas
+      fifa: FIFA_POINTS[name] ?? 0, // pontos do ranking FIFA (desempate dos 3.os)
     };
   }
   return out;

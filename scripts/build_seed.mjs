@@ -39,12 +39,20 @@ for (const line of rows) {
 
   const player = rec.participante;
   const grupos = {};
-  let thirdsCount = 0;
+  // Regra do teto: quem listar mais de 8 terceiros só conta os 8 PRIMEIROS por ordem de
+  // grupo (A->L); os restantes são descartados (não dão pontos de apuramento).
+  let listed = 0;
+  let kept = 0;
+  let capped = 0;
   for (const g of GROUP_IDS) {
     const first = rec[`${g}1`] || null;
     const second = rec[`${g}2`] || null;
-    const third = rec[`${g}3`] || null;
-    if (third) thirdsCount++;
+    let third = rec[`${g}3`] || null;
+    if (third) {
+      listed++;
+      if (kept < 8) kept++;
+      else { third = null; capped++; } // já tem 8 -> descarta este 3.º
+    }
     grupos[g] = { first, second, third };
     for (const [slot, pick] of [['first', first], ['second', second], ['third', third]]) {
       if (pick && teamGroup[pick] !== g) {
@@ -52,7 +60,8 @@ for (const line of rows) {
       }
     }
   }
-  if (thirdsCount !== 8) warnings.push(`${player}: ${thirdsCount} terceiros (esperado 8)`);
+  if (capped) warnings.push(`${player}: listou ${listed} terceiros -> aplicado teto de 8 (descartados ${capped} por ordem de grupo)`);
+  else if (listed < 8) warnings.push(`${player}: só ${listed} terceiros`);
 
   bets.push({
     player,
@@ -68,16 +77,16 @@ for (const line of rows) {
 }
 
 // --- resultados reais (fase de grupos) ---
-// formato de origem: { A: { jornadas, jogos: [[home, away, hg, ag], ...] }, ... }
+// formato de origem: { A: { jornadas, jogos: [[home, away, hg, ag, matchday?], ...] }, ... }
 const groupResults = {};
 for (const g of GROUP_IDS) {
   const src = estado.grupos_resultados?.[g];
-  groupResults[g] = (src?.jogos || []).map(([home, away, hg, ag]) => ({
+  groupResults[g] = (src?.jogos || []).map(([home, away, hg, ag, md]) => ({
     home,
     away,
     homeGoals: hg,
     awayGoals: ag,
-    matchday: 1,
+    matchday: md || 1,
   }));
 }
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { standingsForGroup, computeWorldState, scoreBet, allStandings, clinchStatus } from './scoring.mjs';
+import { standingsForGroup, computeWorldState, scoreBet, allStandings, clinchStatus, bestThirds } from './scoring.mjs';
 import { assignThirds } from './bracket.mjs';
 
 // Grupo simples: 1 jornada, define classificação provisória.
@@ -64,6 +64,19 @@ test('clinching: 1.º garantido e eliminado, calculados com os jogos que faltam'
   assert.equal(c.D, 'eliminated'); // 0 pts e já jogou tudo -> sempre último
   assert.equal(c.B, null); // joga com C: pode ser 2.º ou 3.º
   assert.equal(c.C, null);
+});
+
+test('desempate dos 8 melhores 3.os por ranking FIFA (não alfabético)', () => {
+  // A3 e B3 empatados em pontos/DG/GM; o ranking FIFA decide quando há `teams`.
+  const standings = {
+    A: [{ team: 'A1', rank: 1 }, { team: 'A2', rank: 2 }, { team: 'A3', rank: 3, points: 3, gd: 0, gf: 1 }, { team: 'A4', rank: 4 }],
+    B: [{ team: 'B1', rank: 1 }, { team: 'B2', rank: 2 }, { team: 'B3', rank: 3, points: 3, gd: 0, gf: 1 }, { team: 'B4', rank: 4 }],
+  };
+  const teams = { A3: { fifa: 1600 }, B3: { fifa: 1700 } };
+  const withFifa = bestThirds(standings, 1, teams);
+  assert.ok(withFifa.set.has('B3') && !withFifa.set.has('A3')); // FIFA: B3 (1700) > A3 (1600)
+  const noFifa = bestThirds(standings, 1);
+  assert.ok(noFifa.set.has('A3')); // sem ranking, recai no nome (A3 < B3)
 });
 
 test('grupo perfeito = 4 pts (2 apuradas + 2 posições)', () => {
