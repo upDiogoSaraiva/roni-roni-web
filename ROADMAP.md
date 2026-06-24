@@ -54,9 +54,11 @@ Plano por fases:
 - [ ] Preset "clássico Roni" (apostar em todos os jogos de grupo + underdog + jokers de grupo).
 - [ ] Pontos totalmente editáveis no construtor.
 
-## Utilizadores
-- [ ] Contas (nome + PIN hoje; evoluir para login simples por dispositivo/token).
-- [ ] Página pessoal liga as apostas da pessoa em todas as edições.
+## Utilizadores — Fase B ✅
+- [x] Identidade por **token de dispositivo, sem password**: reivindicar o nome (gera código de 6
+      dígitos) e ligar outros dispositivos com esse código. `data/identities.json` (com .bak). Boot
+      reconhece o token e auto-identifica o jogador em toda a app.
+- [x] Página pessoal liga as apostas da pessoa em todas as edições (`/api/player`).
 
 ## Ideias minhas (extra)
 - [x] Gráfico da posição ao longo das jornadas (página **Evolução**, replay por jornada).

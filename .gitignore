@@ -5,6 +5,10 @@ node_modules/
 data/store.json
 data/competitions/*/store.json
 
+# identidades de dispositivo (tokens) e backups automáticos — dados, não código
+data/identities.json
+*.bak
+
 # screenshots de teste e artefactos do browser
 /*.png
 .playwright-mcp/

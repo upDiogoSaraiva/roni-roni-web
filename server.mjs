@@ -2,7 +2,7 @@
 // Serve a SPA em public/ e uma API neutra (apostas, resultados, pontos). Nada do motor.
 
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync, copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -33,7 +33,17 @@ function defaultWindows(groupsOpen) {
   for (const r of KO_ROUNDS) w[r] = false;
   return w;
 }
-const saveStore = () => writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
+// escreve com cópia de segurança .bak antes de cada gravação (nunca perder dados)
+function backupThenWrite(path, data) {
+  try { if (existsSync(path)) copyFileSync(path, path + '.bak'); } catch { /* backup best-effort */ }
+  writeFileSync(path, data);
+}
+const saveStore = () => backupThenWrite(STORE_PATH, JSON.stringify(store, null, 2));
+
+// identidades (token de dispositivo, sem password) — ficheiro transversal às edições
+const IDENTITIES_PATH = join(root, 'data/identities.json');
+let identities = existsSync(IDENTITIES_PATH) ? JSON.parse(readFileSync(IDENTITIES_PATH, 'utf8')) : { byToken: {}, byPlayer: {} };
+const saveIdentities = () => backupThenWrite(IDENTITIES_PATH, JSON.stringify(identities, null, 2));
 
 // Lê uma competição (qualquer, não só a ativa) para um objeto, sem tocar nos globais.
 function readCompetition(id) {
@@ -258,6 +268,40 @@ async function api(req, res, path) {
       editions.push({ id: c.id, name: sum.competition.name, edition: sum.competition.edition, status: c.status, rank: row.rank, total: row.score.total, players: sum.leaderboard.length });
     }
     return json(res, 200, { player: name, editions });
+  }
+
+  // ---------- identidade (token de dispositivo, sem password) ----------
+  // reivindicar um nome: emite token + código de 6 dígitos para ligar outros dispositivos
+  if (path === '/api/identity/claim' && method === 'POST') {
+    const body = await readBody(req);
+    const player = (body.player || '').trim();
+    if (!player) return json(res, 400, { error: 'Indica o teu nome.' });
+    if (identities.byPlayer[player]) return json(res, 409, { error: 'Este nome já foi reivindicado. No outro dispositivo usa "Ligar dispositivo" com o código.' });
+    const token = randomUUID();
+    const code = (randomUUID().replace(/[^0-9]/g, '') + '000000').slice(0, 6);
+    identities.byPlayer[player] = { code, tokens: [token] };
+    identities.byToken[token] = player;
+    saveIdentities();
+    return json(res, 200, { player, token, code });
+  }
+  // ligar este dispositivo a um nome já reivindicado, com o código
+  if (path === '/api/identity/link' && method === 'POST') {
+    const body = await readBody(req);
+    const player = (body.player || '').trim();
+    const code = (body.code || '').trim();
+    const rec = identities.byPlayer[player];
+    if (!rec || rec.code !== code) return json(res, 403, { error: 'Nome ou código errado.' });
+    const token = randomUUID();
+    rec.tokens.push(token);
+    identities.byToken[token] = player;
+    saveIdentities();
+    return json(res, 200, { player, token });
+  }
+  // quem sou eu (a partir do token do dispositivo) + código para ligar outros dispositivos
+  if (path === '/api/identity/me' && method === 'GET') {
+    const token = req.headers['x-player-token'];
+    const player = (token && identities.byToken[token]) || null;
+    return json(res, 200, { player, code: player ? (identities.byPlayer[player]?.code || null) : null });
   }
 
   if (path === '/api/results' && method === 'GET') {

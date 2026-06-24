@@ -156,6 +156,9 @@ button { font: inherit; cursor: pointer; }
 .card-preview { max-width: 340px; margin: 14px auto 0; }
 .card-svg { display: block; width: 100%; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
 
+/* ---------- identidade ---------- */
+.id-row { display: flex; align-items: center; gap: 12px; }
+
 /* ---------- gráfico de evolução ---------- */
 .ev-chart { display: block; width: 100%; height: auto; }
 .ev-grid { stroke: var(--hairline); stroke-width: 1; }

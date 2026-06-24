@@ -78,6 +78,8 @@ function svgEl(tag, attrs = {}, ...kids) {
 async function api(path, opts = {}) {
   const headers = { 'content-type': 'application/json', ...(opts.headers || {}) };
   if (ADMIN_TOKEN) headers['x-admin-token'] = ADMIN_TOKEN;
+  const playerToken = localStorage.getItem('roni-token');
+  if (playerToken) headers['x-player-token'] = playerToken;
   const res = await fetch(path, { ...opts, headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(data.error || 'Erro'), { status: res.status, data });
@@ -971,12 +973,53 @@ async function pageHistorico() {
   if (competitions.length) openEdition(activeId);
 }
 
+// cartão de identidade (token de dispositivo, sem password): reivindicar o nome ou ligar com código
+function identityCard(refresh) {
+  const card = el('div', { class: 'card', style: { padding: '14px' } });
+  if (STATE.identity?.player) {
+    card.appendChild(el('div', { class: 'id-row' }, monogram(STATE.identity.player),
+      el('div', {}, el('div', { style: { fontWeight: '700' } }, 'És ' + STATE.identity.player),
+        el('div', { class: 'muted', style: { fontSize: '12px' } }, 'Identificado neste dispositivo'))));
+    if (STATE.identity.code) card.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '10px 0 0' } },
+      'Código para ligares outro dispositivo: ', el('b', { class: 'num', style: { color: 'var(--brand)', letterSpacing: '2px' } }, STATE.identity.code)));
+    card.appendChild(el('button', { class: 'btn btn-ghost', style: { marginTop: '10px' }, onclick: () => { localStorage.removeItem('roni-token'); STATE.identity = null; refresh(); } }, 'Sair deste dispositivo'));
+    return card;
+  }
+  card.appendChild(el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Sou eu (neste dispositivo)'));
+  const claimSel = el('select', { class: 'select', style: { width: '100%' } },
+    el('option', { value: '' }, '— escolher o teu nome —'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
+  card.appendChild(el('div', { class: 'field' }, el('label', {}, 'Reivindicar o meu nome'), claimSel,
+    el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '8px' }, onclick: async () => {
+      if (!claimSel.value) return toast('Escolhe o teu nome.', true);
+      try {
+        const r = await api('/api/identity/claim', { method: 'POST', body: { player: claimSel.value } });
+        localStorage.setItem('roni-token', r.token); localStorage.setItem('roni-me', r.player);
+        STATE.identity = { player: r.player, code: r.code };
+        toast('És ' + r.player + '. Guarda o código ' + r.code); refresh();
+      } catch (e) { toast(e.message, true); }
+    } }, 'Reivindicar')));
+  card.appendChild(el('div', { class: 'section-label' }, 'ou ligar este dispositivo'));
+  const linkName = el('select', { class: 'select', style: { width: '100%' } },
+    el('option', { value: '' }, '— o teu nome —'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
+  const linkCode = el('input', { class: 'input num', placeholder: 'código de 6 dígitos', inputmode: 'numeric', maxlength: '6' });
+  card.appendChild(el('div', { class: 'field' }, el('label', {}, 'Já me reivindiquei noutro dispositivo'), linkName, linkCode,
+    el('button', { class: 'btn btn-ghost btn-block', style: { marginTop: '8px' }, onclick: async () => {
+      try {
+        const r = await api('/api/identity/link', { method: 'POST', body: { player: linkName.value, code: linkCode.value } });
+        localStorage.setItem('roni-token', r.token); localStorage.setItem('roni-me', r.player);
+        STATE.identity = { player: r.player }; toast('Dispositivo ligado a ' + r.player + '.'); refresh();
+      } catch (e) { toast(e.message, true); }
+    } }, 'Ligar dispositivo')));
+  return card;
+}
+
 /* ---------------- PÁGINA: PESSOAL (a minha época) ---------------- */
 async function pagePessoal() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'A minha época'),
     el('p', {}, 'O teu percurso no pool, edição a edição.')));
   const host = el('div', {});
   MAIN.append(host);
+  host.appendChild(identityCard(() => render()));
   let me = localStorage.getItem('roni-me') || '';
   const sel = el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); load(); } },
     el('option', { value: '' }, '— escolher jogador —'),
@@ -1800,6 +1843,10 @@ async function boot() {
   try {
     const st = await api('/api/state');
     Object.assign(STATE, st);
+    if (localStorage.getItem('roni-token')) {
+      try { const id = await api('/api/identity/me'); if (id.player) { STATE.identity = id; localStorage.setItem('roni-me', id.player); } else { localStorage.removeItem('roni-token'); } }
+      catch { /* identidade é best-effort */ }
+    }
     paintWindowPill();
     if (STATE.competition?.tagline) { const s = $('.brand-name small'); if (s) s.textContent = STATE.competition.tagline; }
   } catch (e) {
