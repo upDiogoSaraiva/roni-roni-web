@@ -49,7 +49,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [💡] **Transições de página** suaves.
 
 ### Acessibilidade
-- [💡] **Modo alto contraste** e respeito por `prefers-reduced-motion`.
+- [✅] Respeito por `prefers-reduced-motion` (global) + `aria-label` na nav de chips. [💡] falta modo alto contraste.
 - [💡] **Navegação por teclado** completa nos chips e listas.
 
 ## Implementadas (rasto)
@@ -70,3 +70,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Cartão pessoal "hero"** (Ronda 6, ângulo QoL/mobile) — no topo da Geral, quando há jogador
   identificado/escolhido, mostra a sua posição, pontos, movimento e distância ao 1.º. Fonte: dashboards
   personalizados de fantasy. Porquê: respondes logo a "como vou eu?" sem procurar na tabela. Neutro.
+- **Movimento reduzido + semântica** (Ronda 7, ângulo acessibilidade) — `@media (prefers-reduced-motion)`
+  global desliga animações/transições; `aria-label` na nav de chips. Fonte: boas práticas de UX/a11y.
+  Porquê: inclusivo e respeita preferências do sistema, sem custo para os restantes.

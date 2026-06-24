@@ -242,7 +242,7 @@ const ENGAGE = [
   ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
-  const row = el('div', { class: 'engage-nav' });
+  const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas' });
   for (const [route, label] of ENGAGE) {
     if (!ROUTES.includes(route)) continue;
     row.appendChild(el('button', { type: 'button', class: 'chip-nav' + (route === active ? ' on' : ''), onclick: () => navigate(route) }, label));
