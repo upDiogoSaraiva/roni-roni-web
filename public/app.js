@@ -826,6 +826,10 @@ async function pageReveal() {
   host.appendChild(el('div', { class: 'section-label' }, 'Final 4 · seleções mais escolhidas'));
   host.appendChild(barCard(final4.slice(0, 10)));
 
+  const qualifyPicks = countPicks(bets.flatMap((b) => STATE.groupOrder.flatMap((g) => [b.groups?.[g]?.first, b.groups?.[g]?.second])));
+  host.appendChild(el('div', { class: 'section-label' }, 'Mais escolhidas para apurar'));
+  host.appendChild(barCard(qualifyPicks.slice(0, 12)));
+
   host.appendChild(el('div', { class: 'section-label' }, 'Vencedor de cada grupo · consenso'));
   const grid = el('div', { class: 'sheet-grid' });
   for (const g of STATE.groupOrder) {

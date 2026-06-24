@@ -31,7 +31,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Partilhar a tabela** como imagem (cartão de leaderboard top 10 para o WhatsApp).
 
 ### Dados / visualização
-- [💡] **Mapa de calor de apuramento** — por grupo, quantas vezes cada equipa foi escolhida 1.º/2.º/3.º.
+- [✅] **Mais escolhidas para apurar** (Reveal) — seleções mais escolhidas como 1.º/2.º em todos os grupos. [💡] falta versão por-grupo (heatmap).
 - [✅] **"De onde vêm os meus pontos"** — barra empilhada (apuramento/posição/campeão/Final 4/mata-mata/extras) na folha que abre no leaderboard.
 - [💡] **Linha do tempo de recordes** — maior subida/queda de sempre, melhor jornada do grupo.
 - [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
@@ -85,3 +85,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Nível/XP** (Ronda 11, ângulo gamificação) — título por pontos (Estreante→Lenda) + barra de
   progresso para o nível seguinte, na Conquistas. Fonte: tiers/XP de fantasy apps. Porquê: progressão
   dá sensação de evolução. Neutro.
+- **Mais escolhidas para apurar** (Ronda 12, ângulo dados) — no Reveal, seleções mais escolhidas como
+  1.º/2.º em todos os grupos. Fonte: heatmaps de consenso. Porquê: mostra o "chalk" coletivo do
+  apuramento de relance. Neutro.
