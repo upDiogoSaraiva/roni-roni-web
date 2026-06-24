@@ -61,7 +61,7 @@ Plano por fases:
 ## Ideias minhas (extra)
 - [x] Gráfico da posição ao longo das jornadas (página **Evolução**, replay por jornada).
 - [ ] Comparar dois jogadores lado a lado (head-to-head).
-- [ ] Simulador "e se?" — como muda a minha posição se a equipa X ganhar.
+- [x] Simulador "e se?" — página **E se?**, projeta a classificação dos jogos que faltam.
 - [ ] Cartão de jogador partilhável (imagem) para o WhatsApp.
 - [ ] Estatísticas: mais "chalk" vs mais contrário ao campo; média de pontos; melhor aposta.
 - [ ] Contagem decrescente para o próximo prazo de apostas.

@@ -323,6 +323,30 @@ async function api(req, res, path) {
     return json(res, 200, { matchdays, groupGames: COMP.format?.groupGames || 3, count: store.bets.length, players: [...series.values()] });
   }
 
+  // simulador "e se?" — sobrepõe resultados hipotéticos aos reais e devolve a classificação
+  // projetada, com o movimento de cada jogador face a agora. NÃO persiste (clone do estado).
+  if (path === '/api/whatif' && method === 'POST') {
+    const body = await readBody(req);
+    const hyp = Array.isArray(body.results) ? body.results : [];
+    const groups = structuredClone(store.results.groups);
+    for (const it of hyp) {
+      const { group, home, away } = it;
+      if (!groups[group] || teamGroup(home) !== group || teamGroup(away) !== group || home === away) continue;
+      const hg = Number(it.homeGoals);
+      const ag = Number(it.awayGoals);
+      if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0) continue;
+      const list = groups[group];
+      const idx = list.findIndex((m) => (m.home === home && m.away === away) || (m.home === away && m.away === home));
+      const match = { home, away, homeGoals: hg, awayGoals: ag, matchday: Number(it.matchday) || 1 };
+      if (idx < 0) list.push(match); else list[idx] = match;
+    }
+    const rankNow = Object.fromEntries(leaderboard(store.bets, world(), teamGroup).map((r) => [r.player, r.rank]));
+    const wHyp = computeWorldState(GROUPS, groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, COMP);
+    const lbHyp = leaderboard(store.bets, wHyp, teamGroup);
+    for (const r of lbHyp) { const p = rankNow[r.player]; r.movement = p == null ? 0 : p - r.rank; r.baselineRank = p ?? null; }
+    return json(res, 200, { leaderboard: lbHyp, matchesPlayed: wHyp.matchesPlayed });
+  }
+
   if (path === '/api/bets' && method === 'GET') {
     return json(res, 200, { bets: store.bets.map(publicBet) });
   }

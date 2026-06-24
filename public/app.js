@@ -215,7 +215,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -242,6 +242,7 @@ async function render() {
     else if (r === 'historico') await pageHistorico();
     else if (r === 'pessoal') await pagePessoal();
     else if (r === 'evolucao') await pageEvolucao();
+    else if (r === 'simular') await pageSimular();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -285,7 +286,8 @@ async function pageGeral() {
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
-  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput)));
+  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput),
+    el('button', { class: 'btn btn-ghost', style: { whiteSpace: 'nowrap' }, onclick: () => navigate('simular') }, 'E se?')));
 
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
@@ -482,6 +484,126 @@ function buildEvolutionChart(data, players, me) {
   if (meP) highlight(meP, 'me');
 
   return svg;
+}
+
+/* ---------------- PÁGINA: SIMULAR ("e se?") ---------------- */
+const WHATIF_SCORE = { H: [2, 0], D: [1, 1], A: [0, 2] }; // casa / empate / fora -> golos representativos
+async function pageSimular() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'E se?'),
+    el('p', {}, 'Escolhe como acabam os jogos que faltam e vê a classificação projetada.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(6));
+  const data = await api('/api/results');
+  clear(host);
+
+  // jogos por jogar = calendário canónico de cada grupo menos os já registados
+  const played = data.results;
+  const remaining = {};
+  for (const g of STATE.groupOrder) {
+    const t = STATE.groups[g];
+    const sched = [
+      [1, t[0], t[1]], [1, t[2], t[3]],
+      [2, t[0], t[2]], [2, t[3], t[1]],
+      [3, t[0], t[3]], [3, t[1], t[2]],
+    ];
+    const isPlayed = (a, b) => (played[g] || []).some((m) => (m.home === a && m.away === b) || (m.home === b && m.away === a));
+    remaining[g] = sched.filter(([, a, b]) => !isPlayed(a, b));
+  }
+  const total = STATE.groupOrder.reduce((s, g) => s + remaining[g].length, 0);
+  if (!total) { host.appendChild(emptyState('Fase de grupos completa', 'Já não há jogos de grupo por simular.', 'check')); return; }
+
+  let me = localStorage.getItem('roni-me') || '';
+  const choices = {}; // `${g}|${home}|${away}` -> 'H'|'D'|'A'
+  const key = (g, a, b) => `${g}|${a}|${b}`;
+
+  const meSel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); if (resHost.childElementCount) simulate(); } },
+    el('option', { value: '' }, '— destacar um jogador —'),
+    ...[...STATE.players].sort((a, b) => a.player.localeCompare(b.player, 'pt'))
+      .map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
+    el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Destacar o meu percurso'), meSel)));
+
+  const fixturesHost = el('div', {});
+  host.append(fixturesHost);
+  const resHost = el('div', {});
+  host.append(resHost);
+
+  function paintFixtures() {
+    clear(fixturesHost);
+    for (const g of STATE.groupOrder) {
+      if (!remaining[g].length) continue;
+      fixturesHost.appendChild(el('div', { class: 'section-label' }, 'Grupo ' + g + ' · faltam ' + remaining[g].length));
+      for (const [md, home, away] of remaining[g]) {
+        const cur = choices[key(g, home, away)];
+        const seg = el('div', { class: 'ko-seg' });
+        for (const [val, lbl] of [['H', 'Casa'], ['D', 'X'], ['A', 'Fora']]) {
+          seg.appendChild(el('button', { type: 'button', class: 'seg-opt' + (cur === val ? ' on' : ''),
+            onclick: () => { choices[key(g, home, away)] = val; paintFixtures(); } }, lbl));
+        }
+        fixturesHost.appendChild(el('div', { class: 'card', style: { padding: '12px', marginTop: '8px' } },
+          el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' } },
+            el('span', { class: 'team mini' }, flag(home), el('span', { class: 'nm' }, codeOf(home))),
+            el('span', { class: 'num muted', style: { fontSize: '11px' } }, 'J' + md),
+            el('span', { class: 'team mini' }, el('span', { class: 'nm' }, codeOf(away)), flag(away))),
+          seg));
+      }
+    }
+  }
+
+  const countChosen = () => Object.keys(choices).length;
+  const actions = el('div', { class: 'row-actions', style: { marginTop: '16px' } },
+    el('button', { class: 'btn btn-ghost', onclick: () => { for (const g of STATE.groupOrder) for (const [, a, b] of remaining[g]) choices[key(g, a, b)] = ['H', 'D', 'A'][Math.floor(Math.random() * 3)]; paintFixtures(); simulate(); } }, 'Sortear tudo'),
+    el('button', { class: 'btn btn-primary', onclick: simulate }, icon('arrow'), 'Simular'));
+  host.append(actions);
+
+  async function simulate() {
+    const results = [];
+    for (const g of STATE.groupOrder) {
+      for (const [md, home, away] of remaining[g]) {
+        const c = choices[key(g, home, away)];
+        if (!c) continue;
+        const [hg, ag] = WHATIF_SCORE[c];
+        results.push({ group: g, home, away, homeGoals: hg, awayGoals: ag, matchday: md });
+      }
+    }
+    if (!results.length) return toast('Escolhe pelo menos um resultado.', true);
+    clear(resHost);
+    resHost.appendChild(skeletonList(5));
+    try {
+      const proj = await api('/api/whatif', { method: 'POST', body: { results } });
+      renderProjection(resHost, proj, me, countChosen());
+      resHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) { clear(resHost); resHost.appendChild(errorState(e.message, simulate)); }
+  }
+
+  paintFixtures();
+}
+
+function renderProjection(resHost, data, me, chosen) {
+  clear(resHost);
+  const lb = data.leaderboard;
+  resHost.appendChild(el('div', { class: 'section-label' }, `Classificação projetada · ${chosen} jogo(s)`));
+  const meRow = me && lb.find((r) => r.player === me);
+  if (meRow) {
+    const mv = meRow.movement;
+    resHost.appendChild(el('div', { class: 'pot' },
+      el('div', { class: 'kv' }, el('b', {}, 'Ficavas em'), el('span', { class: 'v num' }, `${meRow.rank}.º de ${lb.length}`)),
+      el('div', { class: 'kv' }, el('b', {}, 'vs agora'), el('span', { class: 'v', style: { color: mv > 0 ? 'var(--ok)' : mv < 0 ? 'var(--out)' : 'var(--text-soft)' } }, mv > 0 ? `subias ${mv}` : mv < 0 ? `descias ${-mv}` : 'igual')),
+      el('div', { class: 'kv' }, el('b', {}, 'Pontos'), el('span', { class: 'v num' }, meRow.score.total))));
+  }
+  const card = el('div', { class: 'card' });
+  lb.forEach((r) => {
+    const isMe = r.player === me;
+    card.appendChild(el('div', { class: 'lb-row' + (r.rank === 1 ? ' leader' : '') + (isMe ? ' me' : '') },
+      el('div', { class: 'lb-pos' }, medal(r.rank) || el('span', { class: 'lb-rank num' }, r.rank)),
+      el('div', { class: 'lb-player' }, monogram(r.player),
+        el('div', { style: { minWidth: '0' } }, el('div', { class: 'nm' }, r.player),
+          el('div', { class: 'sub' }, r.baselineRank ? 'era ' + r.baselineRank + '.º' : ''))),
+      el('div', { class: 'lb-pts' }, movementEl(r.movement || 0), el('span', { class: 'v num' }, r.score.total))));
+  });
+  resHost.appendChild(card);
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */
