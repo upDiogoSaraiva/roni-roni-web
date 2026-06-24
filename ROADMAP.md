@@ -45,7 +45,8 @@ Plano por fases:
 - [ ] Resultado de cada jogo de grupo, com **bónus de underdog**.
 
 ## Boosts (configuráveis, estilo joker)
-- [ ] Joker: duplica os pontos de um jogo (já existe no mata-mata; trazer também aos grupos).
+- [x] Joker: duplica os pontos (mata-mata já tinha; **joker de grupo** adicionado — duplica os
+      pontos de posição de um grupo à escolha, na revisão da aposta). Testado: +3 confirmado.
 - [ ] Escudo: anula a perda de pontos num jogo.
 - [ ] Triplo / Banker: aposta de confiança que vale a triplar.
 - [ ] Limites configuráveis por fase (quantos boosts, em que rondas).

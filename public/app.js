@@ -1104,7 +1104,7 @@ async function pagePessoal() {
 function blankDraft() {
   const groups = {};
   for (const g of STATE.groupOrder) groups[g] = { first: null, second: null, third: null };
-  return { player: '', pin: '', editing: false, champion: null, final4: [null, null, null, null], groups, markets: {} };
+  return { player: '', pin: '', editing: false, champion: null, final4: [null, null, null, null], groups, markets: {}, groupJoker: null };
 }
 let draft = null;
 let stepIdx = 0;
@@ -1208,6 +1208,7 @@ async function loadExisting(player) {
     draft.final4 = [...bet.final4, null, null, null, null].slice(0, 4);
     for (const g of STATE.groupOrder) draft.groups[g] = { first: bet.groups[g]?.first || null, second: bet.groups[g]?.second || null, third: bet.groups[g]?.third || null };
     draft.markets = { ...(bet.markets || {}) };
+    draft.groupJoker = bet.groupJoker || null;
     if (bet.hasPin) {
       const pin = prompt('Esta aposta tem PIN. Introduz o PIN para editar:');
       draft.pin = (pin || '').replace(/\D/g, '');
@@ -1344,6 +1345,13 @@ function renderReview(body) {
       ...mk.filter((m) => draft.markets[m.id]).map((m) => el('div', { class: 'sheet-line' }, el('span', { class: 'pos' }, m.name), teamChip(draft.markets[m.id])))));
   }
 
+  body.appendChild(el('div', { class: 'card', style: { padding: '16px', marginTop: '12px' } },
+    el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Joker de grupo (opcional)'),
+    el('p', { class: 'hint', style: { marginTop: '-4px', marginBottom: '8px' } }, 'Duplica os pontos de posição de um grupo à tua escolha.'),
+    el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { draft.groupJoker = e.target.value || null; } },
+      el('option', { value: '' }, '— sem joker —'),
+      ...STATE.groupOrder.map((g) => el('option', { value: g, selected: draft.groupJoker === g }, 'Grupo ' + g)))));
+
   body.appendChild(navButtons({
     onNext: submitDraft, nextLabel: draft.editing ? 'Guardar alterações' : 'Confirmar e submeter',
     nextDisabled: errors.length > 0,
@@ -1367,7 +1375,7 @@ function validateDraft() {
 async function submitDraft() {
   const body = {
     player: draft.player.trim(), pin: draft.pin || undefined,
-    champion: draft.champion, final4: draft.final4.filter(Boolean), groups: draft.groups, markets: draft.markets,
+    champion: draft.champion, final4: draft.final4.filter(Boolean), groups: draft.groups, markets: draft.markets, groupJoker: draft.groupJoker || null,
   };
   try {
     const res = await api('/api/bet', { method: 'POST', body });

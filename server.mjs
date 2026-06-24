@@ -195,6 +195,7 @@ function publicBet(b) {
     champion: b.champion,
     final4: b.final4,
     groups: b.groups,
+    groupJoker: b.groupJoker || null,
     knockouts: b.knockouts || {},
     jokers: b.jokers || [],
     markets: b.markets || {},
@@ -443,6 +444,7 @@ async function api(req, res, path) {
       existing.final4 = body.final4;
       existing.groups = normalizeGroups(body.groups);
       if (body.markets) existing.markets = sanitizeMarkets(body.markets);
+      existing.groupJoker = GROUP_ORDER.includes(body.groupJoker) ? body.groupJoker : null;
       existing.submittedAt = new Date().toISOString();
       if (body.pin) existing.pin = String(body.pin);
       existing.seed = false;
@@ -457,6 +459,7 @@ async function api(req, res, path) {
       final4: body.final4,
       groups: normalizeGroups(body.groups),
       markets: sanitizeMarkets(body.markets),
+      groupJoker: GROUP_ORDER.includes(body.groupJoker) ? body.groupJoker : null,
       pin: body.pin ? String(body.pin) : null,
       submittedAt: new Date().toISOString(),
       seed: false,
