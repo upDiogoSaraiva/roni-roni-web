@@ -4,6 +4,19 @@ Visão: deixar de ser uma app de uma edição e passar a ser uma plataforma de m
 utilizadores, histórico por pessoa e por competição, e um construtor de competições com regras
 flexíveis. Trabalho no ramo `platform`; o `main` mantém a app ao vivo do Mundial 2026.
 
+## Alvo acordado (2026-06-24)
+Estrela polar: **jogar ano após ano** — carreiras (palmarés, recordes, rivalidades), drama ao vivo
+e reveal com história, recaps automáticos e um construtor onde o grupo inventa o seu jogo. Tudo
+neutro, determinístico e partilhável no WhatsApp. Decisões: alcance = pool do grupo multi-edição
+(não multi-grupo, não genérico); identidade = token mágico sem password; primeiro = camada social.
+
+Plano por fases:
+- **Fase A — drama da edição atual** (sem contas): evolução por jornada, simulador "e se?", reveal
+  das apostas, recaps por jornada, H2H da época, cartões SVG para WhatsApp.
+- **Fase B — identidade** (token mágico, persistente entre dispositivos/edições).
+- **Fase C — carreiras & Hall da Fama** (agregação entre edições, all-time, rivalidades).
+- **Fase D — o jogo é teu** (boosts, aposta por jogo + underdog, UI dos mercados, construtor).
+
 ## Já feito (base)
 - Pool do Mundial 2026: apostar (campeão, Final 4, grupos, 8 melhores 3.os), classificação ao vivo,
   resultados, mata-mata (vencedor/fase/jokers), prémios, admin.
@@ -46,7 +59,7 @@ flexíveis. Trabalho no ramo `platform`; o `main` mantém a app ao vivo do Mundi
 - [ ] Página pessoal liga as apostas da pessoa em todas as edições.
 
 ## Ideias minhas (extra)
-- [ ] Gráfico da posição ao longo das jornadas.
+- [x] Gráfico da posição ao longo das jornadas (página **Evolução**, replay por jornada).
 - [ ] Comparar dois jogadores lado a lado (head-to-head).
 - [ ] Simulador "e se?" — como muda a minha posição se a equipa X ganhar.
 - [ ] Cartão de jogador partilhável (imagem) para o WhatsApp.
