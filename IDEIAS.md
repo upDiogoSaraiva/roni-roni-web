@@ -32,7 +32,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 
 ### Dados / visualização
 - [💡] **Mapa de calor de apuramento** — por grupo, quantas vezes cada equipa foi escolhida 1.º/2.º/3.º.
-- [💡] **Gráfico "de onde vêm os meus pontos"** — donut apuramento/posição/extras/mata-mata.
+- [✅] **"De onde vêm os meus pontos"** — barra empilhada (apuramento/posição/campeão/Final 4/mata-mata/extras) na folha que abre no leaderboard.
 - [💡] **Linha do tempo de recordes** — maior subida/queda de sempre, melhor jornada do grupo.
 - [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
 
@@ -55,3 +55,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ## Implementadas (rasto)
 - **Conquistas / Badges** (Ronda 1, ângulo gamificação) — ver commit. Fonte: fantasy apps (badges/achievements).
   Porquê: dá estatuto e colecionismo, dois motores de regresso diário, e é 100% derivável dos dados neutros.
+- **Composição dos pontos** (Ronda 2, ângulo visualização de dados) — barra empilhada na folha do
+  jogador. Fonte: dashboards de fantasy ("de onde vêm os pontos"). Porquê: torna o score legível de
+  relance e dá identidade ("eu vivo da posição", "eu vivo do apuramento"). Neutro.

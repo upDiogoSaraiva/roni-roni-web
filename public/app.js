@@ -371,6 +371,24 @@ function sheetLine(label, team, pick) {
   return el('div', { class: 'sheet-line' + (qualifies === false ? ' faded' : '') },
     el('span', { class: 'pos' }, label), teamChip(team), pointBadges(pick));
 }
+// barra empilhada: de onde vêm os pontos de um jogador (composição neutra do score)
+function pointsBar(score) {
+  const segs = [
+    { k: 'qualification', label: 'Apuramento', color: 'var(--ok)' },
+    { k: 'position', label: 'Posição', color: 'var(--gold)' },
+    { k: 'champion', label: 'Campeão', color: 'var(--brand)' },
+    { k: 'final4', label: 'Final 4', color: 'var(--brand-ink)' },
+    { k: 'knockout', label: 'Mata-mata', color: 'var(--pending)' },
+    { k: 'markets', label: 'Extras', color: 'var(--out)' },
+  ].map((s) => ({ ...s, v: score[s.k] || 0 })).filter((s) => s.v > 0);
+  const total = segs.reduce((n, s) => n + s.v, 0);
+  if (!total) return null;
+  const bar = el('div', { class: 'pbar' });
+  for (const s of segs) bar.appendChild(el('div', { class: 'pbar-seg', style: { width: (s.v / total * 100) + '%', background: s.color }, title: `${s.label}: ${s.v}` }));
+  const legend = el('div', { class: 'pbar-legend' });
+  for (const s of segs) legend.appendChild(el('span', {}, el('i', { style: { background: s.color } }), `${s.label} ${s.v}`));
+  return el('div', { style: { marginTop: '12px' } }, el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Composição dos pontos'), bar, legend);
+}
 function sheetDetail(bet, score) {
   const box = el('div', { class: 'lb-detail' });
   if (!bet) { box.appendChild(el('p', { class: 'muted' }, 'Sem folha.')); return box; }
@@ -390,6 +408,8 @@ function sheetDetail(bet, score) {
     if (score.markets) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Extras'), el('span', { class: 'num' }, '+' + score.markets)));
     kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total)));
     box.appendChild(el('div', { class: 'sheet-top' }, ...kvs));
+    const pb = pointsBar(score);
+    if (pb) box.appendChild(pb);
   }
   box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo · de onde vêm os pontos'));
   box.appendChild(el('div', { class: 'sheet-legend' },
