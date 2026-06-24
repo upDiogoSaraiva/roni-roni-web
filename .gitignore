@@ -1,8 +1,9 @@
 # dependências (não há runtime deps, mas por segurança)
 node_modules/
 
-# estado mutável gerado em runtime (recriado a partir de data/seed.json no 1.º arranque)
+# estado mutável gerado em runtime (recriado a partir do seed no 1.º arranque)
 data/store.json
+data/competitions/*/store.json
 
 # screenshots de teste e artefactos do browser
 /*.png

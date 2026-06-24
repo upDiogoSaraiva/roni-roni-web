@@ -1,0 +1,54 @@
+# ROADMAP — plataforma de pools
+
+Visão: deixar de ser uma app de uma edição e passar a ser uma plataforma de muitos anos, com
+utilizadores, histórico por pessoa e por competição, e um construtor de competições com regras
+flexíveis. Trabalho no ramo `platform`; o `main` mantém a app ao vivo do Mundial 2026.
+
+## Já feito (base)
+- Pool do Mundial 2026: apostar (campeão, Final 4, grupos, 8 melhores 3.os), classificação ao vivo,
+  resultados, mata-mata (vencedor/fase/jokers), prémios, admin.
+- Pontuação de raiz com desempate por confronto direto (2026), badges de garantido/eliminado.
+- Resultados reais ao vivo da ESPN; competição já vem de `data/competition.json`.
+
+## Fase 2 — multi-competição + histórico + pessoal
+- [x] Estrutura `data/competitions/<id>/` + `data/registry.json` (ativa + arquivadas).
+- [x] Servidor carrega a competição ativa; admin troca a ativa.
+- [x] Página **Histórico**: lista de edições; ver uma edição passada (classificação final, vencedores, prémios).
+- [x] Página **Pessoal** ("A minha época"): a folha e os pontos de um jogador, e o seu historial entre edições.
+
+## Fase 3 — construtor de competições + import
+- [ ] Admin **cria competição**: nome, grupos, equipas, formato, e as regras (ver mercados/boosts).
+- [ ] **Import de Excel/CSV** de edições passadas para o histórico (apostas + resultados → arquivo).
+
+## Mercados de aposta (configuráveis por competição)
+- [ ] Posições de grupo (1.º/2.º) + N melhores 3.os.
+- [ ] Resultado de cada jogo de grupo, com **bónus de underdog** (acertar a vitória do mais fraco vale +1).
+- [ ] Outright: campeão, Final 4 (semifinalistas).
+- [ ] Mata-mata por ronda: vencedor + fase (TR/Prol/Pen).
+- [ ] Prémios individuais: **melhor marcador**, **melhor jogador**, **melhor jovem**.
+- [ ] **"Melhor pior equipa"**: a que vai mais longe estando fora do top 30 do ranking FIFA.
+
+## Boosts (configuráveis, estilo joker)
+- [ ] Joker: duplica os pontos de um jogo (já existe no mata-mata; trazer também aos grupos).
+- [ ] Escudo: anula a perda de pontos num jogo.
+- [ ] Triplo / Banker: aposta de confiança que vale a triplar.
+- [ ] Limites configuráveis por fase (quantos boosts, em que rondas).
+
+## Sistemas de pontuação (presets)
+- [ ] Preset "Mundial 2026" (atual).
+- [ ] Preset "clássico Roni" (apostar em todos os jogos de grupo + underdog + jokers de grupo).
+- [ ] Pontos totalmente editáveis no construtor.
+
+## Utilizadores
+- [ ] Contas (nome + PIN hoje; evoluir para login simples por dispositivo/token).
+- [ ] Página pessoal liga as apostas da pessoa em todas as edições.
+
+## Ideias minhas (extra)
+- [ ] Gráfico da posição ao longo das jornadas.
+- [ ] Comparar dois jogadores lado a lado (head-to-head).
+- [ ] Simulador "e se?" — como muda a minha posição se a equipa X ganhar.
+- [ ] Cartão de jogador partilhável (imagem) para o WhatsApp.
+- [ ] Estatísticas: mais "chalk" vs mais contrário ao campo; média de pontos; melhor aposta.
+- [ ] Contagem decrescente para o próximo prazo de apostas.
+- [ ] Transparência do desempate ("porque está esta equipa à frente").
+- [ ] Multi-idioma (PT/EN) para abrir a mais gente.

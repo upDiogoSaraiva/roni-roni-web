@@ -10,10 +10,13 @@ import { dirname, join } from 'node:path';
 import { buildTeamsMeta } from './teams_meta.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+// competição alvo (por defeito wc2026); os dados vivem em data/competitions/<id>/
+const compId = process.argv[2] || 'wc2026';
+const compRoot = `data/competitions/${compId}`;
 const read = (p) => readFileSync(join(root, p), 'utf8');
 
-const groups = JSON.parse(read('data/groups.json'));
-const estado = JSON.parse(read('data/estado_atual_ref.json'));
+const groups = JSON.parse(read(`${compRoot}/groups.json`));
+const estado = JSON.parse(read(`${compRoot}/estado_atual_ref.json`));
 const teams = buildTeamsMeta();
 
 // índice equipa -> grupo, e validação de que cada nome do CSV é uma seleção conhecida
@@ -25,7 +28,7 @@ for (const [g, list] of Object.entries(groups)) {
 const GROUP_IDS = Object.keys(groups); // A..L
 
 // --- parse do CSV das apostas reais ---
-const csv = read('data/field_2026_real.csv').replace(/\r\n/g, '\n').trim();
+const csv = read(`${compRoot}/field_2026_real.csv`).replace(/\r\n/g, '\n').trim();
 const [headerLine, ...rows] = csv.split('\n');
 const header = headerLine.split(',');
 
@@ -96,7 +99,7 @@ const seed = {
   bets,
 };
 
-writeFileSync(join(root, 'data/seed.json'), JSON.stringify(seed, null, 2));
+writeFileSync(join(root, `${compRoot}/seed.json`), JSON.stringify(seed, null, 2));
 console.log(`seed.json: ${bets.length} apostas, ${Object.keys(teams).length} seleções, ${GROUP_IDS.length} grupos`);
 if (warnings.length) {
   console.log(`\n${warnings.length} aviso(s) sobre os dados reais (mantidos tal como estão):`);

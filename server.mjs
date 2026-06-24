@@ -12,52 +12,76 @@ import { resolveBracket, groupStageComplete } from './src/bracket.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
-const SEED_PATH = join(root, 'data/seed.json');
-const STORE_PATH = join(root, 'data/store.json');
 const PORT = Number(process.env.PORT || 4026);
 const HOST = process.env.HOST || '0.0.0.0';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'roni2026';
+const REGISTRY_PATH = join(root, 'data/registry.json');
+const compDir = (id) => join(root, 'data/competitions', id);
 
-// --- config estático (grupos, equipas) vem do seed; nunca muda em runtime ---
-const seed = JSON.parse(readFileSync(SEED_PATH, 'utf8'));
-const GROUPS = seed.groups;
-const GROUP_ORDER = seed.groupOrder;
-const TEAMS = seed.teams;
-const META = seed.meta;
-const BRACKET = JSON.parse(readFileSync(join(root, 'data/bracket.json'), 'utf8'));
-// configuração da competição (formato, pontos, fonte, prémios) — tudo num só ficheiro por edição
-const COMP = JSON.parse(readFileSync(join(root, 'data/competition.json'), 'utf8'));
-const KO_ROUNDS = BRACKET.rounds.map((r) => r.id); // r32..final
-const matchRound = {};
-for (const [id, m] of Object.entries(BRACKET.matches)) matchRound[id] = m.round;
-const roundJoker = Object.fromEntries(BRACKET.rounds.map((r) => [r.id, !!r.joker]));
-const groupOf = {};
-for (const [g, ts] of Object.entries(GROUPS)) for (const t of ts) groupOf[t] = g;
+// --- registo de competições (qual é a ativa, quais existem) ---
+let registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+const saveRegistry = () => writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
+
+// --- competição ATIVA: estes valores são recarregados ao trocar de competição ---
+let activeId; let seed; let GROUPS; let GROUP_ORDER; let TEAMS; let META; let BRACKET; let COMP;
+let KO_ROUNDS; let matchRound; let roundJoker; let groupOf; let store; let STORE_PATH;
 const teamGroup = (t) => groupOf[t] || null;
-// código FIFA (ESPN abbreviation) -> nome PT, para a fonte ao vivo
-const codeToTeam = {};
-for (const [name, meta] of Object.entries(TEAMS)) codeToTeam[meta.code] = name;
+let codeToTeam = {};
 
-// --- estado mutável (apostas, resultados, janela) em store.json ---
 function defaultWindows(groupsOpen) {
-  // só a janela de grupos abre por defeito; as do mata-mata abrem-se à medida (ronda a ronda)
   const w = { grupos: groupsOpen };
   for (const r of KO_ROUNDS) w[r] = false;
   return w;
 }
-function loadStore() {
-  let s;
-  if (existsSync(STORE_PATH)) s = JSON.parse(readFileSync(STORE_PATH, 'utf8'));
-  else s = { windowOpen: seed.windowOpen !== false, results: structuredClone(seed.results), bets: structuredClone(seed.bets) };
-  // migração / campos novos do mata-mata
-  if (!s.windows) s.windows = defaultWindows(s.windowOpen !== false);
-  if (!s.knockouts) s.knockouts = {}; // { matchId: { home, away, homeGoals, awayGoals, winner, method } }
-  for (const b of s.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; }
-  writeFileSync(STORE_PATH, JSON.stringify(s, null, 2));
-  return s;
-}
-let store = loadStore();
 const saveStore = () => writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
+
+// Lê uma competição (qualquer, não só a ativa) para um objeto, sem tocar nos globais.
+function readCompetition(id) {
+  const dir = compDir(id);
+  const s = JSON.parse(readFileSync(join(dir, 'seed.json'), 'utf8'));
+  const bracket = JSON.parse(readFileSync(join(dir, 'bracket.json'), 'utf8'));
+  const comp = JSON.parse(readFileSync(join(dir, 'competition.json'), 'utf8'));
+  comp.sourceFile = join(dir, 'results_source.json');
+  const koRounds = bracket.rounds.map((r) => r.id);
+  const mRound = {};
+  for (const [mid, m] of Object.entries(bracket.matches)) mRound[mid] = m.round;
+  const gOf = {};
+  for (const [g, ts] of Object.entries(s.groups)) for (const t of ts) gOf[t] = g;
+  const c2t = {};
+  for (const [name, meta] of Object.entries(s.teams)) c2t[meta.code] = name;
+  const storePath = join(dir, 'store.json');
+  let st;
+  if (existsSync(storePath)) st = JSON.parse(readFileSync(storePath, 'utf8'));
+  else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
+  if (!st.windows) { st.windows = { grupos: s.windowOpen !== false }; for (const r of koRounds) st.windows[r] = false; }
+  if (!st.knockouts) st.knockouts = {};
+  for (const b of st.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; }
+  return {
+    id, seed: s, GROUPS: s.groups, GROUP_ORDER: s.groupOrder, TEAMS: s.teams, META: s.meta,
+    BRACKET: bracket, COMP: comp, KO_ROUNDS: koRounds, matchRound: mRound,
+    roundJoker: Object.fromEntries(bracket.rounds.map((r) => [r.id, !!r.joker])),
+    groupOf: gOf, codeToTeam: c2t, store: st, STORE_PATH: storePath,
+  };
+}
+
+function loadActive(id) {
+  const c = readCompetition(id);
+  ({ seed, GROUPS, GROUP_ORDER, TEAMS, META, BRACKET, COMP, KO_ROUNDS, matchRound, roundJoker, groupOf, codeToTeam, store, STORE_PATH } = c);
+  activeId = id;
+  saveStore();
+}
+loadActive(registry.activeId);
+
+// Resumo de uma competição (ativa ou arquivada): classificação + folhas, sem mexer na ativa.
+function competitionSummary(id) {
+  const c = id === activeId
+    ? { GROUPS, BRACKET, COMP, store, groupOf, TEAMS, GROUP_ORDER }
+    : readCompetition(id);
+  const w = computeWorldState(c.GROUPS, c.store.results.groups, { bracket: c.BRACKET, knockoutResults: c.store.knockouts }, c.COMP);
+  const lb = leaderboard(c.store.bets, w, (t) => c.groupOf[t] || null);
+  const meta = registry.competitions.find((x) => x.id === id) || { id, name: c.COMP.name, edition: c.COMP.edition, status: 'active' };
+  return { meta, competition: { name: c.COMP.name, edition: c.COMP.edition, entry: c.COMP.entry, prizes: c.COMP.prizes }, leaderboard: lb, teams: c.TEAMS, groupOrder: c.GROUP_ORDER, matchesPlayed: w.matchesPlayed, bets: Object.fromEntries(c.store.bets.map((b) => [b.player, publicBet(b)])) };
+}
 
 // tokens de admin válidos (memória; nível protótipo)
 const adminTokens = new Set();
@@ -193,6 +217,33 @@ async function api(req, res, path) {
       windows: store.windows,
       groupStageComplete: groupStageComplete(w.standings),
     });
+  }
+
+  // lista de competições (ativa + arquivadas)
+  if (path === '/api/competitions' && method === 'GET') {
+    return json(res, 200, { activeId, competitions: registry.competitions });
+  }
+
+  // resumo de uma competição (qualquer): classificação final/atual + folhas
+  if (path.startsWith('/api/history/') && method === 'GET') {
+    const id = decodeURIComponent(path.slice('/api/history/'.length));
+    if (!registry.competitions.some((c) => c.id === id)) return json(res, 404, { error: 'Competição desconhecida.' });
+    try { return json(res, 200, competitionSummary(id)); }
+    catch (e) { return json(res, 500, { error: String(e.message || e) }); }
+  }
+
+  // historial de um jogador ao longo de todas as edições
+  if (path.startsWith('/api/player/') && method === 'GET') {
+    const name = decodeURIComponent(path.slice('/api/player/'.length));
+    const editions = [];
+    for (const c of registry.competitions) {
+      let sum;
+      try { sum = competitionSummary(c.id); } catch { continue; }
+      const row = sum.leaderboard.find((r) => r.player === name);
+      if (!row) continue;
+      editions.push({ id: c.id, name: sum.competition.name, edition: sum.competition.edition, status: c.status, rank: row.rank, total: row.score.total, players: sum.leaderboard.length });
+    }
+    return json(res, 200, { player: name, editions });
   }
 
   if (path === '/api/results' && method === 'GET') {
@@ -338,6 +389,16 @@ async function api(req, res, path) {
   if (path.startsWith('/api/admin/')) {
     if (!isAdmin(req)) return json(res, 401, { error: 'Não autenticado.' });
 
+    // trocar a competição ativa
+    if (path === '/api/admin/competition/active' && method === 'POST') {
+      const body = await readBody(req);
+      if (!registry.competitions.some((c) => c.id === body.id)) return json(res, 400, { error: 'Competição desconhecida.' });
+      loadActive(body.id);
+      registry.activeId = body.id;
+      saveRegistry();
+      return json(res, 200, { activeId });
+    }
+
     if (path === '/api/admin/window' && method === 'POST') {
       const body = await readBody(req);
       const round = body.round || 'grupos';
@@ -404,7 +465,7 @@ async function api(req, res, path) {
     // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
     if (path === '/api/admin/fetch' && method === 'POST') {
       let loaded;
-      try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: COMP.source }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: { ...COMP.source, file: COMP.sourceFile } }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];

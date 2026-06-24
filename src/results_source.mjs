@@ -149,7 +149,7 @@ export async function loadResultsSource(ctx) {
     try { return await fetchEspnGroupResults(ctx); }
     catch (e) { lastLiveError = e.message; } // cai para o ficheiro local
   }
-  const file = join(root, 'data/results_source.json');
+  const file = ctx?.source?.file || join(root, 'data/results_source.json');
   if (!existsSync(file)) throw new Error(lastLiveError || 'sem fonte de resultados disponível');
   const raw = JSON.parse(readFileSync(file, 'utf8'));
   return { groups: normalize(raw), source: (raw.source || 'data/results_source.json') + (lastLiveError ? ` (ESPN indisponível: ${lastLiveError})` : '') };
