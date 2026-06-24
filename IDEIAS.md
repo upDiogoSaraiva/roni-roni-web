@@ -33,6 +33,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 
 ### Dados / visualização
 - [✅] **Mais escolhidas para apurar** (Reveal) — seleções mais escolhidas como 1.º/2.º em todos os grupos. [💡] falta versão por-grupo (heatmap).
+- [✅] **Distribuição de pontos** (Reveal) — histograma dos pontos do grupo por intervalos de 5.
 - [✅] **"De onde vêm os meus pontos"** — barra empilhada (apuramento/posição/campeão/Final 4/mata-mata/extras) na folha que abre no leaderboard.
 - [✅] **Recorde "maior salto"** no Hall da Fama (maior ganho de pontos numa jornada). [💡] falta linha do tempo completa.
 - [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
@@ -128,3 +129,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Copiar o meu resumo** (Ronda 25, ângulo distribuição) — botão no hero que copia um texto curto
   ("Estou em X.º de Y com Z pontos") para colar no WhatsApp. Fonte: partilha por texto. Porquê:
   partilha sem fricção, complementa o cartão-imagem. Neutro.
+- **Distribuição de pontos** (Ronda 26, ângulo visualização) — histograma dos pontos do grupo por
+  intervalos de 5, no Reveal. Fonte: histogramas de dashboards. Porquê: mostra se a pool está
+  renhida ou esticada. Neutro.

@@ -828,6 +828,18 @@ function barCard(rows, max) {
   }
   return card;
 }
+// histograma simples: barras por intervalo de pontos (rótulo de texto + barra proporcional)
+function histCard(buckets) {
+  const card = el('div', { class: 'card', style: { padding: '10px 14px' } });
+  const max = Math.max(1, ...buckets.map((b) => b.n));
+  for (const b of buckets) {
+    card.appendChild(el('div', { class: 'reveal-row' },
+      el('div', { class: 'reveal-team num', style: { fontSize: '12px' } }, `${b.lo}–${b.hi}`),
+      el('div', { class: 'reveal-bar-wrap' }, el('div', { class: 'reveal-bar', style: { width: Math.round(b.n / max * 100) + '%' } })),
+      el('span', { class: 'num reveal-n' }, b.n)));
+  }
+  return card;
+}
 async function pageReveal() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Reveal'),
     el('p', {}, 'Como o grupo apostou — o consenso e a coragem de cada um.')));
@@ -858,6 +870,12 @@ async function pageReveal() {
       el('div', { class: 'kv' }, el('b', {}, 'Média do grupo'), el('span', { class: 'v num' }, String(avg))),
       el('div', { class: 'kv' }, el('b', {}, 'Mais pontos'), el('span', { class: 'v' }, `${top.player} · ${top.score.total}`)),
       el('div', { class: 'kv' }, el('b', {}, 'Menos pontos'), el('span', { class: 'v' }, `${bottom.player} · ${bottom.score.total}`))));
+    const totals = lb.map((r) => r.score.total);
+    const min = Math.min(...totals), max = Math.max(...totals), size = 5, start = Math.floor(min / size) * size;
+    const buckets = [];
+    for (let b = start; b <= max; b += size) buckets.push({ lo: b, hi: b + size - 1, n: totals.filter((t) => t >= b && t < b + size).length });
+    host.appendChild(el('div', { class: 'section-label' }, 'Distribuição de pontos'));
+    host.appendChild(histCard(buckets));
   }
 
   host.appendChild(el('div', { class: 'section-label' }, 'Campeão · quem escolheu cada seleção'));
