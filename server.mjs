@@ -2,7 +2,7 @@
 // Serve a SPA em public/ e uma API neutra (apostas, resultados, pontos). Nada do motor.
 
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, statSync, createReadStream } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -57,7 +57,12 @@ function loadStore() {
   return s;
 }
 let store = loadStore();
-const saveStore = () => writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
+// Grava o estado em disco com cópia de segurança: o store.json atual é copiado para
+// store.json.bak antes de ser reescrito, para sobreviver a falhas a meio da escrita.
+function saveStore() {
+  try { if (existsSync(STORE_PATH)) copyFileSync(STORE_PATH, STORE_PATH + '.bak'); } catch { /* backup best-effort */ }
+  writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
+}
 
 // tokens de admin válidos (memória; nível protótipo)
 const adminTokens = new Set();
@@ -116,7 +121,7 @@ function validateBet(b) {
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts }, COMP);
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts }, { ...COMP, teams: TEAMS });
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -189,7 +194,7 @@ async function api(req, res, path) {
     return json(res, 200, {
       rounds: BRACKET.rounds,
       matches: BRACKET.matches,
-      resolved: resolveBracket(BRACKET, w.standings, store.knockouts),
+      resolved: resolveBracket(BRACKET, w.standings, store.knockouts, TEAMS),
       windows: store.windows,
       groupStageComplete: groupStageComplete(w.standings),
     });
@@ -295,7 +300,7 @@ async function api(req, res, path) {
       return json(res, 403, { errors: ['PIN incorreto para editar esta aposta.'] });
     }
     const w = world();
-    const resolved = resolveBracket(BRACKET, w.standings, store.knockouts);
+    const resolved = resolveBracket(BRACKET, w.standings, store.knockouts, TEAMS);
     const errors = [];
     const picks = body.picks || {};
     for (const [mid, pick] of Object.entries(picks)) {

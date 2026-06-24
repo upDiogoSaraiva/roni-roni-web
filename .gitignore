@@ -4,6 +4,9 @@ node_modules/
 # estado mutável gerado em runtime (recriado a partir de data/seed.json no 1.º arranque)
 data/store.json
 
+# backups automáticos do estado (cópia .bak antes de cada gravação)
+*.bak
+
 # screenshots de teste e artefactos do browser
 /*.png
 .playwright-mcp/
