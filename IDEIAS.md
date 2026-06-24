@@ -39,7 +39,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ### Qualidade de vida / mobile
 - [💡] **Contagem decrescente** para o próximo prazo de apostas / próxima jornada.
 - [💡] **Pesquisa global** (jogadores + seleções) no topo.
-- [💡] **"A minha equipa do dia"** — atalho para a minha folha e posição num cartão compacto.
+- [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
 - [💡] **Partilha por link** de uma folha de jogador.
 
 ### Polish visual / microinterações
@@ -67,3 +67,6 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Partilhar a tabela** (Ronda 5, ângulo distribuição) — botão "Partilhar" na Geral gera um cartão
   PNG (top 10) via SVG→canvas e usa a partilha nativa (ou descarrega). Fonte: cultura de partilha no
   WhatsApp dos grupos. Porquê: traz gente de volta à app a partir do chat; reusa o pipeline do cartão.
+- **Cartão pessoal "hero"** (Ronda 6, ângulo QoL/mobile) — no topo da Geral, quando há jogador
+  identificado/escolhido, mostra a sua posição, pontos, movimento e distância ao 1.º. Fonte: dashboards
+  personalizados de fantasy. Porquê: respondes logo a "como vou eu?" sem procurar na tabela. Neutro.

@@ -319,6 +319,19 @@ async function pageGeral() {
   const expanded = new Set();
   let firstLbPaint = true;
 
+  // cartão pessoal: a minha posição de relance (quando identificado / escolhido)
+  const myRow = myName && data.leaderboard.find((r) => r.player === myName);
+  if (myRow) {
+    const toLeader = data.leaderboard[0].score.total - myRow.score.total;
+    const sub = myRow.rank === 1 ? 'Estás na liderança!' : `a ${toLeader} ponto(s) do 1.º · ${myRow.rank}.º de ${data.leaderboard.length}`;
+    host.appendChild(el('div', { class: 'card hero' },
+      monogram(myRow.player),
+      el('div', { style: { flex: '1', minWidth: '0' } },
+        el('div', { class: 'hero-rank num' }, myRow.rank + '.º'),
+        el('div', { class: 'hero-sub' }, sub)),
+      el('div', { class: 'hero-pts' }, movementEl(myRow.movement || 0), el('span', { class: 'num' }, myRow.score.total))));
+  }
+
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
   host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput),

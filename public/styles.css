@@ -172,6 +172,12 @@ button { font: inherit; cursor: pointer; }
 .badge-name { font-weight: 700; font-size: 13.5px; margin-top: 8px; }
 .badge-desc { color: var(--text-soft); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
 
+/* ---------- cartão pessoal (hero) ---------- */
+.hero { display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 12px; }
+.hero-rank { font-size: 30px; font-weight: 700; font-family: var(--font-display); line-height: 1; }
+.hero-sub { color: var(--text-soft); font-size: 13px; margin-top: 3px; }
+.hero-pts { display: flex; align-items: center; gap: 6px; font-size: 26px; font-weight: 700; color: var(--brand); }
+
 /* ---------- composição de pontos (barra empilhada) ---------- */
 .pbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--surface-2); }
 .pbar-seg { height: 100%; }
