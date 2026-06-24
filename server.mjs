@@ -2,7 +2,7 @@
 // Serve a SPA em public/ e uma API neutra (apostas, resultados, pontos). Nada do motor.
 
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, statSync, createReadStream } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -72,8 +72,20 @@ function loadActive(id) {
 }
 loadActive(registry.activeId);
 
+// Classificação final guardada de uma edição importada (sem grupos para recalcular).
+function archivedSummary(id) {
+  const comp = JSON.parse(readFileSync(join(compDir(id), 'competition.json'), 'utf8'));
+  const rows = [...(comp.finalStandings || [])].sort((a, b) => b.total - a.total).map((r) => ({ player: r.player, score: { total: r.total } }));
+  let lastPts = null;
+  let lastRank = 0;
+  rows.forEach((r, i) => { if (r.score.total !== lastPts) { lastRank = i + 1; lastPts = r.score.total; } r.rank = lastRank; });
+  const meta = registry.competitions.find((x) => x.id === id) || { id, name: comp.name, edition: comp.edition, status: 'archived' };
+  return { meta, competition: { name: comp.name, edition: comp.edition, entry: comp.entry || 0, prizes: comp.prizes || [] }, leaderboard: rows, teams: {}, groupOrder: [], matchesPlayed: null, bets: {}, archived: true };
+}
+
 // Resumo de uma competição (ativa ou arquivada): classificação + folhas, sem mexer na ativa.
 function competitionSummary(id) {
+  if (registry.competitions.find((x) => x.id === id)?.kind === 'archive') return archivedSummary(id);
   const c = id === activeId
     ? { GROUPS, BRACKET, COMP, store, groupOf, TEAMS, GROUP_ORDER }
     : readCompetition(id);
@@ -392,11 +404,33 @@ async function api(req, res, path) {
     // trocar a competição ativa
     if (path === '/api/admin/competition/active' && method === 'POST') {
       const body = await readBody(req);
-      if (!registry.competitions.some((c) => c.id === body.id)) return json(res, 400, { error: 'Competição desconhecida.' });
+      const reg = registry.competitions.find((c) => c.id === body.id);
+      if (!reg) return json(res, 400, { error: 'Competição desconhecida.' });
+      if (reg.kind === 'archive') return json(res, 400, { error: 'Uma edição arquivada não pode ser a ativa.' });
       loadActive(body.id);
       registry.activeId = body.id;
       saveRegistry();
       return json(res, 200, { activeId });
+    }
+
+    // importar uma edição passada (classificação final) para o histórico
+    if (path === '/api/admin/import' && method === 'POST') {
+      const body = await readBody(req);
+      const name = (body.name || 'Roni Roni').trim();
+      const edition = (body.edition || '').trim();
+      const rows = Array.isArray(body.rows) ? body.rows : [];
+      if (!edition) return json(res, 400, { error: 'Indica o nome da edição.' });
+      const finalStandings = rows.filter((r) => r.player && r.points != null).map((r) => ({ player: String(r.player).trim(), total: Number(r.points) }));
+      if (!finalStandings.length) return json(res, 400, { error: 'Classificação vazia ou inválida.' });
+      const base = (body.id || edition).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'edicao';
+      let id = base;
+      let n = 2;
+      while (registry.competitions.some((c) => c.id === id)) id = `${base}-${n++}`;
+      mkdirSync(compDir(id), { recursive: true });
+      writeFileSync(join(compDir(id), 'competition.json'), JSON.stringify({ id, name, edition, kind: 'archive', entry: body.entry || 0, prizes: body.prizes || [], finalStandings }, null, 2));
+      registry.competitions.push({ id, name, edition, status: 'archived', kind: 'archive' });
+      saveRegistry();
+      return json(res, 200, { ok: true, id, players: finalStandings.length });
     }
 
     if (path === '/api/admin/window' && method === 'POST') {

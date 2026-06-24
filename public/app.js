@@ -1008,6 +1008,49 @@ async function renderKoBetting(openRounds) {
 }
 
 /* ---------------- PÁGINA: ADMIN ---------------- */
+async function adminCompetitions(host) {
+  const data = await api('/api/competitions');
+  const list = el('div', { class: 'card' });
+  for (const c of data.competitions) {
+    const isActive = c.id === data.activeId;
+    const right = isActive
+      ? el('span', { class: 'badge ok' }, 'Ativa')
+      : (c.kind === 'archive'
+        ? el('span', { class: 'badge seed' }, 'Arquivada')
+        : el('button', { class: 'btn btn-ghost', style: { minHeight: '36px', padding: '6px 12px' }, onclick: async () => { try { await api('/api/admin/competition/active', { method: 'POST', body: { id: c.id } }); toast('Ativa: ' + c.edition); render(); } catch (e) { toast(e.message, true); } } }, 'Tornar ativa'));
+    list.appendChild(el('div', { class: 'res-row', style: { gridTemplateColumns: '1fr auto' } },
+      el('div', {}, el('div', { style: { fontWeight: '700' } }, c.edition), el('div', { class: 'muted', style: { fontSize: '12px' } }, c.id)),
+      right));
+  }
+  host.appendChild(list);
+
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '10px 0 6px' } },
+    'Importar edição passada — classificação final, uma linha por jogador: nome, pontos.'));
+  const nm = el('input', { class: 'input', placeholder: 'Nome', value: 'Torneio Roni Roni' });
+  const ed = el('input', { class: 'input', placeholder: 'Edição (ex.: Euro 2024)' });
+  const csv = el('textarea', { class: 'input', rows: '5', placeholder: 'Diogo Saraiva, 84\nManel, 80', style: { resize: 'vertical', fontFamily: 'var(--font-num)' } });
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
+    el('div', { class: 'field' }, el('label', {}, 'Nome'), nm),
+    el('div', { class: 'field' }, el('label', {}, 'Edição'), ed),
+    el('div', { class: 'field' }, el('label', {}, 'Classificação (CSV)'), csv),
+    el('button', { class: 'btn btn-primary btn-block', onclick: doImport }, icon('plus'), 'Importar edição')));
+
+  async function doImport() {
+    const rows = csv.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+      const i = l.lastIndexOf(',');
+      if (i < 0) return null;
+      return { player: l.slice(0, i).trim(), points: Number(l.slice(i + 1).trim()) };
+    }).filter((r) => r && r.player && !Number.isNaN(r.points));
+    if (!ed.value.trim()) return toast('Indica a edição.', true);
+    if (!rows.length) return toast('Cola a classificação (nome, pontos).', true);
+    try {
+      const r = await api('/api/admin/import', { method: 'POST', body: { name: nm.value, edition: ed.value, rows } });
+      toast(`Importado: ${r.players} jogadores em ${ed.value}.`);
+      render();
+    } catch (e) { toast(e.message, true); }
+  }
+}
+
 async function pageAdmin() {
   if (!ADMIN_TOKEN) return renderAdminLogin();
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Administração'),
@@ -1019,6 +1062,10 @@ async function pageAdmin() {
   try { [status, results] = await Promise.all([api('/api/admin/status'), api('/api/results')]); }
   catch (e) { if (e.status === 401) { ADMIN_TOKEN = null; sessionStorage.removeItem('roni-admin'); return renderAdminLogin(); } throw e; }
   clear(host);
+
+  // competições (ativa + arquivadas) + importar edição passada
+  host.appendChild(el('div', { class: 'section-label' }, 'Competições'));
+  await adminCompetitions(host);
 
   // janelas de apostas (grupos + cada ronda do mata-mata) — abrem-se ronda a ronda
   host.appendChild(el('div', { class: 'section-label' }, 'Janelas de apostas'));
