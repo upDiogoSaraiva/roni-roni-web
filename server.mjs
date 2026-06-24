@@ -300,6 +300,29 @@ async function api(req, res, path) {
     });
   }
 
+  // evolução das posições jornada a jornada — replay determinístico dos resultados de grupo
+  // (recalcula a classificação como se a fase de grupos terminasse no fim de cada jornada)
+  if (path === '/api/timeline' && method === 'GET') {
+    let maxMd = 0;
+    for (const g of GROUP_ORDER) for (const m of store.results.groups[g] || []) maxMd = Math.max(maxMd, m.matchday || 1);
+    const matchdays = [];
+    const series = new Map(store.bets.map((b) => [b.player, { player: b.player, seed: !!b.seed, points: [] }]));
+    for (let md = 1; md <= maxMd; md++) {
+      const cut = {};
+      let any = false;
+      for (const g of GROUP_ORDER) {
+        cut[g] = (store.results.groups[g] || []).filter((m) => (m.matchday || 1) <= md);
+        if (cut[g].length) any = true;
+      }
+      if (!any) continue;
+      matchdays.push(md);
+      const w = computeWorldState(GROUPS, cut, { bracket: BRACKET, knockoutResults: {}, marketResults: {} }, COMP);
+      const lb = leaderboard(store.bets, w, teamGroup);
+      for (const r of lb) series.get(r.player)?.points.push({ md, rank: r.rank, total: r.score.total });
+    }
+    return json(res, 200, { matchdays, groupGames: COMP.format?.groupGames || 3, count: store.bets.length, players: [...series.values()] });
+  }
+
   if (path === '/api/bets' && method === 'GET') {
     return json(res, 200, { bets: store.bets.map(publicBet) });
   }

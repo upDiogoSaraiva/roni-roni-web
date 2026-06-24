@@ -66,6 +66,13 @@ function icon(name, cls) {
   }
   return svg;
 }
+// elemento SVG genérico — para gráficos construídos nó-a-nó (sem innerHTML cru)
+function svgEl(tag, attrs = {}, ...kids) {
+  const node = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) { if (v == null || v === false) continue; node.setAttribute(k, v); }
+  for (const k of kids.flat()) { if (k == null || k === false) continue; node.appendChild(k.nodeType ? k : document.createTextNode(String(k))); }
+  return node;
+}
 
 /* ---------------- API ---------------- */
 async function api(path, opts = {}) {
@@ -208,7 +215,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -234,6 +241,7 @@ async function render() {
     else if (r === 'admin') await pageAdmin();
     else if (r === 'historico') await pageHistorico();
     else if (r === 'pessoal') await pagePessoal();
+    else if (r === 'evolucao') await pageEvolucao();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -375,6 +383,105 @@ function sheetDetail(bet, score) {
   }
   box.appendChild(grid);
   return box;
+}
+
+/* ---------------- PÁGINA: EVOLUÇÃO (posição por jornada) ---------------- */
+async function pageEvolucao() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Evolução'),
+    el('p', {}, 'Como mexeu a classificação, jornada a jornada. Escolhe-te para destacares o teu percurso.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const data = await api('/api/timeline');
+  clear(host);
+
+  const players = data.players.filter((p) => p.points.length);
+  if (!data.matchdays.length || !players.length) {
+    host.appendChild(emptyState('Ainda sem jornadas', 'Aparece aqui assim que houver resultados inseridos.', 'search'));
+    return;
+  }
+
+  let me = localStorage.getItem('roni-me') || '';
+  const sel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); paint(); } },
+    el('option', { value: '' }, '— destacar um jogador —'),
+    ...[...players].sort((a, b) => a.player.localeCompare(b.player, 'pt'))
+      .map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
+    el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Destacar o meu percurso'), sel)));
+
+  // maior subida / queda entre a 1.ª e a última jornada com dados — a picardia
+  if (data.matchdays.length >= 2) {
+    const movers = players.map((p) => ({ player: p.player, delta: p.points[0].rank - p.points[p.points.length - 1].rank }));
+    const up = movers.reduce((b, m) => (m.delta > b.delta ? m : b));
+    const down = movers.reduce((b, m) => (m.delta < b.delta ? m : b));
+    const kvs = [];
+    if (up.delta > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior subida'), el('span', { class: 'v' }, `${up.player} · +${up.delta}`)));
+    if (down.delta < 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior queda'), el('span', { class: 'v' }, `${down.player} · ${down.delta}`)));
+    if (kvs.length) host.appendChild(el('div', { class: 'pot', style: { marginTop: '12px' } }, ...kvs));
+  }
+
+  const chartCard = el('div', { class: 'card', style: { padding: '14px 10px 10px', marginTop: '12px', overflow: 'hidden' } });
+  host.appendChild(chartCard);
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '10px' } },
+    'Posição recalculada como se a fase de grupos terminasse no fim de cada jornada (provisório).'));
+
+  function paint() { clear(chartCard); chartCard.appendChild(buildEvolutionChart(data, players, me)); }
+  paint();
+}
+
+// nome curto para o rótulo no fim da linha (cabe no espaço à direita)
+function shortName(name) {
+  const parts = name.trim().split(/\s+/);
+  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0];
+}
+
+function buildEvolutionChart(data, players, me) {
+  const W = 700, H = 380, padL = 32, padR = 104, padT = 18, padB = 30;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const mds = data.matchdays, n = mds.length, count = Math.max(data.count, 2);
+  const X = (md) => (n === 1 ? padL + plotW / 2 : padL + (mds.indexOf(md) / (n - 1)) * plotW);
+  const Y = (rank) => padT + ((rank - 1) / (count - 1)) * plotH;
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'ev-chart', width: '100%', role: 'img',
+    'aria-label': 'Gráfico da posição de cada jogador por jornada' });
+  svg.appendChild(svgEl('title', {}, 'Evolução da posição por jornada'));
+
+  // grelha + eixos (topo = 1.º; cada coluna = uma jornada)
+  const axis = svgEl('g', { class: 'ev-axis' });
+  for (const md of mds) {
+    axis.appendChild(svgEl('line', { class: 'ev-grid', x1: X(md), y1: padT, x2: X(md), y2: padT + plotH }));
+    axis.appendChild(svgEl('text', { class: 'ev-xlab', x: X(md), y: H - 10, 'text-anchor': 'middle' }, 'J' + md));
+  }
+  axis.appendChild(svgEl('text', { class: 'ev-ylab', x: padL - 8, y: Y(1) + 3, 'text-anchor': 'end' }, '1.º'));
+  axis.appendChild(svgEl('text', { class: 'ev-ylab', x: padL - 8, y: Y(data.count) + 3, 'text-anchor': 'end' }, data.count + '.º'));
+  svg.appendChild(axis);
+
+  const lineFor = (p) => p.points.map((pt) => `${X(pt.md)},${Y(pt.rank)}`).join(' ');
+  const leader = players.find((p) => p.points[p.points.length - 1].rank === 1);
+
+  // 1) todas as linhas, esbatidas
+  const back = svgEl('g', { class: 'ev-back' });
+  for (const p of players) {
+    if (p.player === me) continue;
+    back.appendChild(svgEl('polyline', { class: 'ev-line', points: lineFor(p) }));
+  }
+  svg.appendChild(back);
+
+  // 2) destaques por cima: líder (ouro) e eu (brand)
+  function highlight(p, cls) {
+    const g = svgEl('g', { class: 'ev-hl ' + cls });
+    g.appendChild(svgEl('polyline', { class: 'ev-line ' + cls, points: lineFor(p) }));
+    for (const pt of p.points) g.appendChild(svgEl('circle', { class: 'ev-dot ' + cls, cx: X(pt.md), cy: Y(pt.rank), r: 3.2 }));
+    const last = p.points[p.points.length - 1];
+    g.appendChild(svgEl('text', { class: 'ev-end ' + cls, x: X(last.md) + 8, y: Y(last.rank) + 4 }, `${shortName(p.player)} · ${last.rank}.º`));
+    svg.appendChild(g);
+  }
+  if (leader && leader.player !== me) highlight(leader, 'leader');
+  const meP = players.find((p) => p.player === me);
+  if (meP) highlight(meP, 'me');
+
+  return svg;
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */
