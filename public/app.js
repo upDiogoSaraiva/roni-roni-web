@@ -500,8 +500,13 @@ function buildEvolutionChart(data, players, me) {
     const last = p.points[p.points.length - 1];
     g.appendChild(svgEl('text', { class: 'ev-end ' + cls, x: X(last.md) + 8, y: Y(last.rank) + 4 }, `${shortName(p.player)} · ${last.rank}.º`));
     g.appendChild(svgEl('polyline', { class: 'ev-hit', points: lineFor(p) }));
-    g.addEventListener('mouseenter', () => { g.classList.add('hover'); svg.appendChild(g); });
-    g.addEventListener('mouseleave', () => { g.classList.remove('hover'); });
+    // realça só a linha sob o rato; limpa qualquer destaque preso ao entrar e ao sair.
+    // (NÃO reparentar aqui — mover o nó em hover impede o mouseleave de disparar = linha presa.)
+    g.addEventListener('mouseenter', () => {
+      for (const s of layer.querySelectorAll('.ev-series.hover')) s.classList.remove('hover');
+      g.classList.add('hover');
+    });
+    g.addEventListener('mouseleave', () => g.classList.remove('hover'));
     return g;
   }
   // desenha primeiro as linhas normais; líder e eu por cima (persistentes)
