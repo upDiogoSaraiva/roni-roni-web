@@ -955,8 +955,8 @@ async function pageAdmin() {
   const subWrap = el('div', { class: 'status-row' });
   const submittedSet = new Set(status.submitted);
   const all = [...new Set([...status.seedPlayers, ...status.submitted])].sort((a, b) => a.localeCompare(b, 'pt'));
-  all.forEach((p) => subWrap.appendChild(el('span', { class: 'who' + (submittedSet.has(p) ? ' done' : '') },
-    submittedSet.has(p) ? icon('check') : null, p)));
+  all.forEach((p) => subWrap.appendChild(el('span', { class: 'who' + (submittedSet.has(p) ? ' done' : ' pending') },
+    submittedSet.has(p) ? icon('check') : el('span', { class: 'who-dot' }), el('span', { class: 'who-nm' }, p))));
   host.appendChild(subWrap);
 
   // editor de resultados
