@@ -217,7 +217,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -227,7 +227,7 @@ function navigate(route) { location.hash = '#/' + route; }
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
   ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
-  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'],
+  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
   const row = el('div', { class: 'engage-nav' });
@@ -263,6 +263,7 @@ async function render() {
     else if (r === 'h2h') await pageH2H();
     else if (r === 'cartao') await pageCartao();
     else if (r === 'halloffame') await pageHallOfFame();
+    else if (r === 'conquistas') await pageConquistas();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -871,6 +872,70 @@ async function pageCartao() {
         await navigator.share({ files: [file], title: 'Roni Roni', text: `${me} — ${byPlayer[me].rank}.º no Torneio Roni Roni` });
       } else { toast('Partilha direta indisponível aqui — a descarregar.'); downloadCard(); }
     } catch (e) { /* partilha cancelada pelo utilizador */ }
+  }
+  paint();
+}
+
+/* ---------------- PÁGINA: CONQUISTAS (badges) ---------------- */
+// distintivos determinísticos a partir do score + aposta + consenso do grupo (tudo neutro)
+function computeBadges(row, bet, ctx) {
+  const s = row.score;
+  const out = [];
+  const add = (emoji, name, desc, earned) => out.push({ emoji, name, desc, earned: !!earned });
+  const trio = STATE.groupOrder.some((g) => { const p = s.groups?.[g]?.picks; return p && p.first?.position && p.second?.position && p.third?.position; });
+  add('🎯', 'Trio perfeito', 'Acertaste 1.º, 2.º e 3.º de um grupo', trio);
+  let any = false, allQ = true;
+  for (const g of STATE.groupOrder) { const p = s.groups?.[g]?.picks; if (!p) continue; for (const slot of ['first', 'second']) { if (p[slot]) { any = true; if (!p[slot].qualifies) allQ = false; } } }
+  add('✅', 'Faro de apuramento', 'Todos os teus 1.º/2.º apuraram', any && allQ);
+  add('🥇', 'Na frente', 'Estás em 1.º lugar', row.rank === 1);
+  add('🏅', 'Pódio', 'Estás no top 3', row.rank <= 3);
+  add('📈', 'Em ascensão', 'Subiste na última jornada', (row.movement || 0) > 0);
+  const backers = ctx.champCounts.get(bet?.champion) || 0;
+  add('🦅', 'Contra a corrente', 'O teu campeão foi escolhido por poucos (≤2)', !!bet?.champion && backers <= 2);
+  add('🐑', 'Com a maioria', 'Apostaste no campeão mais escolhido', !!bet?.champion && backers === ctx.maxChamp && ctx.maxChamp > 0);
+  add('💯', 'Caçador de pontos', '40 pontos ou mais', s.total >= 40);
+  add('🎲', 'Aposta única', 'Ninguém escolheu o mesmo campeão que tu', !!bet?.champion && backers === 1);
+  return out;
+}
+async function pageConquistas() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Conquistas'),
+    el('p', {}, 'Distintivos que ganhas pelas tuas escolhas e pelo teu lugar na tabela.')));
+  MAIN.appendChild(engageNav('conquistas'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const lb = data.leaderboard;
+  const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
+  const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
+  const champCounts = new Map();
+  for (const p of Object.values(data.bets)) if (p.champion) champCounts.set(p.champion, (champCounts.get(p.champion) || 0) + 1);
+  const ctx = { champCounts, maxChamp: Math.max(0, ...champCounts.values()) };
+  const meName = localStorage.getItem('roni-me');
+  let me = meName && byPlayer[meName] ? meName : names[0];
+
+  const sel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); paint(); } },
+    ...names.map((n) => el('option', { value: n, selected: n === me }, n)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Conquistas de quem'), sel)));
+  const body = el('div', { class: 'mt4' });
+  host.append(body);
+
+  function paint() {
+    clear(body);
+    const badges = computeBadges(byPlayer[me], data.bets[me], ctx);
+    const earned = badges.filter((b) => b.earned).length;
+    body.appendChild(el('div', { class: 'pot', style: { marginBottom: '12px' } },
+      el('div', { class: 'kv' }, el('b', {}, 'Conquistas'), el('span', { class: 'v num' }, `${earned}/${badges.length}`))));
+    const grid = el('div', { class: 'badge-grid' });
+    for (const b of badges) {
+      grid.appendChild(el('div', { class: 'badge-card' + (b.earned ? ' earned' : ' locked') },
+        el('div', { class: 'badge-emoji' }, b.emoji),
+        el('div', { class: 'badge-name' }, b.name),
+        el('div', { class: 'badge-desc' }, b.desc)));
+    }
+    body.appendChild(grid);
   }
   paint();
 }

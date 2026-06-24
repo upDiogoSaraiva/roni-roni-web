@@ -163,6 +163,15 @@ button { font: inherit; cursor: pointer; }
 .builder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px 12px; }
 .builder-grid .field { margin: 0; }
 
+/* ---------- conquistas (badges) ---------- */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+.badge-card { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 12px; background: var(--surface); text-align: center; }
+.badge-card.locked { opacity: 0.5; filter: grayscale(0.8); }
+.badge-card.earned { border-color: var(--brand); box-shadow: var(--shadow); }
+.badge-emoji { font-size: 30px; line-height: 1; }
+.badge-name { font-weight: 700; font-size: 13.5px; margin-top: 8px; }
+.badge-desc { color: var(--text-soft); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
+
 /* ---------- hall da fama ---------- */
 .hof-head, .hof-row { display: grid; grid-template-columns: 26px 1fr 40px 56px 50px; align-items: center; gap: 8px; padding: 8px 14px; }
 .hof-head { color: var(--text-soft); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--hairline); }
