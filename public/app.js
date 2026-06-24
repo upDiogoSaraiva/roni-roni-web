@@ -387,7 +387,7 @@ async function pageGeral() {
         el('div', { class: 'lb-pos' }, medal(r.rank) || el('span', { class: 'lb-rank num' }, r.rank)),
         el('div', { class: 'lb-player' }, monogram(r.player),
           el('div', { style: { minWidth: '0' } },
-            el('div', { class: 'nm' }, r.player),
+            el('div', { class: 'nm' }, (r.rank === 1 ? '👑 ' : '') + r.player),
             el('div', { class: 'sub' }, isMe ? 'Tu' : (r.seed ? 'Aposta inicial' : 'Submetida')))),
         el('div', { class: 'lb-pts' }, movementEl(r.movement || 0), el('span', { class: 'v num' }, r.score.total)));
       card.appendChild(row);

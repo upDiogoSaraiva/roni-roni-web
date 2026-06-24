@@ -181,6 +181,9 @@ button { font: inherit; cursor: pointer; }
 .badge-name { font-weight: 700; font-size: 13.5px; margin-top: 8px; }
 .badge-desc { color: var(--text-soft); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
 
+/* ---------- realce do líder na tabela ---------- */
+.lb-row.leader { background: color-mix(in srgb, var(--gold) 9%, transparent); }
+
 /* ---------- cartão pessoal (hero) ---------- */
 .hero { display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 12px; }
 .hero-rank { font-size: 30px; font-weight: 700; font-family: var(--font-display); line-height: 1; }

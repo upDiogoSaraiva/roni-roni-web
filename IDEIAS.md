@@ -45,7 +45,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ### Polish visual / microinterações
 - [✅] **Sparkline do percurso** no cartão pessoal hero (posição por jornada em miniatura).
 - [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
-- [💡] **Confete/realce** discreto no líder.
+- [✅] **Realce do líder** — coroa 👑 + fundo dourado subtil na linha do 1.º.
 - [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
 - [💡] **Transições de página** suaves.
 
@@ -80,3 +80,5 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Sparkline do percurso** (Ronda 9, ângulo microviz/dados) — mini-gráfico da posição por jornada no
   cartão pessoal hero, do `/api/timeline`. Fonte: sparklines de dashboards. Porquê: o teu percurso de
   relance sem abrir a página de Evolução. Neutro.
+- **Realce do líder** (Ronda 10, ângulo polish/celebração) — coroa 👑 e fundo dourado subtil na linha
+  do 1.º. Fonte: celebração de líderes em leaderboards. Porquê: dá foco e estatuto ao topo. Neutro.
