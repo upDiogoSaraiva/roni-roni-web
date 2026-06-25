@@ -226,7 +226,7 @@ async function api(req, res, path) {
       groupOrder: GROUP_ORDER,
       teams: TEAMS,
       meta: META,
-      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes, markets: COMP.markets || [] },
+      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes, markets: COMP.markets || [], source: COMP.source || null },
       windowOpen: store.windows.grupos,
       windows: store.windows,
       marketResults: store.marketResults,

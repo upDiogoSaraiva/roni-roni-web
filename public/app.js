@@ -73,6 +73,31 @@ function svgEl(tag, attrs = {}, ...kids) {
   for (const k of kids.flat()) { if (k == null || k === false) continue; node.appendChild(k.nodeType ? k : document.createTextNode(String(k))); }
   return node;
 }
+// mini-gráfico (sparkline) da posição de um jogador ao longo das jornadas
+function rankSparkline(series, count) {
+  if (!series || series.points.length < 2) return null;
+  const W = 132, H = 30, pad = 4, n = series.points.length;
+  const X = (i) => pad + (i / (n - 1)) * (W - 2 * pad);
+  const Y = (rank) => pad + ((rank - 1) / Math.max(1, count - 1)) * (H - 2 * pad);
+  const pts = series.points.map((p, i) => `${X(i)},${Y(p.rank)}`).join(' ');
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: 'spark', 'aria-hidden': 'true' });
+  svg.appendChild(svgEl('polyline', { points: pts, fill: 'none', stroke: 'var(--brand)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  const last = series.points[n - 1];
+  svg.appendChild(svgEl('circle', { cx: X(n - 1), cy: Y(last.rank), r: 3, fill: 'var(--brand)' }));
+  return svg;
+}
+// animação count-up de um número (respeita prefers-reduced-motion)
+function countUp(elm, to, ms = 650) {
+  to = Number(to) || 0;
+  if (to <= 0 || matchMedia('(prefers-reduced-motion: reduce)').matches) { elm.textContent = to; return; }
+  const start = performance.now();
+  const step = (now) => {
+    const p = Math.min(1, (now - start) / ms);
+    elm.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
 
 /* ---------------- API ---------------- */
 async function api(path, opts = {}) {
@@ -217,7 +242,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -227,10 +252,18 @@ function navigate(route) { location.hash = '#/' + route; }
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
   ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
-  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'],
+  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
-  const row = el('div', { class: 'engage-nav' });
+  const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas',
+    onkeydown: (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const btns = [...row.querySelectorAll('.chip-nav')];
+      const i = btns.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      btns[(i + (e.key === 'ArrowRight' ? 1 : -1) + btns.length) % btns.length].focus();
+    } });
   for (const [route, label] of ENGAGE) {
     if (!ROUTES.includes(route)) continue;
     row.appendChild(el('button', { type: 'button', class: 'chip-nav' + (route === active ? ' on' : ''), onclick: () => navigate(route) }, label));
@@ -248,6 +281,7 @@ async function render() {
   setActiveTab();
   clear(MAIN);
   MAIN.scrollTop = 0;
+  MAIN.classList.remove('pg-in'); void MAIN.offsetWidth; MAIN.classList.add('pg-in'); // re-dispara a transição
   const r = currentRoute();
   try {
     if (r === 'geral') await pageGeral();
@@ -263,6 +297,8 @@ async function render() {
     else if (r === 'h2h') await pageH2H();
     else if (r === 'cartao') await pageCartao();
     else if (r === 'halloffame') await pageHallOfFame();
+    else if (r === 'conquistas') await pageConquistas();
+    else if (r === 'folha') await pageFolha();
   } catch (e) {
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
@@ -286,9 +322,19 @@ function medal(rank) {
   return svg;
 }
 function movementEl(m) {
-  if (m > 0) return el('span', { class: 'mv up', title: `subiu ${m}`, 'aria-label': `subiu ${m} posições` }, icon('up'));
-  if (m < 0) return el('span', { class: 'mv down', title: `desceu ${-m}`, 'aria-label': `desceu ${-m} posições` }, icon('down'));
+  if (m > 0) return el('span', { class: 'mv up', title: `subiu ${m}`, 'aria-label': `subiu ${m} posições` }, icon('up'), el('span', { class: 'mv-n' }, String(m)));
+  if (m < 0) return el('span', { class: 'mv down', title: `desceu ${-m}`, 'aria-label': `desceu ${-m} posições` }, icon('down'), el('span', { class: 'mv-n' }, String(-m)));
   return el('span', { class: 'mv flat', 'aria-hidden': 'true' }); // espaçador discreto, sem alteração
+}
+// texto da contagem decrescente para o fim da fase de grupos (datas em "AAAAMMDD-AAAAMMDD")
+function groupStageCountdown() {
+  const dates = STATE.competition?.source?.groupStageDates;
+  const end = dates && dates.split('-')[1];
+  if (!end || end.length !== 8) return null;
+  const d = new Date(+end.slice(0, 4), +end.slice(4, 6) - 1, +end.slice(6, 8), 23, 59);
+  const days = Math.ceil((d - new Date()) / 86400000);
+  if (Number.isNaN(days) || days < 0) return null;
+  return days === 0 ? 'Último dia da fase de grupos' : `Faltam ${days} dia(s) para o fim da fase de grupos`;
 }
 let lbSort = { key: 'rank', dir: 1 };
 async function pageGeral() {
@@ -298,16 +344,47 @@ async function pageGeral() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList());
-  const data = await api('/api/leaderboard');
+  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
   clear(host);
 
   const myName = localStorage.getItem('roni-me');
   let query = '';
   const expanded = new Set();
+  let firstLbPaint = true;
+
+  // contagem decrescente para o fim da fase de grupos (a partir das datas da competição)
+  const cd = groupStageCountdown();
+  if (cd) host.appendChild(el('div', { class: 'countdown' }, cd));
+
+  // cartão pessoal: a minha posição de relance (quando identificado / escolhido)
+  const myRow = myName && data.leaderboard.find((r) => r.player === myName);
+  if (myRow) {
+    const myIdx = data.leaderboard.findIndex((r) => r.player === myName);
+    const above = myIdx > 0 ? data.leaderboard[myIdx - 1] : null;
+    const sub = !above ? 'Estás na liderança!' : `Apanhar ${above.player} · +${above.score.total - myRow.score.total} pts · ${myRow.rank}.º de ${data.leaderboard.length}`;
+    const avg = Math.round(data.leaderboard.reduce((a, r) => a + r.score.total, 0) / data.leaderboard.length);
+    const vsAvg = myRow.score.total - avg;
+    const avgTxt = vsAvg === 0 ? 'em linha com a média do grupo' : `${vsAvg > 0 ? '+' + vsAvg : vsAvg} pts vs média do grupo`;
+    const spark = rankSparkline(tl && tl.players.find((p) => p.player === myName), tl ? tl.count : data.leaderboard.length);
+    host.appendChild(el('div', { class: 'card hero' },
+      monogram(myRow.player),
+      el('div', { style: { flex: '1', minWidth: '0' } },
+        el('div', { class: 'hero-rank num' }, myRow.rank + '.º'),
+        el('div', { class: 'hero-sub' }, sub),
+        el('div', { class: 'hero-sub' }, avgTxt),
+        spark || null),
+      el('div', { class: 'hero-pts' }, movementEl(myRow.movement || 0), el('span', { class: 'num' }, myRow.score.total))));
+    host.appendChild(el('button', { class: 'btn btn-ghost', style: { marginBottom: '12px' },
+      onclick: async () => {
+        const t = `Estou em ${myRow.rank}.º de ${data.leaderboard.length} no Torneio Roni Roni com ${myRow.score.total} pontos.`;
+        try { await navigator.clipboard.writeText(t); toast('Resumo copiado!'); } catch { toast('Copia manualmente, por favor.', true); }
+      } }, 'Copiar o meu resumo'));
+  }
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
-  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput)));
+  host.appendChild(el('div', { class: 'toolbar' }, el('div', { class: 'search', style: { flex: '1' } }, icon('search'), searchInput),
+    el('button', { class: 'btn btn-ghost', style: { whiteSpace: 'nowrap' }, onclick: () => shareTable(data.leaderboard) }, 'Partilhar')));
 
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
@@ -344,12 +421,16 @@ async function pageGeral() {
         el('div', { class: 'lb-pos' }, medal(r.rank) || el('span', { class: 'lb-rank num' }, r.rank)),
         el('div', { class: 'lb-player' }, monogram(r.player),
           el('div', { style: { minWidth: '0' } },
-            el('div', { class: 'nm' }, r.player),
+            el('div', { class: 'nm' }, (r.rank === 1 ? '👑 ' : '') + r.player),
             el('div', { class: 'sub' }, isMe ? 'Tu' : (r.seed ? 'Aposta inicial' : 'Submetida')))),
         el('div', { class: 'lb-pts' }, movementEl(r.movement || 0), el('span', { class: 'v num' }, r.score.total)));
       card.appendChild(row);
       if (expanded.has(r.player)) card.appendChild(sheetDetail(data.bets[r.player], r.score));
     });
+    if (firstLbPaint) {
+      firstLbPaint = false;
+      for (const v of card.querySelectorAll('.lb-pts .v')) countUp(v, v.textContent);
+    }
   }
   paint();
 }
@@ -370,6 +451,24 @@ function sheetLine(label, team, pick) {
   return el('div', { class: 'sheet-line' + (qualifies === false ? ' faded' : '') },
     el('span', { class: 'pos' }, label), teamChip(team), pointBadges(pick));
 }
+// barra empilhada: de onde vêm os pontos de um jogador (composição neutra do score)
+function pointsBar(score) {
+  const segs = [
+    { k: 'qualification', label: 'Apuramento', color: 'var(--ok)' },
+    { k: 'position', label: 'Posição', color: 'var(--gold)' },
+    { k: 'champion', label: 'Campeão', color: 'var(--brand)' },
+    { k: 'final4', label: 'Final 4', color: 'var(--brand-ink)' },
+    { k: 'knockout', label: 'Mata-mata', color: 'var(--pending)' },
+    { k: 'markets', label: 'Extras', color: 'var(--out)' },
+  ].map((s) => ({ ...s, v: score[s.k] || 0 })).filter((s) => s.v > 0);
+  const total = segs.reduce((n, s) => n + s.v, 0);
+  if (!total) return null;
+  const bar = el('div', { class: 'pbar' });
+  for (const s of segs) bar.appendChild(el('div', { class: 'pbar-seg', style: { width: (s.v / total * 100) + '%', background: s.color }, title: `${s.label}: ${s.v}` }));
+  const legend = el('div', { class: 'pbar-legend' });
+  for (const s of segs) legend.appendChild(el('span', {}, el('i', { style: { background: s.color } }), `${s.label} ${s.v}`));
+  return el('div', { style: { marginTop: '12px' } }, el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Composição dos pontos'), bar, legend);
+}
 function sheetDetail(bet, score) {
   const box = el('div', { class: 'lb-detail' });
   if (!bet) { box.appendChild(el('p', { class: 'muted' }, 'Sem folha.')); return box; }
@@ -389,6 +488,8 @@ function sheetDetail(bet, score) {
     if (score.markets) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Extras'), el('span', { class: 'num' }, '+' + score.markets)));
     kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Total'), el('span', { class: 'num' }, score.total)));
     box.appendChild(el('div', { class: 'sheet-top' }, ...kvs));
+    const pb = pointsBar(score);
+    if (pb) box.appendChild(pb);
   }
   box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo · de onde vêm os pontos'));
   box.appendChild(el('div', { class: 'sheet-legend' },
@@ -442,6 +543,12 @@ async function pageEvolucao() {
     const kvs = [];
     if (up.delta > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior subida'), el('span', { class: 'v' }, `${up.player} · +${up.delta}`)));
     if (down.delta < 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, 'Maior queda'), el('span', { class: 'v' }, `${down.player} · ${down.delta}`)));
+    const lastK = data.matchdays.length - 1;
+    const full = players.filter((p) => p.points.length === data.matchdays.length);
+    if (full.length) {
+      const champJ = full.map((p) => ({ player: p.player, gain: p.points[lastK].total - p.points[lastK - 1].total })).reduce((b, m) => (m.gain > b.gain ? m : b));
+      if (champJ.gain > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, `Campeão da J${data.matchdays[lastK]}`), el('span', { class: 'v' }, `${champJ.player} · +${champJ.gain} pts`)));
+    }
     if (kvs.length) host.appendChild(el('div', { class: 'pot', style: { marginTop: '12px' } }, ...kvs));
   }
 
@@ -455,6 +562,16 @@ async function pageEvolucao() {
     host.appendChild(el('div', { class: 'section-label' }, 'História da época'));
     const rc = el('div', { class: 'card', style: { padding: '4px 0' } });
     for (const r of recaps) rc.appendChild(el('div', { class: 'recap' }, el('span', { class: 'recap-j num' }, r.title), el('p', {}, r.text)));
+    host.appendChild(rc);
+  }
+
+  const rivals = buildRivalries(data);
+  if (rivals.length) {
+    host.appendChild(el('div', { class: 'section-label' }, 'Rivalidades'));
+    const rc = el('div', { class: 'card' });
+    for (const r of rivals) rc.appendChild(el('div', { class: 'lb-row', style: { gridTemplateColumns: '1fr auto' } },
+      el('div', { class: 'lb-player' }, el('span', { class: 'nm' }, `${r.a}  ↔  ${r.b}`)),
+      el('span', { class: 'muted', style: { fontSize: '12px' } }, r.swaps ? `${r.swaps} troca(s) de posição` : `separados por ${r.gap} lugar(es)`)));
     host.appendChild(rc);
   }
 
@@ -547,6 +664,28 @@ function buildRecaps(data) {
     lines.push({ title: `J${prev}→J${cur}`, text: parts.join('; ') + '.' });
   }
   return lines;
+}
+
+// rivalidades: pares que mais trocaram de posição entre si (desempate: mais próximos agora)
+function buildRivalries(data) {
+  const mds = data.matchdays;
+  const players = data.players.filter((p) => p.points.length === mds.length);
+  if (players.length < 2 || mds.length < 2) return [];
+  const rankAt = (p, md) => (p.points.find((pt) => pt.md === md) || {}).rank;
+  const pairs = [];
+  for (let i = 0; i < players.length; i++) for (let j = i + 1; j < players.length; j++) {
+    const a = players[i], b = players[j];
+    let swaps = 0;
+    for (let k = 1; k < mds.length; k++) {
+      const prev = rankAt(a, mds[k - 1]) - rankAt(b, mds[k - 1]);
+      const cur = rankAt(a, mds[k]) - rankAt(b, mds[k]);
+      if (prev !== 0 && cur !== 0 && Math.sign(prev) !== Math.sign(cur)) swaps++;
+    }
+    const gap = Math.abs(rankAt(a, mds[mds.length - 1]) - rankAt(b, mds[mds.length - 1]));
+    pairs.push({ a: a.player, b: b.player, swaps, gap });
+  }
+  pairs.sort((x, y) => y.swaps - x.swaps || x.gap - y.gap);
+  return pairs.slice(0, 3);
 }
 
 /* ---------------- PÁGINA: SIMULAR ("e se?") ---------------- */
@@ -689,6 +828,18 @@ function barCard(rows, max) {
   }
   return card;
 }
+// histograma simples: barras por intervalo de pontos (rótulo de texto + barra proporcional)
+function histCard(buckets) {
+  const card = el('div', { class: 'card', style: { padding: '10px 14px' } });
+  const max = Math.max(1, ...buckets.map((b) => b.n));
+  for (const b of buckets) {
+    card.appendChild(el('div', { class: 'reveal-row' },
+      el('div', { class: 'reveal-team num', style: { fontSize: '12px' } }, `${b.lo}–${b.hi}`),
+      el('div', { class: 'reveal-bar-wrap' }, el('div', { class: 'reveal-bar', style: { width: Math.round(b.n / max * 100) + '%' } })),
+      el('span', { class: 'num reveal-n' }, b.n)));
+  }
+  return card;
+}
 async function pageReveal() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Reveal'),
     el('p', {}, 'Como o grupo apostou — o consenso e a coragem de cada um.')));
@@ -696,7 +847,7 @@ async function pageReveal() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
-  const { bets } = await api('/api/bets');
+  const [{ bets }, lbData] = await Promise.all([api('/api/bets'), api('/api/leaderboard')]);
   clear(host);
   if (!bets.length) { host.appendChild(emptyState('Sem apostas', 'Ainda não há folhas submetidas.', 'search')); return; }
   const total = bets.length;
@@ -709,11 +860,33 @@ async function pageReveal() {
     el('div', { class: 'kv' }, el('b', {}, 'Campeão favorito'), el('span', { class: 'v' }, `${champ[0].team} · ${champ[0].n}/${total}`)),
     champLone ? el('div', { class: 'kv' }, el('b', {}, 'Aposta solitária'), el('span', { class: 'v' }, `${champLone.team}`)) : null));
 
+  // estatísticas da época (média e extremos de pontos)
+  const lb = lbData.leaderboard;
+  if (lb.length) {
+    const avg = Math.round(lb.reduce((a, r) => a + r.score.total, 0) / lb.length);
+    const top = lb[0], bottom = lb[lb.length - 1];
+    host.appendChild(el('div', { class: 'section-label' }, 'Estatísticas da época'));
+    host.appendChild(el('div', { class: 'pot' },
+      el('div', { class: 'kv' }, el('b', {}, 'Média do grupo'), el('span', { class: 'v num' }, String(avg))),
+      el('div', { class: 'kv' }, el('b', {}, 'Mais pontos'), el('span', { class: 'v' }, `${top.player} · ${top.score.total}`)),
+      el('div', { class: 'kv' }, el('b', {}, 'Menos pontos'), el('span', { class: 'v' }, `${bottom.player} · ${bottom.score.total}`))));
+    const totals = lb.map((r) => r.score.total);
+    const min = Math.min(...totals), max = Math.max(...totals), size = 5, start = Math.floor(min / size) * size;
+    const buckets = [];
+    for (let b = start; b <= max; b += size) buckets.push({ lo: b, hi: b + size - 1, n: totals.filter((t) => t >= b && t < b + size).length });
+    host.appendChild(el('div', { class: 'section-label' }, 'Distribuição de pontos'));
+    host.appendChild(histCard(buckets));
+  }
+
   host.appendChild(el('div', { class: 'section-label' }, 'Campeão · quem escolheu cada seleção'));
   host.appendChild(barCard(champ));
 
   host.appendChild(el('div', { class: 'section-label' }, 'Final 4 · seleções mais escolhidas'));
   host.appendChild(barCard(final4.slice(0, 10)));
+
+  const qualifyPicks = countPicks(bets.flatMap((b) => STATE.groupOrder.flatMap((g) => [b.groups?.[g]?.first, b.groups?.[g]?.second])));
+  host.appendChild(el('div', { class: 'section-label' }, 'Mais escolhidas para apurar'));
+  host.appendChild(barCard(qualifyPicks.slice(0, 12)));
 
   host.appendChild(el('div', { class: 'section-label' }, 'Vencedor de cada grupo · consenso'));
   const grid = el('div', { class: 'sheet-grid' });
@@ -733,12 +906,14 @@ function h2hTrio(bet, g) {
   const p = bet.groups?.[g] || {};
   return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '—';
 }
-function h2hRow(label, a, b, eq) {
+function h2hRow(label, a, b, eq, win) {
   return el('div', { class: 'h2h-row' + (eq ? ' eq' : '') },
     el('span', { class: 'h2h-lbl' }, label),
-    el('span', { class: 'h2h-a num' }, a),
-    el('span', { class: 'h2h-b num' }, b));
+    el('span', { class: 'h2h-a num' + (win === 'a' ? ' win' : '') }, a),
+    el('span', { class: 'h2h-b num' + (win === 'b' ? ' win' : '') }, b));
 }
+// quem ganha uma métrica: 'a'|'b'|null (hi=true → maior é melhor)
+function h2hWin(x, y, hi = true) { return x === y ? null : ((hi ? x > y : x < y) ? 'a' : 'b'); }
 async function pageH2H() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Frente a frente'),
     el('p', {}, 'Compara dois jogadores lado a lado — quem lidera e onde diferem.')));
@@ -783,9 +958,10 @@ async function pageH2H() {
       `${lead} Coincidem em ${sameG}/${STATE.groupOrder.length} grupos${ba.champion === bb.champion ? ' e no campeão' : ''}.`));
 
     const card = el('div', { class: 'card', style: { padding: '4px 0' } });
-    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false));
-    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false));
-    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false));
+    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false, h2hWin(ra.rank, rb.rank, false)));
+    card.appendChild(h2hRow('Pontos', ra.score.total, rb.score.total, false, h2hWin(ra.score.total, rb.score.total)));
+    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false, h2hWin(ra.score.qualification, rb.score.qualification)));
+    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false, h2hWin(ra.score.position, rb.score.position)));
     card.appendChild(h2hRow('Campeão', codeOf(ba.champion), codeOf(bb.champion), ba.champion === bb.champion));
     card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
     for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));
@@ -814,18 +990,52 @@ function buildCardNode(player, row, count, bet) {
   svg.appendChild(svgEl('text', { x: cx, y: 1028, 'text-anchor': 'middle', fill: '#8a8170', 'font-size': 28, 'font-family': F }, 'Torneio Roni Roni 2026'));
   return svg;
 }
-async function cardToPng(svgNode) {
+async function cardToPng(svgNode, w = 1080, h = 1080) {
   const clone = svgNode.cloneNode(true);
-  clone.setAttribute('width', '1080');
-  clone.setAttribute('height', '1080');
+  clone.setAttribute('width', String(w));
+  clone.setAttribute('height', String(h));
   const xml = new XMLSerializer().serializeToString(clone);
   const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
   const img = new Image();
   await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('falha a desenhar o cartão')); img.src = url; });
   const canvas = document.createElement('canvas');
-  canvas.width = 1080; canvas.height = 1080;
-  canvas.getContext('2d').drawImage(img, 0, 0, 1080, 1080);
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
   return await new Promise((res) => canvas.toBlob(res, 'image/png'));
+}
+// cartão da classificação (top 10) para partilhar — SVG retrato 1080×1350, só formas e texto
+function buildTableCardNode(lb) {
+  const W = 1080, H = 1350, F = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif';
+  const svg = svgEl('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${W} ${H}`, width: '100%' });
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: '#f6f1e8' }));
+  svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: 170, fill: '#e5482a' }));
+  svg.appendChild(svgEl('text', { x: 60, y: 104, fill: '#fcf3ee', 'font-size': 58, 'font-weight': 700, 'font-family': F }, 'RONI RONI'));
+  svg.appendChild(svgEl('text', { x: 62, y: 148, fill: '#fcf3ee', 'font-size': 28, 'font-family': F, opacity: 0.9 }, 'Classificação · ' + (STATE.competition?.edition || '')));
+  let y = 240;
+  lb.slice(0, 10).forEach((r, i, arr) => {
+    const nm = r.player.length > 22 ? r.player.slice(0, 21) + '…' : r.player;
+    svg.appendChild(svgEl('text', { x: 92, y: y + 34, fill: '#6b6256', 'font-size': 38, 'font-weight': 700, 'font-family': F, 'text-anchor': 'middle' }, r.rank));
+    svg.appendChild(svgEl('text', { x: 150, y: y + 34, fill: '#1b1712', 'font-size': 40, 'font-family': F }, nm));
+    svg.appendChild(svgEl('text', { x: W - 60, y: y + 34, fill: '#e5482a', 'font-size': 40, 'font-weight': 700, 'font-family': F, 'text-anchor': 'end' }, r.score.total));
+    if (i < arr.length - 1) svg.appendChild(svgEl('line', { x1: 60, y1: y + 58, x2: W - 60, y2: y + 58, stroke: '#e7decf', 'stroke-width': 1 }));
+    y += 104;
+  });
+  svg.appendChild(svgEl('text', { x: W / 2, y: H - 40, 'text-anchor': 'middle', fill: '#8a8170', 'font-size': 26, 'font-family': F }, 'Torneio Roni Roni 2026'));
+  return svg;
+}
+async function shareTable(lb) {
+  try {
+    const blob = await cardToPng(buildTableCardNode(lb), 1080, 1350);
+    const file = new File([blob], 'roni-tabela.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Roni Roni', text: 'Classificação do Torneio Roni Roni' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = el('a', { href: url, download: 'roni-tabela.png' });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  } catch (e) { toast(e.message, true); }
 }
 async function pageCartao() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Cartão'),
@@ -875,6 +1085,115 @@ async function pageCartao() {
   paint();
 }
 
+/* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
+async function pageFolha() {
+  const player = decodeURIComponent(location.hash.split('/')[2] || '');
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Folha de ' + (player || 'jogador')),
+    el('p', {}, 'A folha e os pontos deste jogador.')));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const data = await api('/api/leaderboard');
+  clear(host);
+  const row = data.leaderboard.find((r) => r.player === player);
+  if (!row) { host.appendChild(emptyState('Jogador não encontrado', 'Verifica o nome no link.', 'search')); return; }
+  host.appendChild(el('div', { class: 'pot' },
+    el('div', { class: 'kv' }, el('b', {}, 'Posição'), el('span', { class: 'v num' }, row.rank + '.º')),
+    el('div', { class: 'kv' }, el('b', {}, 'Pontos'), el('span', { class: 'v num' }, row.score.total))));
+  host.appendChild(el('button', { class: 'btn btn-ghost', style: { margin: '10px 0' },
+    onclick: async () => { try { await navigator.clipboard.writeText(location.href); toast('Link copiado!'); } catch { toast('Copia o link da barra do browser.', true); } } },
+    'Copiar link da folha'));
+  host.appendChild(sheetDetail(data.bets[player], row.score));
+}
+
+/* ---------------- PÁGINA: CONQUISTAS (badges) ---------------- */
+// distintivos determinísticos a partir do score + aposta + consenso do grupo (tudo neutro)
+function computeBadges(row, bet, ctx) {
+  const s = row.score;
+  const out = [];
+  const add = (emoji, name, desc, earned) => out.push({ emoji, name, desc, earned: !!earned });
+  const trio = STATE.groupOrder.some((g) => { const p = s.groups?.[g]?.picks; return p && p.first?.position && p.second?.position && p.third?.position; });
+  add('🎯', 'Trio perfeito', 'Acertaste 1.º, 2.º e 3.º de um grupo', trio);
+  let any = false, allQ = true;
+  for (const g of STATE.groupOrder) { const p = s.groups?.[g]?.picks; if (!p) continue; for (const slot of ['first', 'second']) { if (p[slot]) { any = true; if (!p[slot].qualifies) allQ = false; } } }
+  add('✅', 'Faro de apuramento', 'Todos os teus 1.º/2.º apuraram', any && allQ);
+  add('🥇', 'Na frente', 'Estás em 1.º lugar', row.rank === 1);
+  add('🏅', 'Pódio', 'Estás no top 3', row.rank <= 3);
+  add('📈', 'Em ascensão', 'Subiste na última jornada', (row.movement || 0) > 0);
+  const backers = ctx.champCounts.get(bet?.champion) || 0;
+  add('🦅', 'Contra a corrente', 'O teu campeão foi escolhido por poucos (≤2)', !!bet?.champion && backers <= 2);
+  add('🐑', 'Com a maioria', 'Apostaste no campeão mais escolhido', !!bet?.champion && backers === ctx.maxChamp && ctx.maxChamp > 0);
+  add('💯', 'Caçador de pontos', '40 pontos ou mais', s.total >= 40);
+  add('🎲', 'Aposta única', 'Ninguém escolheu o mesmo campeão que tu', !!bet?.champion && backers === 1);
+  return out;
+}
+// jornadas consecutivas (a contar do fim) em que o jogador esteve no top 3
+function podiumStreak(series) {
+  if (!series) return 0;
+  let s = 0;
+  for (let i = series.points.length - 1; i >= 0; i--) { if (series.points[i].rank <= 3) s++; else break; }
+  return s;
+}
+// nível/título do jogador a partir dos pontos (determinístico, neutro)
+function playerLevel(total) {
+  const tiers = [{ min: 0, name: 'Estreante' }, { min: 20, name: 'Habituado' }, { min: 35, name: 'Veterano' }, { min: 45, name: 'Mestre' }, { min: 55, name: 'Lenda' }];
+  let i = 0;
+  for (let k = 0; k < tiers.length; k++) if (total >= tiers[k].min) i = k;
+  const cur = tiers[i], next = tiers[i + 1];
+  const pct = next ? Math.max(0, Math.min(100, Math.round(((total - cur.min) / (next.min - cur.min)) * 100))) : 100;
+  return { name: cur.name, level: i + 1, pct, next: next ? next.name : null, toNext: next ? next.min - total : 0 };
+}
+async function pageConquistas() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Conquistas'),
+    el('p', {}, 'Distintivos que ganhas pelas tuas escolhas e pelo teu lugar na tabela.')));
+  MAIN.appendChild(engageNav('conquistas'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
+  clear(host);
+  const lb = data.leaderboard;
+  const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
+  const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
+  const champCounts = new Map();
+  for (const p of Object.values(data.bets)) if (p.champion) champCounts.set(p.champion, (champCounts.get(p.champion) || 0) + 1);
+  const ctx = { champCounts, maxChamp: Math.max(0, ...champCounts.values()) };
+  const meName = localStorage.getItem('roni-me');
+  let me = meName && byPlayer[meName] ? meName : names[0];
+
+  const sel = el('select', { class: 'select', style: { width: '100%' },
+    onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); paint(); } },
+    ...names.map((n) => el('option', { value: n, selected: n === me }, n)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Conquistas de quem'), sel)));
+  const body = el('div', { class: 'mt4' });
+  host.append(body);
+
+  function paint() {
+    clear(body);
+    const lvl = playerLevel(byPlayer[me].score.total);
+    body.appendChild(el('div', { class: 'card', style: { padding: '14px', marginBottom: '12px' } },
+      el('div', { class: 'lvl-top' },
+        el('span', { class: 'lvl-name' }, `Nível ${lvl.level} · ${lvl.name}`),
+        el('span', { class: 'muted', style: { fontSize: '12px' } }, lvl.next ? `${lvl.toNext} pts para ${lvl.next}` : 'nível máximo')),
+      el('div', { class: 'reveal-bar-wrap', style: { marginTop: '8px' } }, el('div', { class: 'reveal-bar', style: { width: lvl.pct + '%' } }))));
+    const badges = computeBadges(byPlayer[me], data.bets[me], ctx);
+    const earned = badges.filter((b) => b.earned).length;
+    const streak = podiumStreak(tl && tl.players.find((p) => p.player === me));
+    body.appendChild(el('div', { class: 'pot', style: { marginBottom: '12px' } },
+      el('div', { class: 'kv' }, el('b', {}, 'Conquistas'), el('span', { class: 'v num' }, `${earned}/${badges.length}`)),
+      streak > 1 ? el('div', { class: 'kv' }, el('b', {}, 'Pódio seguido'), el('span', { class: 'v num' }, `${streak} jornadas`)) : null));
+    const grid = el('div', { class: 'badge-grid' });
+    for (const b of badges) {
+      grid.appendChild(el('div', { class: 'badge-card' + (b.earned ? ' earned' : ' locked') },
+        el('div', { class: 'badge-emoji' }, b.emoji),
+        el('div', { class: 'badge-name' }, b.name),
+        el('div', { class: 'badge-desc' }, b.desc)));
+    }
+    body.appendChild(grid);
+  }
+  paint();
+}
+
 /* ---------------- PÁGINA: HALL DA FAMA ---------------- */
 async function pageHallOfFame() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Hall da Fama'),
@@ -883,14 +1202,17 @@ async function pageHallOfFame() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
-  const data = await api('/api/halloffame');
+  const [data, tl] = await Promise.all([api('/api/halloffame'), api('/api/timeline').catch(() => null)]);
   clear(host);
   if (!data.table.length) { host.appendChild(emptyState('Ainda sem história', 'Aparece aqui quando houver edições.', 'trophy')); return; }
 
+  let jump = null;
+  if (tl) for (const p of tl.players) for (let k = 1; k < p.points.length; k++) { const d = p.points[k].total - p.points[k - 1].total; if (!jump || d > jump.d) jump = { player: p.player, d, md: p.points[k].md }; }
   const rec = data.records.topScore;
   host.appendChild(el('div', { class: 'pot' },
     el('div', { class: 'kv' }, el('b', {}, 'Edições'), el('span', { class: 'v num' }, String(data.editions))),
-    rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null));
+    rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null,
+    jump && jump.d > 0 ? el('div', { class: 'kv' }, el('b', {}, 'Maior salto'), el('span', { class: 'v' }, `${jump.player} · +${jump.d} (J${jump.md})`)) : null));
 
   host.appendChild(el('div', { class: 'section-label' }, 'Campeões por edição'));
   const champCard = el('div', { class: 'card' });
@@ -1989,6 +2311,13 @@ function applyTheme(t) {
 $('#theme-toggle').addEventListener('click', () => {
   applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
 });
+// modo alto contraste (acessibilidade) — reforça texto e contornos
+function applyContrast(on) {
+  document.documentElement.dataset.hc = on ? '1' : '';
+  localStorage.setItem('roni-hc', on ? '1' : '0');
+  $('#contrast-toggle')?.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+$('#contrast-toggle')?.addEventListener('click', () => applyContrast(document.documentElement.dataset.hc !== '1'));
 
 /* ---------------- window pill ---------------- */
 function paintWindowPill() {
@@ -2002,6 +2331,7 @@ function paintWindowPill() {
 /* ---------------- boot ---------------- */
 async function boot() {
   applyTheme(localStorage.getItem('roni-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  applyContrast(localStorage.getItem('roni-hc') === '1');
   try {
     const st = await api('/api/state');
     Object.assign(STATE, st);
