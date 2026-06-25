@@ -132,3 +132,24 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - **Distribuição de pontos** (Ronda 26, ângulo visualização) — histograma dos pontos do grupo por
   intervalos de 5, no Reveal. Fonte: histogramas de dashboards. Porquê: mostra se a pool está
   renhida ou esticada. Neutro.
+
+## Ronda "uau" (efeito genuíno, pesquisa de microinterações 2026) — ✅ todas implementadas+testadas
+
+Fonte desta ronda: pesquisa sobre delight/microinterações 2026 (confetti tipo Duolingo, "unicórnio"
+do Asana, heart-bloom do Instagram), técnica **FLIP** para reordenação a 60fps, e UX dos **stories**
+do Instagram (barras segmentadas, auto-avanço, tap para saltar, hold para pausar). Princípio que a
+pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagerar** — usar com parcimónia.
+
+- ✅ **Roni Wrapped como story imersivo** (ângulo viralidade/encanto) — o Wrapped deixa de ser cartão
+  com setas e passa a player ecrã-inteiro: barras de progresso segmentadas no topo, auto-avanço,
+  tap à direita/esquerda para saltar, manter premido para pausar, e remate com CTA de partilha.
+  Fonte: UX dos stories do Instagram. Porquê: o formato mais partilhado de 2026, sensação premium.
+- ✅ **Confetti de celebração** (ângulo encanto) — quando lidero ou subo posições, um confetti discreto
+  em canvas (ouro/ember/creme), uma vez por sessão, a respeitar `prefers-reduced-motion`. Fonte:
+  momentos de celebração (Duolingo, Asana). Porquê: recompensa o progresso sem ser repetitivo.
+- ✅ **Reordenação animada (FLIP)** (ângulo polish/motion) — ao mudar a ordenação da classificação, as
+  linhas deslizam para a nova posição (medir→mutar→inverter→tocar, só `transform`, 60fps). Fonte:
+  técnica FLIP. Porquê: a tabela ganha vida, percebe-se quem trocou de lugar.
+- ✅ **Remate + vibração no Wrapped** (ângulo encanto) — confetti por cima do último slide do story e
+  uma vibração curta no telemóvel (quando suportada). Fonte: haptics + finais celebrativos. Porquê:
+  fecha a experiência com um momento de recompensa.
