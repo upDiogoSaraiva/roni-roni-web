@@ -175,3 +175,6 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
 - ✅ **Cor + count-up no Wrapped** (ângulo polish/encanto) — valor a ouro nos momentos bons e a ember nos
   maus (leitura emocional imediata); número conta para cima na revelação de cada slide (só no player,
   respeita reduced-motion). Fonte: Spotify Wrapped + microinterações. Porquê: ritmo visual e revelação. Neutro.
+- ✅ **Capa de abertura pessoal** (ângulo identidade) — o primeiro slide do story ganha o monograma do
+  jogador (cores próprias, reutiliza `monogram()`) por cima da marca. Porquê: abertura pessoal e coesa
+  com o resto da app. Neutro.
