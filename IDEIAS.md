@@ -172,3 +172,6 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
 - ✅ **Bandeiras nos slides de seleção** (ângulo visual/temático) — campeão, seleção da sorte, golpe de
   génio e desastre passam a mostrar a bandeira da seleção (reutiliza `getFlagEl`/`placeFlag` inline, sem
   tainting; na pré-visualização, no story player e no PNG). Porquê: salto visual e identidade WC2026. Neutro.
+- ✅ **Cor + count-up no Wrapped** (ângulo polish/encanto) — valor a ouro nos momentos bons e a ember nos
+  maus (leitura emocional imediata); número conta para cima na revelação de cada slide (só no player,
+  respeita reduced-motion). Fonte: Spotify Wrapped + microinterações. Porquê: ritmo visual e revelação. Neutro.
