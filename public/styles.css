@@ -170,6 +170,23 @@ button { font: inherit; cursor: pointer; }
 .story-svg { display: block; width: 100%; height: auto; border-radius: 16px; }
 .wrap-step { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px; }
 .wrap-step .btn { min-width: 44px; font-size: 20px; }
+/* story player imersivo do Roni Wrapped */
+.wp-overlay { position: fixed; inset: 0; z-index: 200; background: #0e1116; color: #f3ece0; display: flex; flex-direction: column; }
+.wp-bars { display: flex; gap: 5px; padding: 14px 14px 0; }
+.wp-seg { flex: 1; height: 3px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; overflow: hidden; }
+.wp-seg i { display: block; height: 100%; width: 0; background: #e8b23a; }
+.wp-close { position: absolute; top: 26px; right: 14px; z-index: 4; background: none; border: none; color: #f3ece0; font-size: 30px; line-height: 1; cursor: pointer; }
+.wp-tap { position: absolute; top: 0; bottom: 0; z-index: 2; }
+.wp-left { left: 0; width: 33%; } .wp-right { right: 0; width: 67%; }
+.wp-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.wp-card { text-align: center; }
+.wp-brand { color: #e8b23a; letter-spacing: 5px; font-weight: 700; font-size: 18px; }
+.wp-who { color: #9aa3b2; margin-top: 6px; font-size: 14px; }
+.wp-label { color: #9aa3b2; letter-spacing: 2px; margin-top: 56px; font-size: 14px; }
+.wp-value { font-size: 92px; font-weight: 700; line-height: 1; margin-top: 10px; color: #f3ece0; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-card .btn { position: relative; z-index: 4; }
+@keyframes wpIn { from { opacity: 0; transform: translateY(18px) scale(0.92); } to { opacity: 1; transform: none; } }
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 300; }
 
 /* ---------- cartão partilhável (legado) ---------- */
 .card-preview { max-width: 340px; margin: 14px auto 0; }

@@ -98,6 +98,62 @@ function countUp(elm, to, ms = 650) {
   };
   requestAnimationFrame(step);
 }
+// FLIP: anima a reordenação de filhos (medir antes -> mutar -> inverter -> tocar). Só transform (60fps, sem layout thrash).
+function flipReorder(container, selector, mutate) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { mutate(); return; }
+  const first = new Map();
+  container.querySelectorAll(selector).forEach((n) => { if (n.dataset.flip) first.set(n.dataset.flip, n.getBoundingClientRect()); });
+  mutate();
+  if (!first.size) return;
+  container.querySelectorAll(selector).forEach((n) => {
+    const a = first.get(n.dataset.flip);
+    if (!a) return;
+    const b = n.getBoundingClientRect();
+    const dy = a.top - b.top;
+    if (!dy) return;
+    n.style.transform = `translateY(${dy}px)`;
+    n.style.transition = 'none';
+    requestAnimationFrame(() => {
+      n.style.transition = 'transform .42s cubic-bezier(.2,.8,.2,1)';
+      n.style.transform = '';
+    });
+  });
+}
+// momento de celebração: confetti em canvas (ouro/ember/creme), ~1.6s, respeita prefers-reduced-motion
+function celebrate() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cv = el('canvas', { class: 'confetti' });
+  const W = window.innerWidth, H = window.innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  const colors = ['#e8b23a', '#e5482a', '#f3ece0', '#c9962a'];
+  const N = 120;
+  const parts = Array.from({ length: N }, (_, k) => ({
+    x: W / 2 + (((k * 73) % 100) - 50),
+    y: H * 0.32,
+    vx: (((k * 31) % 100) / 100 - 0.5) * 9,
+    vy: -6 - ((k * 17) % 100) / 100 * 7,
+    w: 6 + (k % 4) * 2, h: 4 + (k % 3) * 2,
+    rot: (k % 360) * Math.PI / 180, vr: ((k % 7) - 3) * 0.12,
+    c: colors[k % colors.length],
+  }));
+  const t0 = performance.now();
+  function frame(now) {
+    const t = now - t0;
+    ctx.clearRect(0, 0, W, H);
+    for (const p of parts) {
+      p.vy += 0.28; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vx *= 0.99;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.max(0, 1 - t / 1600);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (t < 1600) requestAnimationFrame(frame); else cv.remove();
+  }
+  requestAnimationFrame(frame);
+}
 
 /* ---------------- API ---------------- */
 async function api(path, opts = {}) {
@@ -406,6 +462,17 @@ async function pageGeral() {
   const card = el('div', { class: 'card' });
   host.appendChild(card);
 
+  // celebração discreta: uma vez por sessão quando lidero ou subo (respeita prefers-reduced-motion)
+  function maybeCelebrate() {
+    if (!myRow) return;
+    const climbed = (myRow.movement || 0) > 0;
+    if (myRow.rank !== 1 && !climbed) return;
+    const sig = `${myRow.rank}|${data.matchesPlayed || 0}|${myRow.score.total}`;
+    if (sessionStorage.getItem('roni-celebrated') === sig) return;
+    sessionStorage.setItem('roni-celebrated', sig);
+    celebrate();
+  }
+
   function sortRows(rows) {
     const r = [...rows];
     if (lbSort.key === 'name') r.sort((a, b) => a.player.localeCompare(b.player, 'pt') * lbSort.dir);
@@ -416,7 +483,7 @@ async function pageGeral() {
     return el('button', { class: alignRight ? 'right' : '', onclick: () => { lbSort = { key, dir: lbSort.key === key ? -lbSort.dir : (key === 'name' ? 1 : 1) }; paint(); } },
       label, lbSort.key === key ? (lbSort.dir > 0 ? ' ↓' : ' ↑') : '');
   }
-  function paint() {
+  function build() {
     clear(card);
     card.appendChild(el('div', { class: 'lb-head' },
       headBtn('#', 'rank'), headBtn('Jogador', 'name'), headBtn('Pontos', 'points', true)));
@@ -426,6 +493,7 @@ async function pageGeral() {
       const isMe = myName && r.player === myName;
       const row = el('button', {
         class: 'lb-row' + (r.rank === 1 ? ' leader' : '') + (isMe ? ' me' : ''),
+        'data-flip': r.player,
         style: { animationDelay: Math.min(i * 18, 360) + 'ms' },
         'aria-expanded': expanded.has(r.player) ? 'true' : 'false',
         onclick: () => { expanded.has(r.player) ? expanded.delete(r.player) : expanded.add(r.player); paint(); },
@@ -439,9 +507,15 @@ async function pageGeral() {
       card.appendChild(row);
       if (expanded.has(r.player)) card.appendChild(sheetDetail(data.bets[r.player], r.score));
     });
+  }
+  function paint() {
     if (firstLbPaint) {
       firstLbPaint = false;
+      build();
       for (const v of card.querySelectorAll('.lb-pts .v')) countUp(v, v.textContent);
+      maybeCelebrate();
+    } else {
+      flipReorder(card, '.lb-row', build);
     }
   }
   paint();
@@ -1335,6 +1409,69 @@ function buildStoryCard(kind, c) {
   }
   return svg;
 }
+// story player imersivo (estilo Instagram): barras segmentadas, auto-avanço, tap p/ saltar, hold p/ pausar
+function openWrappedPlayer(slides, who) {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DUR = 3800;
+  let i = 0, held = false, ignoreTap = false, timer = null, holdT = null, startAt = 0, elapsed = 0;
+  const overlay = el('div', { class: 'wp-overlay' });
+  const bars = el('div', { class: 'wp-bars' });
+  const fills = slides.map(() => { const f = el('i'); bars.appendChild(el('div', { class: 'wp-seg' }, f)); return f; });
+  const stage = el('div', { class: 'wp-stage' });
+  const closeBtn = el('button', { class: 'wp-close', 'aria-label': 'Fechar' }, '×');
+  const leftZone = el('div', { class: 'wp-tap wp-left' });
+  const rightZone = el('div', { class: 'wp-tap wp-right' });
+  closeBtn.addEventListener('click', destroy);
+  const consume = () => { if (ignoreTap) { ignoreTap = false; return true; } return false; };
+  leftZone.addEventListener('click', () => { if (!consume()) go(i - 1); });
+  rightZone.addEventListener('click', () => { if (!consume()) go(i + 1); });
+  if (!reduce) {
+    overlay.addEventListener('pointerdown', () => { holdT = setTimeout(() => { held = true; pause(); }, 180); });
+    overlay.addEventListener('pointerup', () => { clearTimeout(holdT); if (held) { ignoreTap = true; held = false; start(); } });
+  }
+  overlay.append(bars, closeBtn, leftZone, rightZone, stage);
+  document.body.appendChild(overlay);
+  function render() {
+    clear(stage);
+    const s = slides[i];
+    const card = el('div', { class: 'wp-card' },
+      el('div', { class: 'wp-brand' }, 'RONI RONI'),
+      el('div', { class: 'wp-who' }, who),
+      el('div', { class: 'wp-label' }, s.label),
+      el('div', { class: 'wp-value' }, s.value));
+    if (i === slides.length - 1) card.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '36px' }, onclick: share }, icon('arrow'), 'Partilhar'));
+    stage.appendChild(card);
+    fills.forEach((f, k) => { f.style.transition = 'none'; f.style.width = k < i ? '100%' : '0%'; });
+    void bars.offsetWidth;
+    if (!reduce) start();
+  }
+  function start() {
+    const f = fills[i];
+    f.style.transition = `width ${Math.max(0, DUR - elapsed)}ms linear`;
+    f.style.width = '100%';
+    clearTimeout(timer);
+    timer = setTimeout(() => go(i + 1), Math.max(0, DUR - elapsed));
+    startAt = performance.now();
+  }
+  function pause() {
+    clearTimeout(timer);
+    elapsed += performance.now() - startAt;
+    const f = fills[i], full = f.parentElement.getBoundingClientRect().width || 1;
+    f.style.transition = 'none';
+    f.style.width = (f.getBoundingClientRect().width / full * 100) + '%';
+  }
+  function go(n) { clearTimeout(timer); if (n >= slides.length) return destroy(); i = Math.max(0, n); elapsed = 0; render(); }
+  function destroy() { clearTimeout(timer); clearTimeout(holdT); overlay.remove(); }
+  async function share() {
+    try {
+      const blob = await cardToPng(buildStoryCard('wrapped', { who, wrapLabel: slides[i].label, wrapValue: slides[i].value }), 1080, 1920);
+      const file = new File([blob], 'roni-wrapped.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Roni Roni' });
+      else { const url = URL.createObjectURL(blob); const a = el('a', { href: url, download: 'roni-wrapped.png' }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    } catch (e) { toast(e.message, true); }
+  }
+  render();
+}
 async function pagePartilhar() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Partilhar'),
     el('p', {}, 'Cartões verticais para stories do Instagram e WhatsApp.')));
@@ -1436,6 +1573,7 @@ async function pagePartilhar() {
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
         el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
+      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue }))], me) }, '▶  Ver Roni Wrapped'));
     }
   }
   async function shareStory(share) {
