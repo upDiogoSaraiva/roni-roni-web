@@ -242,7 +242,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -252,7 +252,7 @@ function navigate(route) { location.hash = '#/' + route; }
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
   ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
-  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['cartao', 'Cartão'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
+  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
   const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas',
@@ -296,6 +296,7 @@ async function render() {
     else if (r === 'reveal') await pageReveal();
     else if (r === 'h2h') await pageH2H();
     else if (r === 'cartao') await pageCartao();
+    else if (r === 'partilhar') await pagePartilhar();
     else if (r === 'halloffame') await pageHallOfFame();
     else if (r === 'conquistas') await pageConquistas();
     else if (r === 'folha') await pageFolha();
@@ -1239,6 +1240,144 @@ async function pageHallOfFame() {
       el('span', { class: 'num c' }, p.points)));
   });
   host.appendChild(card);
+}
+
+/* ---------------- PÁGINA: PARTILHAR (cartões story 9:16, tema Roni 26) ---------------- */
+const SHARE = { bg: '#0E1116', gold: '#E8B23A', ember: '#E5482A', text: '#F3ECE0', mut: '#9A958A', line: '#262b34' };
+const STORY_DIMS = { posicao: [1080, 1920], acerto: [1080, 1920], jogo: [1080, 1920], wrapped: [1080, 1920], sticker: [760, 300] };
+// cartão vertical de partilha (export PNG); cores escuras fixas de propósito (imagem independente do tema)
+function buildStoryCard(kind, c) {
+  const [W, H] = STORY_DIMS[kind];
+  const F = 'Segoe UI, Roboto, Helvetica, Arial, sans-serif', cx = W / 2, P = SHARE;
+  const txt = (x, y, size, color, content, o = {}) => svgEl('text', { x, y, 'font-family': F, 'font-size': size, fill: color, 'font-weight': o.w || 400, 'text-anchor': o.a || 'start', 'letter-spacing': o.ls || 0 }, content);
+  const svg = svgEl('svg', { xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${W} ${H}`, width: '100%', class: 'story-svg' });
+  if (kind !== 'sticker') {
+    svg.appendChild(svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: P.bg }));
+    svg.appendChild(txt(70, 132, 46, P.gold, 'RONI RONI', { w: 500, ls: 6 }));
+    svg.appendChild(txt(W - 70, 132, 40, P.mut, "'26", { a: 'end', w: 500 }));
+    svg.appendChild(svgEl('line', { x1: 70, y1: 168, x2: W - 70, y2: 168, stroke: P.line, 'stroke-width': 2 }));
+    svg.appendChild(txt(cx, H - 96, 30, P.mut, c.footer || 'MUNDIAL 2026', { a: 'middle', ls: 5 }));
+  }
+  if (kind === 'posicao') {
+    svg.appendChild(txt(cx, 540, 34, P.mut, 'A MINHA POSIÇÃO', { a: 'middle', ls: 10 }));
+    svg.appendChild(txt(cx, 900, 360, P.gold, c.rank + 'º', { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 990, 42, P.mut, 'de ' + c.count, { a: 'middle' }));
+    svg.appendChild(txt(cx, 1130, 70, P.text, c.player, { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 1210, 42, P.ember, (c.movement > 0 ? 'subiu ' + c.movement + ' · ' : '') + c.total + ' pontos', { a: 'middle' }));
+    if (c.spark && c.spark.length > 1) {
+      const n = c.spark.length, x0 = 220, x1 = W - 220, yt = 1300, yb = 1430, mx = Math.max(...c.spark), mn = Math.min(...c.spark);
+      const sx = (i) => x0 + (i / (n - 1)) * (x1 - x0);
+      const sy = (v) => mx === mn ? (yt + yb) / 2 : yt + ((v - mn) / (mx - mn)) * (yb - yt);
+      svg.appendChild(svgEl('polyline', { points: c.spark.map((v, i) => `${sx(i)},${sy(v)}`).join(' '), fill: 'none', stroke: P.ember, 'stroke-width': 6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    }
+  } else if (kind === 'acerto') {
+    svg.appendChild(txt(cx, 520, 34, P.mut, 'ACERTO DO DIA', { a: 'middle', ls: 10 }));
+    svg.appendChild(svgEl('circle', { cx, cy: 760, r: 130, fill: P.ember }));
+    svg.appendChild(svgEl('path', { d: `M ${cx - 58} 760 l 38 44 l 80 -96`, fill: 'none', stroke: P.bg, 'stroke-width': 20, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    svg.appendChild(txt(cx, 1080, 74, P.text, c.label, { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 1160, 46, P.mut, c.team, { a: 'middle' }));
+    svg.appendChild(txt(cx, 1320, 96, P.gold, '+' + c.pts + ' pts', { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 1410, 40, P.mut, c.player, { a: 'middle' }));
+  } else if (kind === 'jogo') {
+    svg.appendChild(txt(cx, 520, 34, P.mut, 'JOGO DO DIA', { a: 'middle', ls: 10 }));
+    svg.appendChild(txt(cx, 780, 116, P.text, `${c.a}  vs  ${c.b}`, { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 960, 36, P.mut, 'quem o grupo vê em 1.º do Grupo ' + c.group, { a: 'middle' }));
+    const total = (c.na + c.nb) || 1, barW = 840, x0 = cx - barW / 2, y0 = 1030, h = 44, wa = Math.round(barW * c.na / total);
+    svg.appendChild(svgEl('rect', { x: x0, y: y0, width: wa, height: h, fill: P.ember, rx: 10 }));
+    svg.appendChild(svgEl('rect', { x: x0 + wa, y: y0, width: barW - wa, height: h, fill: P.gold, rx: 10 }));
+    svg.appendChild(txt(x0, y0 + 100, 42, P.ember, `${c.na} ${c.a}`, {}));
+    svg.appendChild(txt(x0 + barW, y0 + 100, 42, P.gold, `${c.b} ${c.nb}`, { a: 'end' }));
+  } else if (kind === 'wrapped') {
+    svg.appendChild(txt(cx, 470, 68, P.gold, 'RONI WRAPPED', { a: 'middle', w: 500, ls: 4 }));
+    svg.appendChild(txt(cx, 548, 36, P.mut, c.player, { a: 'middle' }));
+    const stat = (y, label, val) => { svg.appendChild(txt(cx, y, 32, P.mut, label, { a: 'middle', ls: 3 })); svg.appendChild(txt(cx, y + 96, 92, P.text, val, { a: 'middle', w: 500 })); };
+    stat(760, 'MELHOR POSIÇÃO', c.bestRank + 'º');
+    stat(1050, 'PONTOS', String(c.total));
+    stat(1340, 'MAIOR SALTO NUMA JORNADA', '+' + c.jump);
+  } else if (kind === 'sticker') {
+    svg.appendChild(svgEl('rect', { x: 8, y: 8, width: W - 16, height: H - 16, rx: (H - 16) / 2, fill: P.bg, stroke: P.gold, 'stroke-width': 8 }));
+    svg.appendChild(txt(170, H / 2 + 38, 130, P.gold, c.rank + 'º', { a: 'middle', w: 500 }));
+    svg.appendChild(txt(330, H / 2 - 18, 54, P.text, 'RONI RONI', { w: 500, ls: 4 }));
+    svg.appendChild(txt(330, H / 2 + 50, 36, P.mut, `de ${c.count} · ${c.total} pts`, {}));
+  }
+  return svg;
+}
+async function pagePartilhar() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Partilhar'),
+    el('p', {}, 'Cartões verticais para stories do Instagram e WhatsApp.')));
+  MAIN.appendChild(engageNav('partilhar'));
+  const host = el('div', {});
+  MAIN.append(host);
+  host.appendChild(skeletonList(4));
+  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
+  clear(host);
+  const lb = data.leaderboard, bets = data.bets;
+  const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
+  const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
+  const meName = localStorage.getItem('roni-me');
+  let me = meName && byPlayer[meName] ? meName : names[0];
+  let kind = 'posicao';
+
+  const jogoCtx = () => {
+    let best = null;
+    for (const g of STATE.groupOrder) {
+      const counts = countPicks(Object.values(bets).map((b) => b.groups?.[g]?.first));
+      if (counts.length < 2) continue;
+      const margin = counts[0].n - counts[1].n;
+      if (!best || margin < best.margin) best = { group: g, a: codeOf(counts[0].team), b: codeOf(counts[1].team), na: counts[0].n, nb: counts[1].n, margin };
+    }
+    return best || { group: STATE.groupOrder[0], a: '—', b: '—', na: 0, nb: 0 };
+  };
+  const acertoCtx = (row) => {
+    const ord = { first: '1.º', second: '2.º', third: '3.º' };
+    for (const g of STATE.groupOrder) {
+      const picks = row.score.groups?.[g]?.picks || {};
+      for (const slot of ['first', 'second', 'third']) if (picks[slot]?.position) return { label: `${ord[slot]} do Grupo ${g}`, team: picks[slot].team, pts: 1, player: me };
+    }
+    return null;
+  };
+  function ctxFor(k) {
+    const row = byPlayer[me];
+    const series = tl && tl.players.find((p) => p.player === me);
+    if (k === 'posicao') return { player: me, rank: row.rank, count: lb.length, total: row.score.total, movement: row.movement || 0, spark: series ? series.points.map((p) => p.rank) : [] };
+    if (k === 'acerto') return acertoCtx(row);
+    if (k === 'jogo') return jogoCtx();
+    if (k === 'wrapped') { let jump = 0; if (series) for (let i = 1; i < series.points.length; i++) jump = Math.max(jump, series.points[i].total - series.points[i - 1].total); return { player: me, bestRank: row.rank, total: row.score.total, jump }; }
+    if (k === 'sticker') return { rank: row.rank, count: lb.length, total: row.score.total };
+    return {};
+  }
+
+  const meSel = el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { me = e.target.value; localStorage.setItem('roni-me', me); paint(); } }, ...names.map((n) => el('option', { value: n, selected: n === me }, n)));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Cartão de quem'), meSel)));
+  const KINDS = [['posicao', 'A minha posição'], ['acerto', 'Acerto do dia'], ['jogo', 'Jogo do dia'], ['wrapped', 'Roni Wrapped'], ['sticker', 'Sticker']];
+  const chips = el('div', { class: 'engage-nav', style: { marginTop: '12px' } });
+  host.append(chips);
+  const preview = el('div', { class: 'story-preview' });
+  host.append(preview);
+  host.append(el('div', { class: 'row-actions', style: { marginTop: '12px' } },
+    el('button', { class: 'btn btn-ghost', onclick: () => shareStory(true) }, 'Partilhar'),
+    el('button', { class: 'btn btn-primary', onclick: () => shareStory(false) }, icon('arrow'), 'Descarregar')));
+
+  function paint() {
+    clear(chips);
+    for (const [k, label] of KINDS) chips.appendChild(el('button', { class: 'chip-nav' + (k === kind ? ' on' : ''), onclick: () => { kind = k; paint(); } }, label));
+    clear(preview);
+    const c = ctxFor(kind);
+    if (!c) { preview.appendChild(emptyState('Ainda sem acertos de posição', 'Aparece quando acertares uma posição exata.', 'search')); return; }
+    preview.appendChild(buildStoryCard(kind, c));
+  }
+  async function shareStory(share) {
+    const c = ctxFor(kind);
+    if (!c) return toast('Ainda não há nada para partilhar aqui.', true);
+    const [w, h] = STORY_DIMS[kind];
+    try {
+      const blob = await cardToPng(buildStoryCard(kind, c), w, h);
+      const file = new File([blob], `roni-${kind}.png`, { type: 'image/png' });
+      if (share && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Roni Roni' });
+      else { const url = URL.createObjectURL(blob); const a = el('a', { href: url, download: `roni-${kind}.png` }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+    } catch (e) { toast(e.message, true); }
+  }
+  paint();
 }
 
 /* ---------------- PÁGINA: PRÉMIOS ---------------- */

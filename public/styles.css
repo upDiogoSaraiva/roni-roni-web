@@ -165,7 +165,11 @@ button { font: inherit; cursor: pointer; }
 .h2h-row.eq .h2h-a, .h2h-row.eq .h2h-b { color: var(--ok); }
 .h2h-a.win, .h2h-b.win { color: var(--brand); font-weight: 700; }
 
-/* ---------- cartão partilhável ---------- */
+/* ---------- partilhar (cartões story 9:16) ---------- */
+.story-preview { max-width: 300px; margin: 14px auto 0; }
+.story-svg { display: block; width: 100%; height: auto; border-radius: 16px; }
+
+/* ---------- cartão partilhável (legado) ---------- */
 .card-preview { max-width: 340px; margin: 14px auto 0; }
 .card-svg { display: block; width: 100%; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
 
