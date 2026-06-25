@@ -1552,23 +1552,37 @@ async function pagePartilhar() {
       const earned = computeBadges(row, bets[me], badgeCtx).filter((b) => b.earned).length;
       const champ = bets[me]?.champion;
       const backers = champ ? (champCounts.get(champ) || 0) : 0;
-      // aposta mais solitária: o 1.º de grupo que menos gente escolheu como tu
-      let lonely = null;
-      if (bets[me]?.groups) for (const g of STATE.groupOrder) {
-        const pick = bets[me].groups[g]?.first;
-        if (!pick) continue;
-        const others = Object.values(bets).filter((b) => b.groups?.[g]?.first === pick).length;
-        if (!lonely || others < lonely.others) lonely = { g, team: pick, others };
+      const slotPt = { first: '1.º', second: '2.º', third: '3.º' };
+      const backersFor = (g, slot, team) => Object.values(bets).filter((b) => b.groups?.[g]?.[slot] === team).length;
+      const gp = row.score.groups || {};
+      // golpe de génio: o acerto de posição que menos gente partilhou · desastre: o favorito que ficou de fora
+      let gem = null, flop = null;
+      for (const g of STATE.groupOrder) for (const slot of ['first', 'second', 'third']) {
+        const p = gp[g]?.picks?.[slot];
+        if (!p) continue;
+        const back = backersFor(g, slot, p.team);
+        if (p.position && (!gem || back < gem.back)) gem = { g, slot, team: p.team, back };
+        if (p.qualifies === false && (!flop || back > flop.back)) flop = { g, slot, team: p.team, back };
+      }
+      // chip especial (joker de grupo): dobra a posição de um grupo — desperdiçado se saiu em branco
+      let joker = null;
+      const jg = bets[me]?.groupJoker;
+      if (jg && gp[jg]) {
+        let jpos = 0;
+        for (const slot of ['first', 'second', 'third']) if (gp[jg].picks?.[slot]?.position) jpos++;
+        joker = { g: jg, jpos };
       }
       const slides = [
         { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: bestRank + 'º', wrapSub: 'de ' + lb.length + ' jogadores' },
         { wrapLabel: 'PONTOS NA ÉPOCA', wrapValue: String(row.score.total), wrapSub: qual + ' apuramentos · ' + pos + ' posições' },
         qual ? { wrapLabel: 'APURAMENTOS CERTOS', wrapValue: String(qual), wrapSub: 'seleções que viste passar' } : null,
         pos ? { wrapLabel: 'POSIÇÕES EXATAS', wrapValue: String(pos), wrapSub: 'no sítio certo da tabela' } : null,
-        jump ? { wrapLabel: 'MAIOR SALTO', wrapValue: '+' + jump, wrapSub: jumpMd ? 'pontos na jornada ' + jumpMd : 'pontos numa só jornada' } : null,
-        (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: climb > 0 ? 'posições que subiste' : 'posições na tabela' } : null,
+        jump ? { wrapLabel: 'MAIS PONTOS NUMA JORNADA', wrapValue: '+' + jump, wrapSub: jumpMd ? 'na jornada ' + jumpMd : 'numa só jornada' } : null,
+        (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
+        gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
         champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
-        (lonely && lonely.others <= 3) ? { wrapLabel: 'APOSTA MAIS SOLITÁRIA', wrapValue: lonely.team, wrapSub: '1.º do Grupo ' + lonely.g + (lonely.others > 1 ? ' · ' + (lonely.others - 1) + ' contigo' : ' · só tu') } : null,
+        flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
+        joker ? { wrapLabel: joker.jpos ? 'CHIP A DOBRAR' : 'CHIP DESPERDIÇADO', wrapValue: 'Grupo ' + joker.g, wrapSub: joker.jpos ? (joker.jpos === 1 ? '1 posição a dobrar' : joker.jpos + ' posições a dobrar') : 'dobraste e saiu em branco' } : null,
         { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9', wrapSub: 'distintivos ganhos' },
       ].filter(Boolean);
       return { who: me, slides, ...slides[Math.min(wrapIdx, slides.length - 1)] };
