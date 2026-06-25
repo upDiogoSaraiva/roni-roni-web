@@ -1288,12 +1288,10 @@ function buildStoryCard(kind, c) {
     svg.appendChild(txt(x0, y0 + 100, 42, P.ember, `${c.na} ${c.a}`, {}));
     svg.appendChild(txt(x0 + barW, y0 + 100, 42, P.gold, `${c.b} ${c.nb}`, { a: 'end' }));
   } else if (kind === 'wrapped') {
-    svg.appendChild(txt(cx, 470, 68, P.gold, 'RONI WRAPPED', { a: 'middle', w: 500, ls: 4 }));
-    svg.appendChild(txt(cx, 548, 36, P.mut, c.player, { a: 'middle' }));
-    const stat = (y, label, val) => { svg.appendChild(txt(cx, y, 32, P.mut, label, { a: 'middle', ls: 3 })); svg.appendChild(txt(cx, y + 96, 92, P.text, val, { a: 'middle', w: 500 })); };
-    stat(760, 'MELHOR POSIÇÃO', c.bestRank + 'º');
-    stat(1050, 'PONTOS', String(c.total));
-    stat(1340, 'MAIOR SALTO NUMA JORNADA', '+' + c.jump);
+    svg.appendChild(txt(cx, 470, 64, P.gold, 'RONI WRAPPED', { a: 'middle', w: 500, ls: 4 }));
+    svg.appendChild(txt(cx, 544, 34, P.mut, c.who || '', { a: 'middle' }));
+    svg.appendChild(txt(cx, 980, 36, P.mut, c.wrapLabel, { a: 'middle', ls: 4 }));
+    svg.appendChild(txt(cx, 1190, 210, P.text, c.wrapValue, { a: 'middle', w: 500 }));
   } else if (kind === 'sticker') {
     svg.appendChild(svgEl('rect', { x: 8, y: 8, width: W - 16, height: H - 16, rx: (H - 16) / 2, fill: P.bg, stroke: P.gold, 'stroke-width': 8 }));
     svg.appendChild(txt(170, H / 2 + 38, 130, P.gold, c.rank + 'º', { a: 'middle', w: 500 }));
@@ -1317,6 +1315,10 @@ async function pagePartilhar() {
   const meName = localStorage.getItem('roni-me');
   let me = meName && byPlayer[meName] ? meName : names[0];
   let kind = 'posicao';
+  let wrapIdx = 0;
+  const champCounts = new Map();
+  for (const p of Object.values(bets)) if (p.champion) champCounts.set(p.champion, (champCounts.get(p.champion) || 0) + 1);
+  const badgeCtx = { champCounts, maxChamp: Math.max(0, ...champCounts.values()) };
 
   const jogoCtx = () => {
     let best = null;
@@ -1342,7 +1344,17 @@ async function pagePartilhar() {
     if (k === 'posicao') return { player: me, rank: row.rank, count: lb.length, total: row.score.total, movement: row.movement || 0, spark: series ? series.points.map((p) => p.rank) : [] };
     if (k === 'acerto') return acertoCtx(row);
     if (k === 'jogo') return jogoCtx();
-    if (k === 'wrapped') { let jump = 0; if (series) for (let i = 1; i < series.points.length; i++) jump = Math.max(jump, series.points[i].total - series.points[i - 1].total); return { player: me, bestRank: row.rank, total: row.score.total, jump }; }
+    if (k === 'wrapped') {
+      let jump = 0; if (series) for (let i = 1; i < series.points.length; i++) jump = Math.max(jump, series.points[i].total - series.points[i - 1].total);
+      const earned = computeBadges(row, bets[me], badgeCtx).filter((b) => b.earned).length;
+      const slides = [
+        { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: row.rank + 'º' },
+        { wrapLabel: 'PONTOS', wrapValue: String(row.score.total) },
+        { wrapLabel: 'MAIOR SALTO NUMA JORNADA', wrapValue: '+' + jump },
+        { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9' },
+      ];
+      return { who: me, slides, ...slides[Math.min(wrapIdx, slides.length - 1)] };
+    }
     if (k === 'sticker') return { rank: row.rank, count: lb.length, total: row.score.total };
     return {};
   }
@@ -1365,6 +1377,12 @@ async function pagePartilhar() {
     const c = ctxFor(kind);
     if (!c) { preview.appendChild(emptyState('Ainda sem acertos de posição', 'Aparece quando acertares uma posição exata.', 'search')); return; }
     preview.appendChild(buildStoryCard(kind, c));
+    if (kind === 'wrapped' && c.slides) {
+      preview.appendChild(el('div', { class: 'wrap-step' },
+        el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
+        el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
+        el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
+    }
   }
   async function shareStory(share) {
     const c = ctxFor(kind);

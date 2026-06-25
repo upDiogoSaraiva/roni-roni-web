@@ -168,6 +168,8 @@ button { font: inherit; cursor: pointer; }
 /* ---------- partilhar (cartões story 9:16) ---------- */
 .story-preview { max-width: 300px; margin: 14px auto 0; }
 .story-svg { display: block; width: 100%; height: auto; border-radius: 16px; }
+.wrap-step { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px; }
+.wrap-step .btn { min-width: 44px; font-size: 20px; }
 
 /* ---------- cartão partilhável (legado) ---------- */
 .card-preview { max-width: 340px; margin: 14px auto 0; }
