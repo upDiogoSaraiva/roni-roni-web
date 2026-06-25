@@ -122,6 +122,7 @@ function flipReorder(container, selector, mutate) {
 // momento de celebração: confetti em canvas (ouro/ember/creme), ~1.6s, respeita prefers-reduced-motion
 function celebrate() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (navigator.vibrate) { try { navigator.vibrate([0, 35, 25, 45]); } catch {} }
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const cv = el('canvas', { class: 'confetti' });
   const W = window.innerWidth, H = window.innerHeight;
@@ -1413,7 +1414,7 @@ function buildStoryCard(kind, c) {
 function openWrappedPlayer(slides, who) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DUR = 3800;
-  let i = 0, held = false, ignoreTap = false, timer = null, holdT = null, startAt = 0, elapsed = 0;
+  let i = 0, held = false, ignoreTap = false, timer = null, holdT = null, startAt = 0, elapsed = 0, finaleDone = false;
   const overlay = el('div', { class: 'wp-overlay' });
   const bars = el('div', { class: 'wp-bars' });
   const fills = slides.map(() => { const f = el('i'); bars.appendChild(el('div', { class: 'wp-seg' }, f)); return f; });
@@ -1439,7 +1440,10 @@ function openWrappedPlayer(slides, who) {
       el('div', { class: 'wp-who' }, who),
       el('div', { class: 'wp-label' }, s.label),
       el('div', { class: 'wp-value' }, s.value));
-    if (i === slides.length - 1) card.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '36px' }, onclick: share }, icon('arrow'), 'Partilhar'));
+    if (i === slides.length - 1) {
+      card.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '36px' }, onclick: share }, icon('arrow'), 'Partilhar'));
+      if (!finaleDone) { finaleDone = true; celebrate(); }
+    }
     stage.appendChild(card);
     fills.forEach((f, k) => { f.style.transition = 'none'; f.style.width = k < i ? '100%' : '0%'; });
     void bars.offsetWidth;
