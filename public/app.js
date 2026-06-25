@@ -1404,7 +1404,8 @@ function buildStoryCard(kind, c) {
     svg.appendChild(txt(cx, 980, 36, P.mut, c.wrapLabel, { a: 'middle', ls: 4 }));
     const vlen = String(c.wrapValue).length;
     const vs = vlen > 14 ? 76 : vlen > 11 ? 96 : vlen > 7 ? 140 : 210;
-    svg.appendChild(txt(cx, 1190, vs, P.text, c.wrapValue, { a: 'middle', w: 500 }));
+    const vcol = c.wrapTone === 'gold' ? P.gold : c.wrapTone === 'ember' ? P.ember : P.text;
+    svg.appendChild(txt(cx, 1190, vs, vcol, c.wrapValue, { a: 'middle', w: 500 }));
     if (c.wrapSub) svg.appendChild(txt(cx, 1330, 40, P.mut, c.wrapSub, { a: 'middle', w: 500 }));
   } else if (kind === 'sticker') {
     svg.appendChild(svgEl('rect', { x: 8, y: 8, width: W - 16, height: H - 16, rx: (H - 16) / 2, fill: P.bg, stroke: P.gold, 'stroke-width': 8 }));
@@ -1446,7 +1447,7 @@ function openWrappedPlayer(slides, who) {
       el('div', { class: 'wp-brand' }, 'RONI RONI'),
       el('div', { class: 'wp-who' }, who),
       labelEl,
-      el('div', { class: 'wp-value', style: { fontSize: vsize } }, s.value));
+      el('div', { class: 'wp-value', style: { fontSize: vsize, color: s.tone === 'gold' ? '#e8b23a' : s.tone === 'ember' ? '#e5482a' : '#f3ece0' } }, s.value));
     if (s.sub) card.appendChild(el('div', { class: 'wp-sub' }, s.sub));
     if (s.team) {
       const holder = el('div', { class: 'wp-flag' });
@@ -1615,22 +1616,22 @@ async function pagePartilhar() {
         if (v > 0 && (!lucky || v > lucky.v)) lucky = { team: p.team, v };
       }
       const slides = [
-        { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: bestRank + 'º', wrapSub: 'de ' + lb.length + ' jogadores' },
+        { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: bestRank + 'º', wrapTone: 'gold', wrapSub: 'de ' + lb.length + ' jogadores' },
         { wrapLabel: 'PONTOS NA ÉPOCA', wrapValue: String(row.score.total), wrapSub: qual + ' apuramentos · ' + pos + ' posições' },
         qual ? { wrapLabel: 'APURAMENTOS CERTOS', wrapValue: String(qual), wrapSub: 'seleções que viste passar' } : null,
         pos ? { wrapLabel: 'POSIÇÕES EXATAS', wrapValue: String(pos), wrapSub: 'no sítio certo da tabela' } : null,
-        jump ? { wrapLabel: 'MAIS PONTOS NUMA JORNADA', wrapValue: '+' + jump, wrapSub: jumpMd ? 'na jornada ' + jumpMd : 'numa só jornada' } : null,
-        drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' na jornada ' + dropMd : '') } : null,
-        (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
-        gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapTeam: gem.team, wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
+        jump ? { wrapLabel: 'MAIS PONTOS NUMA JORNADA', wrapValue: '+' + jump, wrapTone: 'gold', wrapSub: jumpMd ? 'na jornada ' + jumpMd : 'numa só jornada' } : null,
+        drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapTone: 'ember', wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' na jornada ' + dropMd : '') } : null,
+        (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapTone: climb > 0 ? 'gold' : 'ember', wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
+        gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapTeam: gem.team, wrapTone: 'gold', wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
         lucky ? { wrapLabel: 'A TUA SELEÇÃO DA SORTE', wrapValue: lucky.team, wrapTeam: lucky.team, wrapSub: 'deu-te ' + lucky.v + (lucky.v === 1 ? ' ponto' : ' pontos') } : null,
         champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapTeam: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
-        flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapTeam: flop.team, wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
-        joker ? { wrapLabel: joker.jpos ? 'CHIP A DOBRAR' : 'CHIP DESPERDIÇADO', wrapValue: 'Grupo ' + joker.g, wrapSub: joker.jpos ? (joker.jpos === 1 ? '1 posição a dobrar' : joker.jpos + ' posições a dobrar') : 'dobraste e saiu em branco' } : null,
+        flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapTeam: flop.team, wrapTone: 'ember', wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
+        joker ? { wrapLabel: joker.jpos ? 'CHIP A DOBRAR' : 'CHIP DESPERDIÇADO', wrapValue: 'Grupo ' + joker.g, wrapTone: joker.jpos ? 'gold' : 'ember', wrapSub: joker.jpos ? (joker.jpos === 1 ? '1 posição a dobrar' : joker.jpos + ' posições a dobrar') : 'dobraste e saiu em branco' } : null,
         (rival && rival.flips >= 1) ? { wrapLabel: 'RIVAL DA ÉPOCA', wrapValue: rival.player, wrapSub: rival.flips === 1 ? '1 troca de lugar' : rival.flips + ' trocas de lugar' } : null,
         (row.rank > 3 && podiumGap > 0) ? { wrapLabel: 'FALTOU PARA O PÓDIO', wrapValue: '+' + podiumGap, wrapSub: 'pontos para o 3.º lugar' } : null,
         { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9', wrapSub: 'distintivos ganhos' },
-        { wrapLabel: 'A MINHA ÉPOCA', wrapValue: row.rank + 'º', wrapSub: row.score.total + ' pts · entre ' + lb.length + ' jogadores' },
+        { wrapLabel: 'A MINHA ÉPOCA', wrapValue: row.rank + 'º', wrapTone: 'gold', wrapSub: row.score.total + ' pts · entre ' + lb.length + ' jogadores' },
       ].filter(Boolean);
       return { who: me, slides, ...slides[Math.min(wrapIdx, slides.length - 1)] };
     }
@@ -1669,7 +1670,7 @@ async function pagePartilhar() {
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
         el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
-      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub, team: s.wrapTeam }))], me) }, '▶  Ver Roni Wrapped'));
+      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub, team: s.wrapTeam, tone: s.wrapTone }))], me) }, '▶  Ver Roni Wrapped'));
     }
   }
   async function shareStory(share) {
