@@ -169,3 +169,6 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
   (apuramento+posição, a dobrar no grupo do joker) e uma capa final "A minha época" (posição + pontos
   entre N jogadores) onde o confetti remata. Porquê: nota pessoal sobre uma seleção + um frame de fecho
   feito para partilhar. Neutro.
+- ✅ **Bandeiras nos slides de seleção** (ângulo visual/temático) — campeão, seleção da sorte, golpe de
+  génio e desastre passam a mostrar a bandeira da seleção (reutiliza `getFlagEl`/`placeFlag` inline, sem
+  tainting; na pré-visualização, no story player e no PNG). Porquê: salto visual e identidade WC2026. Neutro.
