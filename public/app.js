@@ -1597,6 +1597,14 @@ async function pagePartilhar() {
       }
       // distância ao pódio (só se ainda fora do top 3)
       const podiumGap = (row.rank > 3 && lb[2]) ? (lb[2].score.total - row.score.total) : 0;
+      // seleção da sorte: a que mais pontos te deu (apuramento + posição, a dobrar no grupo do joker)
+      let lucky = null;
+      for (const g of STATE.groupOrder) for (const slot of ['first', 'second', 'third']) {
+        const p = gp[g]?.picks?.[slot];
+        if (!p) continue;
+        const v = (p.credited ? 1 : 0) + (p.position ? (g === jg ? 2 : 1) : 0);
+        if (v > 0 && (!lucky || v > lucky.v)) lucky = { team: p.team, v };
+      }
       const slides = [
         { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: bestRank + 'º', wrapSub: 'de ' + lb.length + ' jogadores' },
         { wrapLabel: 'PONTOS NA ÉPOCA', wrapValue: String(row.score.total), wrapSub: qual + ' apuramentos · ' + pos + ' posições' },
@@ -1606,12 +1614,14 @@ async function pagePartilhar() {
         drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' na jornada ' + dropMd : '') } : null,
         (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
         gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
+        lucky ? { wrapLabel: 'A TUA SELEÇÃO DA SORTE', wrapValue: lucky.team, wrapSub: 'deu-te ' + lucky.v + (lucky.v === 1 ? ' ponto' : ' pontos') } : null,
         champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
         flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
         joker ? { wrapLabel: joker.jpos ? 'CHIP A DOBRAR' : 'CHIP DESPERDIÇADO', wrapValue: 'Grupo ' + joker.g, wrapSub: joker.jpos ? (joker.jpos === 1 ? '1 posição a dobrar' : joker.jpos + ' posições a dobrar') : 'dobraste e saiu em branco' } : null,
         (rival && rival.flips >= 1) ? { wrapLabel: 'RIVAL DA ÉPOCA', wrapValue: rival.player, wrapSub: rival.flips === 1 ? '1 troca de lugar' : rival.flips + ' trocas de lugar' } : null,
         (row.rank > 3 && podiumGap > 0) ? { wrapLabel: 'FALTOU PARA O PÓDIO', wrapValue: '+' + podiumGap, wrapSub: 'pontos para o 3.º lugar' } : null,
         { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9', wrapSub: 'distintivos ganhos' },
+        { wrapLabel: 'A MINHA ÉPOCA', wrapValue: row.rank + 'º', wrapSub: row.score.total + ' pts · entre ' + lb.length + ' jogadores' },
       ].filter(Boolean);
       return { who: me, slides, ...slides[Math.min(wrapIdx, slides.length - 1)] };
     }
