@@ -160,3 +160,8 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
   **desastre da época** (o favorito que apostaste e ficou de fora), **chip especial** (joker de grupo
   a dobrar ou desperdiçado) e conquistas. Fonte: Spotify/sports Wrapped + pedido do utilizador.
   Porquê: transforma estatística em história com drama; cada jogador vê um recap diferente. Neutro.
+- ✅ **Mais drama no Wrapped** (ângulo narrativa, pedido do utilizador) — **a maior queda** (pior descida
+  de lugares numa jornada, o oposto do maior salto), **rival da época** (o jogador com quem mais trocaste
+  de lugar ao longo das jornadas — lead changes do `/api/timeline`) e **faltou para o pódio** (pontos
+  até ao 3.º lugar, só se fora do top 3). Porquê: o contraste entre o teu resultado e os outros é o que
+  cria história (herói/vítima/quase). Neutro.
