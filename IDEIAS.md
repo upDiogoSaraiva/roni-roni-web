@@ -165,3 +165,7 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
   de lugar ao longo das jornadas — lead changes do `/api/timeline`) e **faltou para o pódio** (pontos
   até ao 3.º lugar, só se fora do top 3). Porquê: o contraste entre o teu resultado e os outros é o que
   cria história (herói/vítima/quase). Neutro.
+- ✅ **Seleção da sorte + capa de fecho** (ângulo recap/partilha) — a seleção que mais pontos te deu
+  (apuramento+posição, a dobrar no grupo do joker) e uma capa final "A minha época" (posição + pontos
+  entre N jogadores) onde o confetti remata. Porquê: nota pessoal sobre uma seleção + um frame de fecho
+  feito para partilhar. Neutro.
