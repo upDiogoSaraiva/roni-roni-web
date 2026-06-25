@@ -1462,6 +1462,7 @@ function openWrappedPlayer(slides, who) {
       labelEl,
       valueEl);
     animateValue(valueEl, s.value);
+    if (s.intro) card.insertBefore(el('div', { class: 'wp-mono' }, monogram(who)), card.firstChild);
     if (s.sub) card.appendChild(el('div', { class: 'wp-sub' }, s.sub));
     if (s.team) {
       const holder = el('div', { class: 'wp-flag' });
@@ -1684,7 +1685,7 @@ async function pagePartilhar() {
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
         el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
-      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub, team: s.wrapTeam, tone: s.wrapTone }))], me) }, '▶  Ver Roni Wrapped'));
+      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26', tone: 'gold', intro: true }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub, team: s.wrapTeam, tone: s.wrapTone }))], me) }, '▶  Ver Roni Wrapped'));
     }
   }
   async function shareStory(share) {
