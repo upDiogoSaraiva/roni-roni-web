@@ -1401,7 +1401,10 @@ function buildStoryCard(kind, c) {
     svg.appendChild(txt(cx, 470, 64, P.gold, 'RONI WRAPPED', { a: 'middle', w: 500, ls: 4 }));
     svg.appendChild(txt(cx, 544, 34, P.mut, c.who || '', { a: 'middle' }));
     svg.appendChild(txt(cx, 980, 36, P.mut, c.wrapLabel, { a: 'middle', ls: 4 }));
-    svg.appendChild(txt(cx, 1190, 210, P.text, c.wrapValue, { a: 'middle', w: 500 }));
+    const vlen = String(c.wrapValue).length;
+    const vs = vlen > 11 ? 96 : vlen > 7 ? 140 : 210;
+    svg.appendChild(txt(cx, 1190, vs, P.text, c.wrapValue, { a: 'middle', w: 500 }));
+    if (c.wrapSub) svg.appendChild(txt(cx, 1330, 40, P.mut, c.wrapSub, { a: 'middle', w: 500 }));
   } else if (kind === 'sticker') {
     svg.appendChild(svgEl('rect', { x: 8, y: 8, width: W - 16, height: H - 16, rx: (H - 16) / 2, fill: P.bg, stroke: P.gold, 'stroke-width': 8 }));
     svg.appendChild(txt(170, H / 2 + 38, 130, P.gold, c.rank + 'º', { a: 'middle', w: 500 }));
@@ -1435,11 +1438,14 @@ function openWrappedPlayer(slides, who) {
   function render() {
     clear(stage);
     const s = slides[i];
+    const vlen = String(s.value).length;
+    const vsize = vlen > 11 ? '50px' : vlen > 7 ? '68px' : '92px';
     const card = el('div', { class: 'wp-card' },
       el('div', { class: 'wp-brand' }, 'RONI RONI'),
       el('div', { class: 'wp-who' }, who),
       el('div', { class: 'wp-label' }, s.label),
-      el('div', { class: 'wp-value' }, s.value));
+      el('div', { class: 'wp-value', style: { fontSize: vsize } }, s.value));
+    if (s.sub) card.appendChild(el('div', { class: 'wp-sub' }, s.sub));
     if (i === slides.length - 1) {
       card.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '36px' }, onclick: share }, icon('arrow'), 'Partilhar'));
       if (!finaleDone) { finaleDone = true; celebrate(); }
@@ -1468,7 +1474,7 @@ function openWrappedPlayer(slides, who) {
   function destroy() { clearTimeout(timer); clearTimeout(holdT); overlay.remove(); }
   async function share() {
     try {
-      const blob = await cardToPng(buildStoryCard('wrapped', { who, wrapLabel: slides[i].label, wrapValue: slides[i].value }), 1080, 1920);
+      const blob = await cardToPng(buildStoryCard('wrapped', { who, wrapLabel: slides[i].label, wrapValue: slides[i].value, wrapSub: slides[i].sub }), 1080, 1920);
       const file = new File([blob], 'roni-wrapped.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Roni Roni' });
       else { const url = URL.createObjectURL(blob); const a = el('a', { href: url, download: 'roni-wrapped.png' }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
@@ -1533,14 +1539,38 @@ async function pagePartilhar() {
     if (k === 'acerto') return acertoCtx(row);
     if (k === 'jogo') return jogoCtx();
     if (k === 'wrapped') {
-      let jump = 0; if (series) for (let i = 1; i < series.points.length; i++) jump = Math.max(jump, series.points[i].total - series.points[i - 1].total);
+      let jump = 0, jumpMd = 0;
+      if (series) for (let i = 1; i < series.points.length; i++) {
+        const d = series.points[i].total - series.points[i - 1].total;
+        if (d > jump) { jump = d; jumpMd = i + 1; }
+      }
+      const ranks = series ? series.points.map((p) => p.rank) : [row.rank];
+      const bestRank = Math.min(...ranks);
+      const climb = ranks[0] - ranks[ranks.length - 1]; // >0 = subiu desde a 1.ª jornada
+      const qual = row.score.qualification || 0;
+      const pos = row.score.position || 0;
       const earned = computeBadges(row, bets[me], badgeCtx).filter((b) => b.earned).length;
+      const champ = bets[me]?.champion;
+      const backers = champ ? (champCounts.get(champ) || 0) : 0;
+      // aposta mais solitária: o 1.º de grupo que menos gente escolheu como tu
+      let lonely = null;
+      if (bets[me]?.groups) for (const g of STATE.groupOrder) {
+        const pick = bets[me].groups[g]?.first;
+        if (!pick) continue;
+        const others = Object.values(bets).filter((b) => b.groups?.[g]?.first === pick).length;
+        if (!lonely || others < lonely.others) lonely = { g, team: pick, others };
+      }
       const slides = [
-        { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: row.rank + 'º' },
-        { wrapLabel: 'PONTOS', wrapValue: String(row.score.total) },
-        { wrapLabel: 'MAIOR SALTO NUMA JORNADA', wrapValue: '+' + jump },
-        { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9' },
-      ];
+        { wrapLabel: 'MELHOR POSIÇÃO', wrapValue: bestRank + 'º', wrapSub: 'de ' + lb.length + ' jogadores' },
+        { wrapLabel: 'PONTOS NA ÉPOCA', wrapValue: String(row.score.total), wrapSub: qual + ' apuramentos · ' + pos + ' posições' },
+        qual ? { wrapLabel: 'APURAMENTOS CERTOS', wrapValue: String(qual), wrapSub: 'seleções que viste passar' } : null,
+        pos ? { wrapLabel: 'POSIÇÕES EXATAS', wrapValue: String(pos), wrapSub: 'no sítio certo da tabela' } : null,
+        jump ? { wrapLabel: 'MAIOR SALTO', wrapValue: '+' + jump, wrapSub: jumpMd ? 'pontos na jornada ' + jumpMd : 'pontos numa só jornada' } : null,
+        (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: climb > 0 ? 'posições que subiste' : 'posições na tabela' } : null,
+        champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
+        (lonely && lonely.others <= 3) ? { wrapLabel: 'APOSTA MAIS SOLITÁRIA', wrapValue: lonely.team, wrapSub: '1.º do Grupo ' + lonely.g + (lonely.others > 1 ? ' · ' + (lonely.others - 1) + ' contigo' : ' · só tu') } : null,
+        { wrapLabel: 'CONQUISTAS', wrapValue: earned + '/9', wrapSub: 'distintivos ganhos' },
+      ].filter(Boolean);
       return { who: me, slides, ...slides[Math.min(wrapIdx, slides.length - 1)] };
     }
     if (k === 'sticker') return { rank: row.rank, count: lb.length, total: row.score.total };
@@ -1577,7 +1607,7 @@ async function pagePartilhar() {
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
         el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
-      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue }))], me) }, '▶  Ver Roni Wrapped'));
+      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub }))], me) }, '▶  Ver Roni Wrapped'));
     }
   }
   async function shareStory(share) {
