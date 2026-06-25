@@ -153,3 +153,10 @@ pesquisa reforça: surpresa+encanto eleva muito a perceção, mas **não exagera
 - ✅ **Remate + vibração no Wrapped** (ângulo encanto) — confetti por cima do último slide do story e
   uma vibração curta no telemóvel (quando suportada). Fonte: haptics + finais celebrativos. Porquê:
   fecha a experiência com um momento de recompensa.
+- ✅ **Roni Wrapped mais profundo** (ângulo narrativa/recap) — de 4 para ~12 slides pessoais e
+  condicionais com linha de contexto: melhor posição, pontos com detalhe, apuramentos certos,
+  posições exatas, mais pontos numa jornada (com a jornada), subida desde o arranque, **golpe de
+  génio** (acerto de posição que menos gente partilhou), o teu campeão (e quantos o escolheram),
+  **desastre da época** (o favorito que apostaste e ficou de fora), **chip especial** (joker de grupo
+  a dobrar ou desperdiçado) e conquistas. Fonte: Spotify/sports Wrapped + pedido do utilizador.
+  Porquê: transforma estatística em história com drama; cada jogador vê um recap diferente. Neutro.
