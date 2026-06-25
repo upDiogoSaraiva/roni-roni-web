@@ -199,6 +199,14 @@ button { font: inherit; cursor: pointer; }
 @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .pg-in { animation: pageIn 0.24s ease; }
 
+/* ---------- bento (módulos de relance) ---------- */
+.bento { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.bento-tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 14px 16px; text-align: left; }
+.bento-k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); }
+.bento-v { font-size: 17px; font-weight: 700; margin-top: 5px; font-family: var(--font-display); }
+.bento-cta { cursor: pointer; }
+.bento-cta:active { transform: scale(0.98); }
+
 /* ---------- contagem decrescente ---------- */
 .countdown { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand-ink); border-radius: var(--r-ctrl); padding: 9px 14px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
 

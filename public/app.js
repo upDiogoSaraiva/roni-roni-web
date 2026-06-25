@@ -353,9 +353,8 @@ async function pageGeral() {
   const expanded = new Set();
   let firstLbPaint = true;
 
-  // contagem decrescente para o fim da fase de grupos (a partir das datas da competição)
+  // contagem decrescente (entra no bento abaixo)
   const cd = groupStageCountdown();
-  if (cd) host.appendChild(el('div', { class: 'countdown' }, cd));
 
   // cartão pessoal: a minha posição de relance (quando identificado / escolhido)
   const myRow = myName && data.leaderboard.find((r) => r.player === myName);
@@ -381,6 +380,18 @@ async function pageGeral() {
         try { await navigator.clipboard.writeText(t); toast('Resumo copiado!'); } catch { toast('Copia manualmente, por favor.', true); }
       } }, 'Copiar o meu resumo'));
   }
+
+  // bento: módulos de relance (prazo · conquistas · partilhar)
+  const bento = el('div', { class: 'bento' });
+  if (cd) bento.appendChild(el('div', { class: 'bento-tile' }, el('div', { class: 'bento-k' }, 'Próximo prazo'), el('div', { class: 'bento-v' }, cd)));
+  if (myRow) {
+    const champCounts = new Map();
+    for (const p of Object.values(data.bets)) if (p.champion) champCounts.set(p.champion, (champCounts.get(p.champion) || 0) + 1);
+    const earned = computeBadges(myRow, data.bets[myName], { champCounts, maxChamp: Math.max(0, ...champCounts.values()) }).filter((b) => b.earned).length;
+    bento.appendChild(el('button', { class: 'bento-tile bento-cta', onclick: () => navigate('conquistas') }, el('div', { class: 'bento-k' }, 'Conquistas'), el('div', { class: 'bento-v' }, earned + '/9')));
+  }
+  bento.appendChild(el('button', { class: 'bento-tile bento-cta', onclick: () => navigate('partilhar') }, el('div', { class: 'bento-k' }, 'Partilhar'), el('div', { class: 'bento-v' }, 'Cartões e stories')));
+  if (bento.childElementCount) host.appendChild(bento);
 
   const searchInput = el('input', { class: 'input', type: 'search', placeholder: 'Procurar jogador…', 'aria-label': 'Procurar jogador',
     oninput: (e) => { query = e.target.value.toLowerCase(); paint(); } });
