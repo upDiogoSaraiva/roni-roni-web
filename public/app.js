@@ -1256,6 +1256,27 @@ async function pageHallOfFame() {
 /* ---------------- PÁGINA: PARTILHAR (cartões story 9:16, tema Roni 26) ---------------- */
 const SHARE = { bg: '#0E1116', gold: '#E8B23A', ember: '#E5482A', text: '#F3ECE0', mut: '#9A958A', line: '#262b34' };
 const STORY_DIMS = { posicao: [1080, 1920], acerto: [1080, 1920], jogo: [1080, 1920], wrapped: [1080, 1920], sticker: [760, 300] };
+// bandeira como SVG inline (mesmo domínio → não "tainta" o canvas ao rasterizar)
+const flagCache = {};
+async function getFlagEl(name) {
+  const code = STATE.teams[name]?.flagFile;
+  if (!code) return null;
+  if (!(code in flagCache)) {
+    try {
+      const t = await (await fetch(`flags/${code}.svg`)).text();
+      const root = new DOMParser().parseFromString(t, 'image/svg+xml').querySelector('svg');
+      if (root && !root.getAttribute('viewBox')) { const w = root.getAttribute('width'), h = root.getAttribute('height'); if (w && h) root.setAttribute('viewBox', `0 0 ${parseFloat(w)} ${parseFloat(h)}`); }
+      flagCache[code] = root || null;
+    } catch { flagCache[code] = null; }
+  }
+  return flagCache[code] ? flagCache[code].cloneNode(true) : null;
+}
+function placeFlag(flagEl, x, y, w, h) {
+  if (!flagEl) return null;
+  flagEl.setAttribute('x', x); flagEl.setAttribute('y', y); flagEl.setAttribute('width', w); flagEl.setAttribute('height', h);
+  flagEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  return flagEl;
+}
 // cartão vertical de partilha (export PNG); cores escuras fixas de propósito (imagem independente do tema)
 function buildStoryCard(kind, c) {
   const [W, H] = STORY_DIMS[kind];
@@ -1285,13 +1306,16 @@ function buildStoryCard(kind, c) {
     svg.appendChild(txt(cx, 520, 34, P.mut, 'ACERTO DO DIA', { a: 'middle', ls: 10 }));
     svg.appendChild(svgEl('circle', { cx, cy: 760, r: 130, fill: P.ember }));
     svg.appendChild(svgEl('path', { d: `M ${cx - 58} 760 l 38 44 l 80 -96`, fill: 'none', stroke: P.bg, 'stroke-width': 20, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
-    svg.appendChild(txt(cx, 1080, 74, P.text, c.label, { a: 'middle', w: 500 }));
-    svg.appendChild(txt(cx, 1160, 46, P.mut, c.team, { a: 'middle' }));
-    svg.appendChild(txt(cx, 1320, 96, P.gold, '+' + c.pts + ' pts', { a: 'middle', w: 500 }));
-    svg.appendChild(txt(cx, 1410, 40, P.mut, c.player, { a: 'middle' }));
+    svg.appendChild(txt(cx, 1060, 74, P.text, c.label, { a: 'middle', w: 500 }));
+    const flA = placeFlag(c.flagEl, cx - 70, 1110, 140, 94); if (flA) svg.appendChild(flA);
+    svg.appendChild(txt(cx, 1280, 46, P.mut, c.team, { a: 'middle' }));
+    svg.appendChild(txt(cx, 1420, 96, P.gold, '+' + c.pts + ' pts', { a: 'middle', w: 500 }));
+    svg.appendChild(txt(cx, 1510, 40, P.mut, c.player, { a: 'middle' }));
   } else if (kind === 'jogo') {
     svg.appendChild(txt(cx, 520, 34, P.mut, 'JOGO DO DIA', { a: 'middle', ls: 10 }));
-    svg.appendChild(txt(cx, 780, 116, P.text, `${c.a}  vs  ${c.b}`, { a: 'middle', w: 500 }));
+    const fgA = placeFlag(c.flagAEl, cx - 320, 620, 170, 113); if (fgA) svg.appendChild(fgA);
+    const fgB = placeFlag(c.flagBEl, cx + 150, 620, 170, 113); if (fgB) svg.appendChild(fgB);
+    svg.appendChild(txt(cx, 850, 116, P.text, `${c.a}  vs  ${c.b}`, { a: 'middle', w: 500 }));
     svg.appendChild(txt(cx, 960, 36, P.mut, 'quem o grupo vê em 1.º do Grupo ' + c.group, { a: 'middle' }));
     const total = (c.na + c.nb) || 1, barW = 840, x0 = cx - barW / 2, y0 = 1030, h = 44, wa = Math.round(barW * c.na / total);
     svg.appendChild(svgEl('rect', { x: x0, y: y0, width: wa, height: h, fill: P.ember, rx: 10 }));
@@ -1337,7 +1361,7 @@ async function pagePartilhar() {
       const counts = countPicks(Object.values(bets).map((b) => b.groups?.[g]?.first));
       if (counts.length < 2) continue;
       const margin = counts[0].n - counts[1].n;
-      if (!best || margin < best.margin) best = { group: g, a: codeOf(counts[0].team), b: codeOf(counts[1].team), na: counts[0].n, nb: counts[1].n, margin };
+      if (!best || margin < best.margin) best = { group: g, a: codeOf(counts[0].team), b: codeOf(counts[1].team), aName: counts[0].team, bName: counts[1].team, na: counts[0].n, nb: counts[1].n, margin };
     }
     return best || { group: STATE.groupOrder[0], a: '—', b: '—', na: 0, nb: 0 };
   };
@@ -1381,11 +1405,18 @@ async function pagePartilhar() {
     el('button', { class: 'btn btn-ghost', onclick: () => shareStory(true) }, 'Partilhar'),
     el('button', { class: 'btn btn-primary', onclick: () => shareStory(false) }, icon('arrow'), 'Descarregar')));
 
-  function paint() {
+  const withFlags = async (k, c) => {
+    if (!c) return c;
+    if (k === 'acerto' && c.team) c.flagEl = await getFlagEl(c.team);
+    if (k === 'jogo') { c.flagAEl = await getFlagEl(c.aName); c.flagBEl = await getFlagEl(c.bName); }
+    return c;
+  };
+  async function paint() {
     clear(chips);
     for (const [k, label] of KINDS) chips.appendChild(el('button', { class: 'chip-nav' + (k === kind ? ' on' : ''), onclick: () => { kind = k; paint(); } }, label));
-    clear(preview);
     const c = ctxFor(kind);
+    if (c) await withFlags(kind, c);
+    clear(preview);
     if (!c) { preview.appendChild(emptyState('Ainda sem acertos de posição', 'Aparece quando acertares uma posição exata.', 'search')); return; }
     preview.appendChild(buildStoryCard(kind, c));
     if (kind === 'wrapped' && c.slides) {
@@ -1398,6 +1429,7 @@ async function pagePartilhar() {
   async function shareStory(share) {
     const c = ctxFor(kind);
     if (!c) return toast('Ainda não há nada para partilhar aqui.', true);
+    await withFlags(kind, c);
     const [w, h] = STORY_DIMS[kind];
     try {
       const blob = await cardToPng(buildStoryCard(kind, c), w, h);
