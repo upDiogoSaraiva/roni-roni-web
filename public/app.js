@@ -1342,7 +1342,7 @@ async function pagePartilhar() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(4));
-  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
+  const [data, tl, res] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null), api('/api/results').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard, bets = data.bets;
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
@@ -1355,13 +1355,25 @@ async function pagePartilhar() {
   for (const p of Object.values(bets)) if (p.champion) champCounts.set(p.champion, (champCounts.get(p.champion) || 0) + 1);
   const badgeCtx = { champCounts, maxChamp: Math.max(0, ...champCounts.values()) };
 
+  const consensus = (g, a, b) => {
+    const firsts = Object.values(bets).map((x) => x.groups?.[g]?.first);
+    return { group: g, a: codeOf(a), b: codeOf(b), aName: a, bName: b, na: firsts.filter((x) => x === a).length, nb: firsts.filter((x) => x === b).length };
+  };
   const jogoCtx = () => {
+    // próximo jogo por disputar do calendário canónico de cada grupo (J1: 0-1,2-3 · J2: 0-2,3-1 · J3: 0-3,1-2)
+    const played = (g, a, b) => (res?.results?.[g] || []).some((m) => (m.home === a && m.away === b) || (m.home === b && m.away === a));
+    for (const g of STATE.groupOrder) {
+      const t = STATE.groups[g];
+      const sched = [[t[0], t[1]], [t[2], t[3]], [t[0], t[2]], [t[3], t[1]], [t[0], t[3]], [t[1], t[2]]];
+      for (const [a, b] of sched) if (!played(g, a, b)) return consensus(g, a, b);
+    }
+    // fallback (tudo jogado): grupo com o 1.º mais dividido
     let best = null;
     for (const g of STATE.groupOrder) {
-      const counts = countPicks(Object.values(bets).map((b) => b.groups?.[g]?.first));
+      const counts = countPicks(Object.values(bets).map((x) => x.groups?.[g]?.first));
       if (counts.length < 2) continue;
       const margin = counts[0].n - counts[1].n;
-      if (!best || margin < best.margin) best = { group: g, a: codeOf(counts[0].team), b: codeOf(counts[1].team), aName: counts[0].team, bName: counts[1].team, na: counts[0].n, nb: counts[1].n, margin };
+      if (!best || margin < best.margin) best = { ...consensus(g, counts[0].team, counts[1].team), margin };
     }
     return best || { group: STATE.groupOrder[0], a: '—', b: '—', na: 0, nb: 0 };
   };
