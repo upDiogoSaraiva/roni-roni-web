@@ -185,6 +185,8 @@ button { font: inherit; cursor: pointer; }
 .wp-label { color: #9aa3b2; letter-spacing: 2px; margin-top: 56px; font-size: 14px; }
 .wp-value { font-size: 92px; font-weight: 700; line-height: 1.05; margin-top: 10px; color: #f3ece0; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 0 16px; }
 .wp-sub { color: #9aa3b2; margin-top: 18px; font-size: 16px; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-flag { width: 132px; height: 88px; margin: 0 auto 22px; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45); animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-flag svg { width: 100%; height: 100%; display: block; }
 .wp-card .btn { position: relative; z-index: 4; }
 @keyframes wpIn { from { opacity: 0; transform: translateY(18px) scale(0.92); } to { opacity: 1; transform: none; } }
 .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 300; }

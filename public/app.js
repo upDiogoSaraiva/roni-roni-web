@@ -1400,6 +1400,7 @@ function buildStoryCard(kind, c) {
   } else if (kind === 'wrapped') {
     svg.appendChild(txt(cx, 470, 64, P.gold, 'RONI WRAPPED', { a: 'middle', w: 500, ls: 4 }));
     svg.appendChild(txt(cx, 544, 34, P.mut, c.who || '', { a: 'middle' }));
+    const wfl = placeFlag(c.wrapFlagEl, cx - 140, 700, 280, 187); if (wfl) svg.appendChild(wfl);
     svg.appendChild(txt(cx, 980, 36, P.mut, c.wrapLabel, { a: 'middle', ls: 4 }));
     const vlen = String(c.wrapValue).length;
     const vs = vlen > 14 ? 76 : vlen > 11 ? 96 : vlen > 7 ? 140 : 210;
@@ -1440,12 +1441,18 @@ function openWrappedPlayer(slides, who) {
     const s = slides[i];
     const vlen = String(s.value).length;
     const vsize = vlen > 14 ? '40px' : vlen > 11 ? '50px' : vlen > 7 ? '68px' : '92px';
+    const labelEl = el('div', { class: 'wp-label' }, s.label);
     const card = el('div', { class: 'wp-card' },
       el('div', { class: 'wp-brand' }, 'RONI RONI'),
       el('div', { class: 'wp-who' }, who),
-      el('div', { class: 'wp-label' }, s.label),
+      labelEl,
       el('div', { class: 'wp-value', style: { fontSize: vsize } }, s.value));
     if (s.sub) card.appendChild(el('div', { class: 'wp-sub' }, s.sub));
+    if (s.team) {
+      const holder = el('div', { class: 'wp-flag' });
+      card.insertBefore(holder, labelEl);
+      getFlagEl(s.team).then((fl) => { if (slides[i] === s && fl) holder.appendChild(fl); }).catch(() => {});
+    }
     if (i === slides.length - 1) {
       card.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '36px' }, onclick: share }, icon('arrow'), 'Partilhar'));
       if (!finaleDone) { finaleDone = true; celebrate(); }
@@ -1474,7 +1481,9 @@ function openWrappedPlayer(slides, who) {
   function destroy() { clearTimeout(timer); clearTimeout(holdT); overlay.remove(); }
   async function share() {
     try {
-      const blob = await cardToPng(buildStoryCard('wrapped', { who, wrapLabel: slides[i].label, wrapValue: slides[i].value, wrapSub: slides[i].sub }), 1080, 1920);
+      const sc = { who, wrapLabel: slides[i].label, wrapValue: slides[i].value, wrapSub: slides[i].sub };
+      if (slides[i].team) sc.wrapFlagEl = await getFlagEl(slides[i].team);
+      const blob = await cardToPng(buildStoryCard('wrapped', sc), 1080, 1920);
       const file = new File([blob], 'roni-wrapped.png', { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Roni Roni' });
       else { const url = URL.createObjectURL(blob); const a = el('a', { href: url, download: 'roni-wrapped.png' }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
@@ -1613,10 +1622,10 @@ async function pagePartilhar() {
         jump ? { wrapLabel: 'MAIS PONTOS NUMA JORNADA', wrapValue: '+' + jump, wrapSub: jumpMd ? 'na jornada ' + jumpMd : 'numa só jornada' } : null,
         drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' na jornada ' + dropMd : '') } : null,
         (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
-        gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
-        lucky ? { wrapLabel: 'A TUA SELEÇÃO DA SORTE', wrapValue: lucky.team, wrapSub: 'deu-te ' + lucky.v + (lucky.v === 1 ? ' ponto' : ' pontos') } : null,
-        champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
-        flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
+        gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapTeam: gem.team, wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
+        lucky ? { wrapLabel: 'A TUA SELEÇÃO DA SORTE', wrapValue: lucky.team, wrapTeam: lucky.team, wrapSub: 'deu-te ' + lucky.v + (lucky.v === 1 ? ' ponto' : ' pontos') } : null,
+        champ ? { wrapLabel: 'O TEU CAMPEÃO', wrapValue: champ, wrapTeam: champ, wrapSub: backers <= 1 ? 'só tu acreditaste' : 'tu e mais ' + (backers - 1) } : null,
+        flop ? { wrapLabel: 'DESASTRE DA ÉPOCA', wrapValue: flop.team, wrapTeam: flop.team, wrapSub: flop.back > 1 ? flop.back + ' apostaram, ficou de fora' : 'apostaste, ficou de fora' } : null,
         joker ? { wrapLabel: joker.jpos ? 'CHIP A DOBRAR' : 'CHIP DESPERDIÇADO', wrapValue: 'Grupo ' + joker.g, wrapSub: joker.jpos ? (joker.jpos === 1 ? '1 posição a dobrar' : joker.jpos + ' posições a dobrar') : 'dobraste e saiu em branco' } : null,
         (rival && rival.flips >= 1) ? { wrapLabel: 'RIVAL DA ÉPOCA', wrapValue: rival.player, wrapSub: rival.flips === 1 ? '1 troca de lugar' : rival.flips + ' trocas de lugar' } : null,
         (row.rank > 3 && podiumGap > 0) ? { wrapLabel: 'FALTOU PARA O PÓDIO', wrapValue: '+' + podiumGap, wrapSub: 'pontos para o 3.º lugar' } : null,
@@ -1644,6 +1653,7 @@ async function pagePartilhar() {
     if (!c) return c;
     if (k === 'acerto' && c.team) c.flagEl = await getFlagEl(c.team);
     if (k === 'jogo') { c.flagAEl = await getFlagEl(c.aName); c.flagBEl = await getFlagEl(c.bName); }
+    if (k === 'wrapped' && c.wrapTeam) c.wrapFlagEl = await getFlagEl(c.wrapTeam);
     return c;
   };
   async function paint() {
@@ -1659,7 +1669,7 @@ async function pagePartilhar() {
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide anterior', onclick: () => { wrapIdx = (wrapIdx - 1 + c.slides.length) % c.slides.length; paint(); } }, '‹'),
         el('span', { class: 'num' }, `${wrapIdx + 1}/${c.slides.length}`),
         el('button', { class: 'btn btn-ghost', 'aria-label': 'Slide seguinte', onclick: () => { wrapIdx = (wrapIdx + 1) % c.slides.length; paint(); } }, '›')));
-      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub }))], me) }, '▶  Ver Roni Wrapped'));
+      preview.appendChild(el('button', { class: 'btn btn-primary', style: { marginTop: '12px', width: '100%' }, onclick: () => openWrappedPlayer([{ label: 'A TUA ÉPOCA NO', value: 'RONI 26' }, ...c.slides.map((s) => ({ label: s.wrapLabel, value: s.wrapValue, sub: s.wrapSub, team: s.wrapTeam }))], me) }, '▶  Ver Roni Wrapped'));
     }
   }
   async function shareStory(share) {
