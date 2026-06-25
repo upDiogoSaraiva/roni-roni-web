@@ -1419,6 +1419,18 @@ function buildStoryCard(kind, c) {
 function openWrappedPlayer(slides, who) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DUR = 3800;
+  // conta para cima o número na revelação do slide (preserva sinal e sufixo: +13, -15, 8º, 5/9)
+  function animateValue(node, text) {
+    const m = String(text).match(/^([+-]?)(\d+)(.*)$/);
+    if (!m || reduce) { node.textContent = text; return; }
+    const sign = m[1], target = +m[2], suffix = m[3], t0 = performance.now(), dur = 650;
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / dur);
+      node.textContent = sign + Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
   let i = 0, held = false, ignoreTap = false, timer = null, holdT = null, startAt = 0, elapsed = 0, finaleDone = false;
   const overlay = el('div', { class: 'wp-overlay' });
   const bars = el('div', { class: 'wp-bars' });
@@ -1443,11 +1455,13 @@ function openWrappedPlayer(slides, who) {
     const vlen = String(s.value).length;
     const vsize = vlen > 14 ? '40px' : vlen > 11 ? '50px' : vlen > 7 ? '68px' : '92px';
     const labelEl = el('div', { class: 'wp-label' }, s.label);
+    const valueEl = el('div', { class: 'wp-value', style: { fontSize: vsize, color: s.tone === 'gold' ? '#e8b23a' : s.tone === 'ember' ? '#e5482a' : '#f3ece0' } });
     const card = el('div', { class: 'wp-card' },
       el('div', { class: 'wp-brand' }, 'RONI RONI'),
       el('div', { class: 'wp-who' }, who),
       labelEl,
-      el('div', { class: 'wp-value', style: { fontSize: vsize, color: s.tone === 'gold' ? '#e8b23a' : s.tone === 'ember' ? '#e5482a' : '#f3ece0' } }, s.value));
+      valueEl);
+    animateValue(valueEl, s.value);
     if (s.sub) card.appendChild(el('div', { class: 'wp-sub' }, s.sub));
     if (s.team) {
       const holder = el('div', { class: 'wp-flag' });
