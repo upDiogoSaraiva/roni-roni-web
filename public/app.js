@@ -2469,7 +2469,7 @@ function paintWindowPill() {
 
 /* ---------------- boot ---------------- */
 async function boot() {
-  applyTheme(localStorage.getItem('roni-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  applyTheme(localStorage.getItem('roni-theme') || 'dark');
   applyContrast(localStorage.getItem('roni-hc') === '1');
   try {
     const st = await api('/api/state');
