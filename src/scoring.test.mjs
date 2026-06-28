@@ -131,6 +131,38 @@ test('3.º só pontua se entrar nos 8 melhores 3.os', () => {
   assert.equal(dIn.position, 3);
 });
 
+test('teto de 3.os: quem indica mais de 8 só vê os primeiros (ordem alfabética dos grupos)', () => {
+  // 9 grupos (A..I), cada um com hierarquia clara; os 8 melhores 3.os são B3..I3 (A3 fica fora).
+  const manyGroups = {};
+  const manyResults = {};
+  for (let i = 0; i < 9; i++) {
+    const g = String.fromCharCode(65 + i);
+    manyGroups[g] = [`${g}1`, `${g}2`, `${g}3`, `${g}4`];
+    manyResults[g] = [
+      { home: `${g}1`, away: `${g}2`, homeGoals: 1, awayGoals: 0 },
+      { home: `${g}1`, away: `${g}3`, homeGoals: 1, awayGoals: 0 },
+      { home: `${g}1`, away: `${g}4`, homeGoals: 1, awayGoals: 0 },
+      { home: `${g}2`, away: `${g}3`, homeGoals: 1, awayGoals: 0 },
+      { home: `${g}2`, away: `${g}4`, homeGoals: 1, awayGoals: 0 },
+      { home: `${g}3`, away: `${g}4`, homeGoals: i + 1, awayGoals: 0 },
+    ];
+  }
+  const world = computeWorldState(manyGroups, manyResults);
+  assert.equal(world.bestThirdsLimit, 8);
+  // jogador indica um 3.º em TODOS os 9 grupos (A..I) — mais do que o teto de 8
+  const groupsBet = {};
+  for (const g of Object.keys(manyGroups)) groupsBet[g] = { third: `${g}3` };
+  const d = scoreBet({ groups: groupsBet }, world, (t) => t[0]);
+  // A3 está fora dos 8 melhores (não apura); I3 apura mas é o 9.º grupo => fora do teto.
+  // Contam apenas B..H (7 grupos): +1 apuramento e +1 posição cada.
+  assert.equal(d.qualification, 7);
+  assert.equal(d.position, 7);
+  assert.equal(d.groups.I.picks.third.capped, true);
+  assert.equal(d.groups.I.picks.third.position, 0);
+  assert.equal(d.groups.I.picks.third.credited, false);
+  assert.equal(d.groups.H.picks.third.capped, undefined); // dentro do teto, conta normalmente
+});
+
 test('detalhe por seleção: apurou (verde) e posição (âmbar) por slot', () => {
   const world = computeWorldState(groups, results);
   const bet = { groups: { A: { first: 'Alfa', second: 'Charlie', third: null } } };
