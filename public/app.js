@@ -326,6 +326,8 @@ async function pageGeral() {
 function pointBadges(pick) {
   const b = el('span', { class: 'pt-badges' });
   if (!pick) return b;
+  // 3.º acima do teto de 8 (por ordem alfabética dos grupos): não conta
+  if (pick.capped) { b.appendChild(el('span', { class: 'pt-chip out', title: 'Fora do teto de 8 terceiros — não conta' }, '8+')); return b; }
   if (pick.credited) b.appendChild(el('span', { class: 'pt-chip apura', title: 'Apurou (+1)' }, '+1'));
   if (pick.position) b.appendChild(el('span', { class: 'pt-chip pos', title: 'Posição certa (+1)' }, '+1'));
   if (pick.qualifies && !pick.credited) b.appendChild(el('span', { class: 'pt-chip dup', title: 'Apurou, mas já contada noutro lugar' }, '✓'));
@@ -335,7 +337,7 @@ function pointBadges(pick) {
 function sheetLine(label, team, pick) {
   if (!team) return null;
   const qualifies = pick ? pick.qualifies : null;
-  return el('div', { class: 'sheet-line' + (qualifies === false ? ' faded' : '') },
+  return el('div', { class: 'sheet-line' + (qualifies === false || pick?.capped ? ' faded' : '') },
     el('span', { class: 'pos' }, label), teamChip(team), pointBadges(pick));
 }
 function sheetDetail(bet, score) {

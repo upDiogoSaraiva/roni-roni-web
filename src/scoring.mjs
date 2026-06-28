@@ -225,13 +225,14 @@ export function computeKnockout(bracket, koResults) {
 // Estado completo derivado dos resultados reais — calculado uma vez por pedido.
 // `comp` é a configuração da competição (formato + pontos). Sem ela, usa os valores do Mundial.
 export function computeWorldState(groups, resultsByGroup, ko = null, comp = null) {
+  const bestThirdsLimit = comp?.format?.bestThirds ?? 8;
   const standings = allStandings(groups, resultsByGroup);
-  const thirds = bestThirds(standings, comp?.format?.bestThirds ?? 8, comp?.teams || null);
+  const thirds = bestThirds(standings, bestThirdsLimit, comp?.teams || null);
   const qualified = qualifiedSet(standings, thirds.set);
   const matchesPlayed = Object.values(resultsByGroup).reduce((n, g) => n + (g?.length || 0), 0);
   const knockout = ko ? computeKnockout(ko.bracket, ko.knockoutResults) : null;
   const points = { champion: comp?.scoring?.champion ?? CHAMPION_POINTS, final4: comp?.scoring?.final4 ?? FINAL4_POINTS };
-  return { standings, thirds, qualified, matchesPlayed, knockout, points };
+  return { standings, thirds, qualified, matchesPlayed, knockout, points, bestThirdsLimit };
 }
 
 // Posição real de uma equipa no seu grupo (1..4) ou null.
@@ -249,6 +250,16 @@ export function scoreBet(bet, world, groupOf) {
   // Apuramento conta UMA vez por equipa distinta (credita-se a 1.ª ocorrência).
   const credited = new Set();
   const SLOTS = [['first', 1], ['second', 2], ['third', 3]];
+  // Teto de 3.os: apuram-se no máximo `bestThirdsLimit` (8) terceiros. Quem indicou um 3.º em mais
+  // grupos do que isso só vê contar os primeiros, por ordem alfabética dos grupos; os restantes 3.os
+  // não dão apuramento nem posição (mas continuam visíveis na folha, marcados como fora do teto).
+  const THIRD_LIMIT = world.bestThirdsLimit ?? 8;
+  const allowedThird = new Set(
+    Object.keys(bet.groups || {})
+      .filter((g) => (bet.groups[g] || {}).third)
+      .sort((a, b) => a.localeCompare(b, 'pt'))
+      .slice(0, THIRD_LIMIT),
+  );
   for (const g of Object.keys(bet.groups || {})) {
     const pick = bet.groups[g] || {};
     const mexido = !!pick.mexido;
@@ -257,6 +268,11 @@ export function scoreBet(bet, world, groupOf) {
     for (const [slot, expectedRank] of SLOTS) {
       const team = pick[slot] || null;
       if (!team) { picks[slot] = null; continue; }
+      // 3.º acima do teto (por ordem alfabética dos grupos): não conta para nada
+      if (slot === 'third' && !allowedThird.has(g)) {
+        picks[slot] = { team, qualifies: qualified.has(team), credited: false, position: 0, capped: true };
+        continue;
+      }
       const qualifies = qualified.has(team);
       // +1 de apuramento (uma vez por equipa)
       const creditQ = qualifies && !credited.has(team);
