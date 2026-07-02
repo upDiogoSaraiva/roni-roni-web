@@ -262,9 +262,19 @@ test('mata-mata: campeão (8) e Final 4 (3 cada)', () => {
   assert.equal(d.final4, 6); // Eco e Golf são semifinalistas; Zulu/Yankee não
 });
 
+test('mercados extra: pick certo vale os pontos do mercado', () => {
+  const comp = { markets: [{ id: 'topScorer', points: 5 }, { id: 'bestWorst', points: 6 }] };
+  const ko = { bracket: { rounds: [], matches: {} }, knockoutResults: {}, marketResults: { topScorer: 'Mbappé', bestWorst: 'Cabo Verde' } };
+  const world = computeWorldState({}, {}, ko, comp);
+  const bet = { groups: {}, markets: { topScorer: 'Mbappé', bestWorst: 'Senegal' } };
+  const d = scoreBet(bet, world, () => null);
+  assert.equal(d.markets, 5); // topScorer certo (+5), bestWorst errado (0)
+  assert.equal(d.total, 5);
+});
+
 test('atribuição dos 8 melhores 3.os respeita os grupos elegíveis (matching Anexo C)', () => {
-  const seed = JSON.parse(readFileSync(new URL('../data/seed.json', import.meta.url)));
-  const bracket = JSON.parse(readFileSync(new URL('../data/bracket.json', import.meta.url)));
+  const seed = JSON.parse(readFileSync(new URL('../data/competitions/wc2026/seed.json', import.meta.url)));
+  const bracket = JSON.parse(readFileSync(new URL('../data/competitions/wc2026/bracket.json', import.meta.url)));
   const standings = allStandings(seed.groups, seed.results.groups);
   const assign = assignThirds(bracket, standings);
   assert.equal(Object.keys(assign).length, 8); // 8 slots todos preenchidos

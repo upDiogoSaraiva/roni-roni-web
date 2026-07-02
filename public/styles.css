@@ -37,25 +37,37 @@
 [data-theme='dark'] {
   --brand: #ff6a4d;
   --brand-ink: #ff8568;
-  --gold: #f2b441;
-  --bg: #14110d;
-  --surface: #1e1a14;
-  --surface-2: #272118;
-  --hairline: #332b20;
+  --gold: #e8b23a;
+  --bg: #0e1116;
+  --surface: #161b22;
+  --surface-2: #1d2430;
+  --hairline: #2a313c;
   --text: #f3ece0;
-  --text-soft: #a89c88;
+  --text-soft: #9aa3b2;
   --ok: #43c98a;
-  --ok-bg: #16352a;
-  --out: #d98a5a;
-  --out-bg: #34241a;
-  --pending: #7c7263;
-  --pending-bg: #2a241b;
-  --on-brand: #1a0f0a;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -16px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 16px 48px -18px rgba(0, 0, 0, 0.7);
+  --ok-bg: #123026;
+  --out: #e08a4f;
+  --out-bg: #2c2118;
+  --pending: #7a8290;
+  --pending-bg: #1c222b;
+  --on-brand: #0e1116;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 34px -16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 18px 52px -18px rgba(0, 0, 0, 0.8);
 }
 
 * { box-sizing: border-box; }
+/* modo alto contraste: reforça texto e contornos (sobre qualquer tema) */
+[data-hc='1'] { --text: #000; --text-soft: #2b2b2b; --hairline: #6b6b6b; }
+[data-hc='1'][data-theme='dark'] { --text: #fff; --text-soft: #e0e0e0; --hairline: #b0b0b0; }
+/* acessibilidade: respeita quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -120,6 +132,158 @@ button { font: inherit; cursor: pointer; }
   color: var(--text-soft); margin: var(--s6) 0 var(--s3);
 }
 .section-label::before { content: ''; width: 7px; height: 7px; border-radius: 2px; background: var(--brand); }
+
+/* ---------- nav de chips (páginas de drama) ---------- */
+.engage-nav { display: flex; gap: var(--s2); overflow-x: auto; margin: 0 0 var(--s5); padding-bottom: 2px; scrollbar-width: none; }
+.engage-nav::-webkit-scrollbar { display: none; }
+.chip-nav { flex: none; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; }
+.chip-nav.on { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+
+/* ---------- reveal (barras de consenso) ---------- */
+.reveal-row { display: grid; grid-template-columns: minmax(108px, 38%) 1fr 30px; align-items: center; gap: 10px; padding: 5px 0; }
+.reveal-bar-wrap { background: var(--surface-2); border-radius: 6px; height: 10px; overflow: hidden; }
+.reveal-bar { height: 100%; background: var(--brand); border-radius: 6px; min-width: 3px; }
+.reveal-n { text-align: right; color: var(--text-soft); font-size: 13px; }
+
+/* ---------- recaps por jornada ---------- */
+.recap { display: grid; grid-template-columns: 58px 1fr; gap: 10px; align-items: baseline; padding: 9px 14px; border-top: 1px solid var(--hairline); }
+.recap:first-child { border-top: none; }
+.recap-j { color: var(--brand); font-size: 12px; font-weight: 600; }
+.recap p { margin: 0; font-size: 13.5px; line-height: 1.4; }
+
+/* ---------- frente a frente (H2H) ---------- */
+.h2h-selects { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
+.h2h-vs { color: var(--text-soft); font-size: 13px; }
+.h2h-head { display: grid; grid-template-columns: 84px 1fr 1fr; gap: 8px; align-items: end; margin-bottom: 4px; }
+.h2h-pl { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.h2h-pl .nm { font-weight: 700; font-size: 14px; }
+.h2h-pl .sub { color: var(--text-soft); font-size: 12px; }
+.h2h-row { display: grid; grid-template-columns: 84px 1fr 1fr; align-items: center; padding: 7px 14px; border-top: 1px solid var(--hairline); }
+.h2h-row:first-child { border-top: none; }
+.h2h-lbl { color: var(--text-soft); font-size: 11.5px; }
+.h2h-a, .h2h-b { text-align: center; font-size: 13px; }
+.h2h-row.eq .h2h-a, .h2h-row.eq .h2h-b { color: var(--ok); }
+.h2h-a.win, .h2h-b.win { color: var(--brand); font-weight: 700; }
+
+/* ---------- partilhar (cartões story 9:16) ---------- */
+.story-preview { max-width: 300px; margin: 14px auto 0; }
+.story-svg { display: block; width: 100%; height: auto; border-radius: 16px; }
+.wrap-step { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px; }
+.wrap-step .btn { min-width: 44px; font-size: 20px; }
+/* story player imersivo do Roni Wrapped */
+.wp-overlay { position: fixed; inset: 0; z-index: 200; background: #0e1116; color: #f3ece0; display: flex; flex-direction: column; }
+.wp-bars { display: flex; gap: 5px; padding: 14px 14px 0; }
+.wp-seg { flex: 1; height: 3px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; overflow: hidden; }
+.wp-seg i { display: block; height: 100%; width: 0; background: #e8b23a; }
+.wp-close { position: absolute; top: 26px; right: 14px; z-index: 4; background: none; border: none; color: #f3ece0; font-size: 30px; line-height: 1; cursor: pointer; }
+.wp-tap { position: absolute; top: 0; bottom: 0; z-index: 2; }
+.wp-left { left: 0; width: 33%; } .wp-right { right: 0; width: 67%; }
+.wp-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.wp-card { text-align: center; }
+.wp-brand { color: #e8b23a; letter-spacing: 5px; font-weight: 700; font-size: 18px; }
+.wp-who { color: #9aa3b2; margin-top: 6px; font-size: 14px; }
+.wp-label { color: #9aa3b2; letter-spacing: 2px; margin-top: 56px; font-size: 14px; }
+.wp-value { font-size: 92px; font-weight: 700; line-height: 1.05; margin-top: 10px; color: #f3ece0; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 0 16px; }
+.wp-sub { color: #9aa3b2; margin-top: 18px; font-size: 16px; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-flag { width: 132px; height: 88px; margin: 0 auto 22px; border-radius: 10px; overflow: hidden; box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45); animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-flag svg { width: 100%; height: 100%; display: block; }
+.wp-mono { display: flex; justify-content: center; margin-bottom: 26px; animation: wpIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.wp-mono .mono { width: 104px; height: 104px; font-size: 40px; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
+.wp-card .btn { position: relative; z-index: 4; }
+@keyframes wpIn { from { opacity: 0; transform: translateY(18px) scale(0.92); } to { opacity: 1; transform: none; } }
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 300; }
+
+/* ---------- cartão partilhável (legado) ---------- */
+.card-preview { max-width: 340px; margin: 14px auto 0; }
+.card-svg { display: block; width: 100%; height: auto; border-radius: 14px; box-shadow: var(--shadow); }
+
+/* ---------- identidade ---------- */
+.id-row { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- construtor de competições ---------- */
+.builder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px 12px; }
+.builder-grid .field { margin: 0; }
+
+/* ---------- nível do jogador ---------- */
+.lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+
+/* ---------- conquistas (badges) ---------- */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+.badge-card { border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 12px; background: var(--surface); text-align: center; }
+.badge-card.locked { opacity: 0.5; filter: grayscale(0.8); }
+.badge-card.earned { border-color: var(--brand); box-shadow: var(--shadow); }
+.badge-emoji { font-size: 30px; line-height: 1; }
+.badge-name { font-weight: 700; font-size: 13.5px; margin-top: 8px; }
+.badge-desc { color: var(--text-soft); font-size: 11.5px; margin-top: 3px; line-height: 1.35; }
+
+/* ---------- transição de entrada de página ---------- */
+@keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.pg-in { animation: pageIn 0.24s ease; }
+
+/* ---------- bento (módulos de relance) ---------- */
+.bento { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.bento-tile { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 14px 16px; text-align: left; }
+.bento-k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); }
+.bento-v { font-size: 17px; font-weight: 700; margin-top: 5px; font-family: var(--font-display); }
+.bento-cta { cursor: pointer; }
+.bento-cta:active { transform: scale(0.98); }
+
+/* ---------- contagem decrescente ---------- */
+.countdown { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand-ink); border-radius: var(--r-ctrl); padding: 9px 14px; font-size: 13px; font-weight: 600; margin-bottom: 12px; text-align: center; }
+
+/* ---------- magnitude do movimento ---------- */
+.mv { display: inline-flex; align-items: center; gap: 1px; }
+.mv-n { font-size: 11px; line-height: 1; font-family: var(--font-num); }
+
+/* ---------- realce do líder na tabela ---------- */
+.lb-row.leader { background: color-mix(in srgb, var(--gold) 9%, transparent); }
+
+/* ---------- cartão pessoal (hero) ---------- */
+.hero { display: flex; align-items: center; gap: 14px; padding: 16px; margin-bottom: 12px; }
+.hero-rank { font-size: 30px; font-weight: 700; font-family: var(--font-display); line-height: 1; }
+.hero-sub { color: var(--text-soft); font-size: 13px; margin-top: 3px; }
+.hero-pts { display: flex; align-items: center; gap: 6px; font-size: 26px; font-weight: 700; color: var(--brand); }
+.spark { display: block; margin-top: 8px; opacity: 0.85; }
+
+/* ---------- composição de pontos (barra empilhada) ---------- */
+.pbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--surface-2); }
+.pbar-seg { height: 100%; }
+.pbar-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 8px; font-size: 11.5px; color: var(--text-soft); }
+.pbar-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.pbar-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+/* ---------- hall da fama ---------- */
+.hof-head, .hof-row { display: grid; grid-template-columns: 26px 1fr 40px 56px 50px; align-items: center; gap: 8px; padding: 8px 14px; }
+.hof-head { color: var(--text-soft); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--hairline); }
+.hof-row { border-top: 1px solid var(--hairline); }
+.hof-row:first-of-type { border-top: none; }
+.hof-head .c, .hof-row .c { text-align: center; }
+
+/* ---------- gráfico de evolução ---------- */
+.ev-chart { display: block; width: 100%; height: auto; }
+.ev-grid { stroke: var(--hairline); stroke-width: 1; }
+.ev-xlab, .ev-ylab { fill: var(--text-soft); font-size: 11px; font-family: var(--font-num); }
+.ev-line, .ev-dot, .ev-end { pointer-events: none; }
+.ev-line { fill: none; stroke: var(--text-soft); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.16; }
+.ev-line.leader { stroke: var(--gold); stroke-width: 2.2; opacity: 0.9; }
+.ev-line.me { stroke: var(--brand); stroke-width: 2.8; opacity: 1; }
+.ev-dot { fill: var(--surface); stroke-width: 2; }
+.ev-dot.leader { stroke: var(--gold); }
+.ev-dot.me { stroke: var(--brand); }
+.ev-end { font-size: 11px; font-weight: 600; font-family: var(--font-ui); }
+.ev-end.leader { fill: var(--gold); }
+.ev-end.me { fill: var(--brand); }
+/* área larga e invisível por cima de cada linha, para facilitar o hover */
+.ev-hit { fill: none; stroke: transparent; stroke-width: 12; stroke-linejoin: round; pointer-events: stroke; cursor: pointer; }
+/* pontos e rótulo só aparecem nas linhas persistentes (líder / eu) … */
+.ev-series .ev-dot, .ev-series .ev-end { display: none; }
+.ev-series.leader .ev-dot, .ev-series.leader .ev-end,
+.ev-series.me .ev-dot, .ev-series.me .ev-end { display: block; }
+/* … ou na linha sob o rato: realça em tinta neutra (distinta do ouro/ember) e revela o nome */
+.ev-series.hover .ev-line { stroke: var(--text); stroke-width: 2.6; opacity: 1; }
+.ev-series.hover .ev-dot { display: block; stroke: var(--text); }
+.ev-series.hover .ev-end { display: block; fill: var(--text); }
 
 /* ---------- tabbar ---------- */
 .tabbar {
@@ -437,6 +601,11 @@ button { font: inherit; cursor: pointer; }
 .pot .kv { background: var(--surface); border: 1px solid var(--hairline); border-radius: 12px; padding: 10px 14px; }
 .pot .kv b { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-soft); font-weight: 700; margin-bottom: 3px; }
 .pot .kv .v { font-family: var(--font-num); font-size: 18px; font-weight: 500; }
+
+/* ---------- perfil ---------- */
+.profile-hd { display: flex; align-items: center; gap: 12px; margin-bottom: var(--s4); }
+.profile-hd .mono { width: 52px; height: 52px; font-size: 18px; }
+.profile-name { font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; }
 
 @media (max-width: 400px) { .tab span { font-size: 10px; } }
 

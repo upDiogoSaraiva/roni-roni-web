@@ -108,12 +108,12 @@ function remainingFixtures(teams, games) {
   const played = new Set();
   for (const g of games) {
     if (g.homeGoals == null || g.awayGoals == null) continue;
-    played.add([g.home, g.away].sort().join('\u0000'));
+    played.add([g.home, g.away].sort().join('\0'));
   }
   const rem = [];
   for (let i = 0; i < teams.length; i++) {
     for (let j = i + 1; j < teams.length; j++) {
-      if (!played.has([teams[i], teams[j]].sort().join('\u0000'))) rem.push([teams[i], teams[j]]);
+      if (!played.has([teams[i], teams[j]].sort().join('\0'))) rem.push([teams[i], teams[j]]);
     }
   }
   return rem;
@@ -232,7 +232,10 @@ export function computeWorldState(groups, resultsByGroup, ko = null, comp = null
   const matchesPlayed = Object.values(resultsByGroup).reduce((n, g) => n + (g?.length || 0), 0);
   const knockout = ko ? computeKnockout(ko.bracket, ko.knockoutResults) : null;
   const points = { champion: comp?.scoring?.champion ?? CHAMPION_POINTS, final4: comp?.scoring?.final4 ?? FINAL4_POINTS };
-  return { standings, thirds, qualified, matchesPlayed, knockout, points, bestThirdsLimit };
+  // mercados extra (melhor marcador, melhor jogador, "melhor pior equipa"...) — configuráveis por edição
+  const markets = comp?.markets || [];
+  const marketResults = ko?.marketResults || {};
+  return { standings, thirds, qualified, matchesPlayed, knockout, points, markets, marketResults, bestThirdsLimit };
 }
 
 // Posição real de uma equipa no seu grupo (1..4) ou null.
@@ -289,8 +292,9 @@ export function scoreBet(bet, world, groupOf) {
       groupPos += position;
       picks[slot] = { team, qualifies, credited: creditQ, position };
     }
-    detail.position += groupPos;
-    detail.groups[g] = { mexido, position: groupPos, picks };
+    const joker = bet.groupJoker === g; // joker de grupo: duplica os pontos de posição deste grupo
+    detail.position += joker ? groupPos * 2 : groupPos;
+    detail.groups[g] = { mexido, position: groupPos, joker, picks };
   }
 
   // Mata-mata: campeão (8), Final 4 (3 cada) e jogos eliminatórios (vencedor + fase + jokers).
@@ -324,7 +328,14 @@ export function scoreBet(bet, world, groupOf) {
     }
   }
 
-  detail.total = detail.qualification + detail.position + detail.champion + detail.final4 + detail.knockout;
+  // mercados extra (configuráveis): cada pick certo vale os pontos do mercado
+  detail.markets = 0;
+  for (const m of world.markets || []) {
+    const pick = bet.markets?.[m.id];
+    if (pick && world.marketResults?.[m.id] && pick === world.marketResults[m.id]) detail.markets += (m.points || 0);
+  }
+
+  detail.total = detail.qualification + detail.position + detail.champion + detail.final4 + detail.knockout + detail.markets;
   return detail;
 }
 

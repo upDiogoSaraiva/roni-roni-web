@@ -2,7 +2,7 @@
 // Serve a SPA em public/ e uma API neutra (apostas, resultados, pontos). Nada do motor.
 
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync, copyFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, normalize, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -12,56 +12,98 @@ import { resolveBracket, groupStageComplete } from './src/bracket.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
-const SEED_PATH = join(root, 'data/seed.json');
-const STORE_PATH = join(root, 'data/store.json');
 const PORT = Number(process.env.PORT || 4026);
 const HOST = process.env.HOST || '0.0.0.0';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'roni2026';
+const REGISTRY_PATH = join(root, 'data/registry.json');
+const compDir = (id) => join(root, 'data/competitions', id);
 
-// --- config estático (grupos, equipas) vem do seed; nunca muda em runtime ---
-const seed = JSON.parse(readFileSync(SEED_PATH, 'utf8'));
-const GROUPS = seed.groups;
-const GROUP_ORDER = seed.groupOrder;
-const TEAMS = seed.teams;
-const META = seed.meta;
-const BRACKET = JSON.parse(readFileSync(join(root, 'data/bracket.json'), 'utf8'));
-// configuração da competição (formato, pontos, fonte, prémios) — tudo num só ficheiro por edição
-const COMP = JSON.parse(readFileSync(join(root, 'data/competition.json'), 'utf8'));
-const KO_ROUNDS = BRACKET.rounds.map((r) => r.id); // r32..final
-const matchRound = {};
-for (const [id, m] of Object.entries(BRACKET.matches)) matchRound[id] = m.round;
-const roundJoker = Object.fromEntries(BRACKET.rounds.map((r) => [r.id, !!r.joker]));
-const groupOf = {};
-for (const [g, ts] of Object.entries(GROUPS)) for (const t of ts) groupOf[t] = g;
+// --- registo de competições (qual é a ativa, quais existem) ---
+let registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+const saveRegistry = () => writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
+
+// --- competição ATIVA: estes valores são recarregados ao trocar de competição ---
+let activeId; let seed; let GROUPS; let GROUP_ORDER; let TEAMS; let META; let BRACKET; let COMP;
+let KO_ROUNDS; let matchRound; let roundJoker; let groupOf; let store; let STORE_PATH;
 const teamGroup = (t) => groupOf[t] || null;
-// código FIFA (ESPN abbreviation) -> nome PT, para a fonte ao vivo
-const codeToTeam = {};
-for (const [name, meta] of Object.entries(TEAMS)) codeToTeam[meta.code] = name;
+let codeToTeam = {};
 
-// --- estado mutável (apostas, resultados, janela) em store.json ---
 function defaultWindows(groupsOpen) {
-  // só a janela de grupos abre por defeito; as do mata-mata abrem-se à medida (ronda a ronda)
   const w = { grupos: groupsOpen };
   for (const r of KO_ROUNDS) w[r] = false;
   return w;
 }
-function loadStore() {
-  let s;
-  if (existsSync(STORE_PATH)) s = JSON.parse(readFileSync(STORE_PATH, 'utf8'));
-  else s = { windowOpen: seed.windowOpen !== false, results: structuredClone(seed.results), bets: structuredClone(seed.bets) };
-  // migração / campos novos do mata-mata
-  if (!s.windows) s.windows = defaultWindows(s.windowOpen !== false);
-  if (!s.knockouts) s.knockouts = {}; // { matchId: { home, away, homeGoals, awayGoals, winner, method } }
-  for (const b of s.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; }
-  writeFileSync(STORE_PATH, JSON.stringify(s, null, 2));
-  return s;
+// escreve com cópia de segurança .bak antes de cada gravação (nunca perder dados)
+function backupThenWrite(path, data) {
+  try { if (existsSync(path)) copyFileSync(path, path + '.bak'); } catch { /* backup best-effort */ }
+  writeFileSync(path, data);
 }
-let store = loadStore();
-// Grava o estado em disco com cópia de segurança: o store.json atual é copiado para
-// store.json.bak antes de ser reescrito, para sobreviver a falhas a meio da escrita.
-function saveStore() {
-  try { if (existsSync(STORE_PATH)) copyFileSync(STORE_PATH, STORE_PATH + '.bak'); } catch { /* backup best-effort */ }
-  writeFileSync(STORE_PATH, JSON.stringify(store, null, 2));
+const saveStore = () => backupThenWrite(STORE_PATH, JSON.stringify(store, null, 2));
+
+// identidades (token de dispositivo, sem password) — ficheiro transversal às edições
+const IDENTITIES_PATH = join(root, 'data/identities.json');
+let identities = existsSync(IDENTITIES_PATH) ? JSON.parse(readFileSync(IDENTITIES_PATH, 'utf8')) : { byToken: {}, byPlayer: {} };
+const saveIdentities = () => backupThenWrite(IDENTITIES_PATH, JSON.stringify(identities, null, 2));
+
+// Lê uma competição (qualquer, não só a ativa) para um objeto, sem tocar nos globais.
+function readCompetition(id) {
+  const dir = compDir(id);
+  const s = JSON.parse(readFileSync(join(dir, 'seed.json'), 'utf8'));
+  const bracket = JSON.parse(readFileSync(join(dir, 'bracket.json'), 'utf8'));
+  const comp = JSON.parse(readFileSync(join(dir, 'competition.json'), 'utf8'));
+  comp.sourceFile = join(dir, 'results_source.json');
+  const koRounds = bracket.rounds.map((r) => r.id);
+  const mRound = {};
+  for (const [mid, m] of Object.entries(bracket.matches)) mRound[mid] = m.round;
+  const gOf = {};
+  for (const [g, ts] of Object.entries(s.groups)) for (const t of ts) gOf[t] = g;
+  const c2t = {};
+  for (const [name, meta] of Object.entries(s.teams)) c2t[meta.code] = name;
+  const storePath = join(dir, 'store.json');
+  let st;
+  if (existsSync(storePath)) st = JSON.parse(readFileSync(storePath, 'utf8'));
+  else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
+  if (!st.windows) { st.windows = { grupos: s.windowOpen !== false }; for (const r of koRounds) st.windows[r] = false; }
+  if (!st.knockouts) st.knockouts = structuredClone(s.knockouts || {});
+  if (!st.marketResults) st.marketResults = {}; // vencedores dos mercados extra (melhor marcador, etc.)
+  for (const b of st.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; if (!b.markets) b.markets = {}; }
+  return {
+    id, seed: s, GROUPS: s.groups, GROUP_ORDER: s.groupOrder, TEAMS: s.teams, META: s.meta,
+    BRACKET: bracket, COMP: comp, KO_ROUNDS: koRounds, matchRound: mRound,
+    roundJoker: Object.fromEntries(bracket.rounds.map((r) => [r.id, !!r.joker])),
+    groupOf: gOf, codeToTeam: c2t, store: st, STORE_PATH: storePath,
+  };
+}
+
+function loadActive(id) {
+  const c = readCompetition(id);
+  ({ seed, GROUPS, GROUP_ORDER, TEAMS, META, BRACKET, COMP, KO_ROUNDS, matchRound, roundJoker, groupOf, codeToTeam, store, STORE_PATH } = c);
+  activeId = id;
+  saveStore();
+}
+loadActive(registry.activeId);
+
+// Classificação final guardada de uma edição importada (sem grupos para recalcular).
+function archivedSummary(id) {
+  const comp = JSON.parse(readFileSync(join(compDir(id), 'competition.json'), 'utf8'));
+  const rows = [...(comp.finalStandings || [])].sort((a, b) => b.total - a.total).map((r) => ({ player: r.player, score: { total: r.total } }));
+  let lastPts = null;
+  let lastRank = 0;
+  rows.forEach((r, i) => { if (r.score.total !== lastPts) { lastRank = i + 1; lastPts = r.score.total; } r.rank = lastRank; });
+  const meta = registry.competitions.find((x) => x.id === id) || { id, name: comp.name, edition: comp.edition, status: 'archived' };
+  return { meta, competition: { name: comp.name, edition: comp.edition, entry: comp.entry || 0, prizes: comp.prizes || [] }, leaderboard: rows, teams: {}, groupOrder: [], matchesPlayed: null, bets: {}, archived: true };
+}
+
+// Resumo de uma competição (ativa ou arquivada): classificação + folhas, sem mexer na ativa.
+function competitionSummary(id) {
+  if (registry.competitions.find((x) => x.id === id)?.kind === 'archive') return archivedSummary(id);
+  const c = id === activeId
+    ? { GROUPS, BRACKET, COMP, store, groupOf, TEAMS, GROUP_ORDER }
+    : readCompetition(id);
+  const w = computeWorldState(c.GROUPS, c.store.results.groups, { bracket: c.BRACKET, knockoutResults: c.store.knockouts }, { ...c.COMP, teams: c.TEAMS });
+  const lb = leaderboard(c.store.bets, w, (t) => c.groupOf[t] || null);
+  const meta = registry.competitions.find((x) => x.id === id) || { id, name: c.COMP.name, edition: c.COMP.edition, status: 'active' };
+  return { meta, competition: { name: c.COMP.name, edition: c.COMP.edition, entry: c.COMP.entry, prizes: c.COMP.prizes }, leaderboard: lb, teams: c.TEAMS, groupOrder: c.GROUP_ORDER, matchesPlayed: w.matchesPlayed, bets: Object.fromEntries(c.store.bets.map((b) => [b.player, publicBet(b)])) };
 }
 
 // tokens de admin válidos (memória; nível protótipo)
@@ -115,13 +157,14 @@ function validateBet(b) {
       thirds++;
     }
   }
-  if (thirds !== 8) errors.push(`Tens de escolher exatamente 8 terceiros (tens ${thirds}).`);
+  const needThirds = COMP.format?.bestThirds ?? 8;
+  if (thirds !== needThirds) errors.push(`Tens de escolher exatamente ${needThirds} terceiros (tens ${thirds}).`);
   return errors;
 }
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts }, { ...COMP, teams: TEAMS });
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, { ...COMP, teams: TEAMS });
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -153,8 +196,10 @@ function publicBet(b) {
     champion: b.champion,
     final4: b.final4,
     groups: b.groups,
+    groupJoker: b.groupJoker || null,
     knockouts: b.knockouts || {},
     jokers: b.jokers || [],
+    markets: b.markets || {},
     seed: !!b.seed,
     hasPin: !!b.pin,
     submittedAt: b.submittedAt || null,
@@ -181,9 +226,10 @@ async function api(req, res, path) {
       groupOrder: GROUP_ORDER,
       teams: TEAMS,
       meta: META,
-      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes },
+      competition: { id: COMP.id, name: COMP.name, edition: COMP.edition, tagline: COMP.tagline, entry: COMP.entry, prizes: COMP.prizes, markets: COMP.markets || [], source: COMP.source || null },
       windowOpen: store.windows.grupos,
       windows: store.windows,
+      marketResults: store.marketResults,
       koRounds: BRACKET.rounds.map((r) => ({ id: r.id, label: r.label, joker: !!r.joker, winPts: r.winPts, methodPts: r.methodPts, matches: r.matches })),
       players: store.bets.map((b) => ({ player: b.player, seed: !!b.seed, hasPin: !!b.pin })),
     });
@@ -198,6 +244,91 @@ async function api(req, res, path) {
       windows: store.windows,
       groupStageComplete: groupStageComplete(w.standings),
     });
+  }
+
+  // lista de competições (ativa + arquivadas)
+  if (path === '/api/competitions' && method === 'GET') {
+    return json(res, 200, { activeId, competitions: registry.competitions });
+  }
+
+  // resumo de uma competição (qualquer): classificação final/atual + folhas
+  if (path.startsWith('/api/history/') && method === 'GET') {
+    const id = decodeURIComponent(path.slice('/api/history/'.length));
+    if (!registry.competitions.some((c) => c.id === id)) return json(res, 404, { error: 'Competição desconhecida.' });
+    try { return json(res, 200, competitionSummary(id)); }
+    catch (e) { return json(res, 500, { error: String(e.message || e) }); }
+  }
+
+  // historial de um jogador ao longo de todas as edições
+  if (path.startsWith('/api/player/') && method === 'GET') {
+    const name = decodeURIComponent(path.slice('/api/player/'.length));
+    const editions = [];
+    for (const c of registry.competitions) {
+      let sum;
+      try { sum = competitionSummary(c.id); } catch { continue; }
+      const row = sum.leaderboard.find((r) => r.player === name);
+      if (!row) continue;
+      editions.push({ id: c.id, name: sum.competition.name, edition: sum.competition.edition, status: c.status, rank: row.rank, total: row.score.total, players: sum.leaderboard.length });
+    }
+    return json(res, 200, { player: name, editions });
+  }
+
+  // ---------- identidade (token de dispositivo, sem password) ----------
+  // reivindicar um nome: emite token + código de 6 dígitos para ligar outros dispositivos
+  if (path === '/api/identity/claim' && method === 'POST') {
+    const body = await readBody(req);
+    const player = (body.player || '').trim();
+    if (!player) return json(res, 400, { error: 'Indica o teu nome.' });
+    if (identities.byPlayer[player]) return json(res, 409, { error: 'Este nome já foi reivindicado. No outro dispositivo usa "Ligar dispositivo" com o código.' });
+    const token = randomUUID();
+    const code = (randomUUID().replace(/[^0-9]/g, '') + '000000').slice(0, 6);
+    identities.byPlayer[player] = { code, tokens: [token] };
+    identities.byToken[token] = player;
+    saveIdentities();
+    return json(res, 200, { player, token, code });
+  }
+  // ligar este dispositivo a um nome já reivindicado, com o código
+  if (path === '/api/identity/link' && method === 'POST') {
+    const body = await readBody(req);
+    const player = (body.player || '').trim();
+    const code = (body.code || '').trim();
+    const rec = identities.byPlayer[player];
+    if (!rec || rec.code !== code) return json(res, 403, { error: 'Nome ou código errado.' });
+    const token = randomUUID();
+    rec.tokens.push(token);
+    identities.byToken[token] = player;
+    saveIdentities();
+    return json(res, 200, { player, token });
+  }
+  // quem sou eu (a partir do token do dispositivo) + código para ligar outros dispositivos
+  if (path === '/api/identity/me' && method === 'GET') {
+    const token = req.headers['x-player-token'];
+    const player = (token && identities.byToken[token]) || null;
+    return json(res, 200, { player, code: player ? (identities.byPlayer[player]?.code || null) : null });
+  }
+
+  // hall da fama — agregação entre TODAS as edições do registo (títulos, pódios, pontos, recordes)
+  if (path === '/api/halloffame' && method === 'GET') {
+    const players = {};
+    const champions = [];
+    let topScore = null;
+    for (const c of registry.competitions) {
+      let sum;
+      try { sum = competitionSummary(c.id); } catch { continue; }
+      const lb = sum.leaderboard;
+      if (!lb.length) continue;
+      champions.push({ id: c.id, edition: sum.competition.edition, player: lb[0].player, total: lb[0].score.total });
+      for (const r of lb) {
+        const p = players[r.player] || (players[r.player] = { player: r.player, editions: 0, titles: 0, podiums: 0, points: 0, bestRank: 99 });
+        p.editions++; p.points += r.score.total; p.bestRank = Math.min(p.bestRank, r.rank);
+        if (r.rank === 1) p.titles++;
+        if (r.rank <= 3) p.podiums++;
+        if (!topScore || r.score.total > topScore.total) topScore = { player: r.player, total: r.score.total, edition: sum.competition.edition };
+      }
+    }
+    const table = Object.values(players).map((p) => ({ ...p, avgPoints: Math.round(p.points / p.editions) }))
+      .sort((a, b) => b.titles - a.titles || b.points - a.points || a.bestRank - b.bestRank);
+    return json(res, 200, { table, champions, records: { topScore }, editions: champions.length });
   }
 
   if (path === '/api/results' && method === 'GET') {
@@ -240,6 +371,53 @@ async function api(req, res, path) {
     });
   }
 
+  // evolução das posições jornada a jornada — replay determinístico dos resultados de grupo
+  // (recalcula a classificação como se a fase de grupos terminasse no fim de cada jornada)
+  if (path === '/api/timeline' && method === 'GET') {
+    let maxMd = 0;
+    for (const g of GROUP_ORDER) for (const m of store.results.groups[g] || []) maxMd = Math.max(maxMd, m.matchday || 1);
+    const matchdays = [];
+    const series = new Map(store.bets.map((b) => [b.player, { player: b.player, seed: !!b.seed, points: [] }]));
+    for (let md = 1; md <= maxMd; md++) {
+      const cut = {};
+      let any = false;
+      for (const g of GROUP_ORDER) {
+        cut[g] = (store.results.groups[g] || []).filter((m) => (m.matchday || 1) <= md);
+        if (cut[g].length) any = true;
+      }
+      if (!any) continue;
+      matchdays.push(md);
+      const w = computeWorldState(GROUPS, cut, { bracket: BRACKET, knockoutResults: {}, marketResults: {} }, { ...COMP, teams: TEAMS });
+      const lb = leaderboard(store.bets, w, teamGroup);
+      for (const r of lb) series.get(r.player)?.points.push({ md, rank: r.rank, total: r.score.total });
+    }
+    return json(res, 200, { matchdays, groupGames: COMP.format?.groupGames || 3, count: store.bets.length, players: [...series.values()] });
+  }
+
+  // simulador "e se?" — sobrepõe resultados hipotéticos aos reais e devolve a classificação
+  // projetada, com o movimento de cada jogador face a agora. NÃO persiste (clone do estado).
+  if (path === '/api/whatif' && method === 'POST') {
+    const body = await readBody(req);
+    const hyp = Array.isArray(body.results) ? body.results : [];
+    const groups = structuredClone(store.results.groups);
+    for (const it of hyp) {
+      const { group, home, away } = it;
+      if (!groups[group] || teamGroup(home) !== group || teamGroup(away) !== group || home === away) continue;
+      const hg = Number(it.homeGoals);
+      const ag = Number(it.awayGoals);
+      if (!Number.isInteger(hg) || !Number.isInteger(ag) || hg < 0 || ag < 0) continue;
+      const list = groups[group];
+      const idx = list.findIndex((m) => (m.home === home && m.away === away) || (m.home === away && m.away === home));
+      const match = { home, away, homeGoals: hg, awayGoals: ag, matchday: Number(it.matchday) || 1 };
+      if (idx < 0) list.push(match); else list[idx] = match;
+    }
+    const rankNow = Object.fromEntries(leaderboard(store.bets, world(), teamGroup).map((r) => [r.player, r.rank]));
+    const wHyp = computeWorldState(GROUPS, groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, { ...COMP, teams: TEAMS });
+    const lbHyp = leaderboard(store.bets, wHyp, teamGroup);
+    for (const r of lbHyp) { const p = rankNow[r.player]; r.movement = p == null ? 0 : p - r.rank; r.baselineRank = p ?? null; }
+    return json(res, 200, { leaderboard: lbHyp, matchesPlayed: wHyp.matchesPlayed });
+  }
+
   if (path === '/api/bets' && method === 'GET') {
     return json(res, 200, { bets: store.bets.map(publicBet) });
   }
@@ -266,6 +444,8 @@ async function api(req, res, path) {
       existing.champion = body.champion;
       existing.final4 = body.final4;
       existing.groups = normalizeGroups(body.groups);
+      if (body.markets) existing.markets = sanitizeMarkets(body.markets);
+      existing.groupJoker = GROUP_ORDER.includes(body.groupJoker) ? body.groupJoker : null;
       existing.submittedAt = new Date().toISOString();
       if (body.pin) existing.pin = String(body.pin);
       existing.seed = false;
@@ -279,6 +459,8 @@ async function api(req, res, path) {
       champion: body.champion,
       final4: body.final4,
       groups: normalizeGroups(body.groups),
+      markets: sanitizeMarkets(body.markets),
+      groupJoker: GROUP_ORDER.includes(body.groupJoker) ? body.groupJoker : null,
       pin: body.pin ? String(body.pin) : null,
       submittedAt: new Date().toISOString(),
       seed: false,
@@ -343,6 +525,87 @@ async function api(req, res, path) {
   if (path.startsWith('/api/admin/')) {
     if (!isAdmin(req)) return json(res, 401, { error: 'Não autenticado.' });
 
+    // trocar a competição ativa
+    if (path === '/api/admin/competition/active' && method === 'POST') {
+      const body = await readBody(req);
+      const reg = registry.competitions.find((c) => c.id === body.id);
+      if (!reg) return json(res, 400, { error: 'Competição desconhecida.' });
+      if (reg.kind === 'archive') return json(res, 400, { error: 'Uma edição arquivada não pode ser a ativa.' });
+      loadActive(body.id);
+      registry.activeId = body.id;
+      saveRegistry();
+      return json(res, 200, { activeId });
+    }
+
+    // importar uma edição passada (classificação final) para o histórico
+    if (path === '/api/admin/import' && method === 'POST') {
+      const body = await readBody(req);
+      const name = (body.name || 'Roni Roni').trim();
+      const edition = (body.edition || '').trim();
+      const rows = Array.isArray(body.rows) ? body.rows : [];
+      if (!edition) return json(res, 400, { error: 'Indica o nome da edição.' });
+      const finalStandings = rows.filter((r) => r.player && r.points != null).map((r) => ({ player: String(r.player).trim(), total: Number(r.points) }));
+      if (!finalStandings.length) return json(res, 400, { error: 'Classificação vazia ou inválida.' });
+      const base = (body.id || edition).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'edicao';
+      let id = base;
+      let n = 2;
+      while (registry.competitions.some((c) => c.id === id)) id = `${base}-${n++}`;
+      mkdirSync(compDir(id), { recursive: true });
+      writeFileSync(join(compDir(id), 'competition.json'), JSON.stringify({ id, name, edition, kind: 'archive', entry: body.entry || 0, prizes: body.prizes || [], finalStandings }, null, 2));
+      registry.competitions.push({ id, name, edition, status: 'archived', kind: 'archive' });
+      saveRegistry();
+      return json(res, 200, { ok: true, id, players: finalStandings.length });
+    }
+
+    // criar uma competição NOVA (fase de grupos): nome, edição, grupos+equipas, formato, pontuação
+    if (path === '/api/admin/create' && method === 'POST') {
+      const body = await readBody(req);
+      const name = (body.name || 'Torneio Roni Roni').trim();
+      const edition = (body.edition || '').trim();
+      if (!edition) return json(res, 400, { error: 'Indica a edição.' });
+      const groups = body.groups && typeof body.groups === 'object' ? body.groups : null;
+      const groupIds = groups ? Object.keys(groups) : [];
+      if (!groupIds.length) return json(res, 400, { error: 'Define pelo menos um grupo com equipas.' });
+      for (const g of groupIds) if (!Array.isArray(groups[g]) || groups[g].length < 2) return json(res, 400, { error: `Grupo ${g} precisa de pelo menos 2 equipas.` });
+      const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const base = slug(body.id || edition) || 'edicao';
+      let id = base; let n = 2;
+      while (registry.competitions.some((c) => c.id === id)) id = `${base}-${n++}`;
+      // meta das equipas: código de 3 letras (sem bandeira para seleções novas)
+      const teams = {}; const used = new Set();
+      for (const g of groupIds) for (const t of groups[g]) {
+        const cod = t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() || 'XXX';
+        let c = cod; let k = 1;
+        while (used.has(c)) c = (cod.slice(0, 2) + k++).toUpperCase();
+        used.add(c); teams[t] = { code: c, flagFile: null };
+      }
+      const fmt = body.format || {};
+      const format = { qualifiersPerGroup: Number(fmt.qualifiersPerGroup) || 2, bestThirds: Number(fmt.bestThirds) || 0, groupGames: Number(fmt.groupGames) || 3 };
+      const sc = body.scoring || {};
+      const scoring = { qualify: Number(sc.qualify) || 1, position: Number(sc.position) || 1, champion: Number(sc.champion) || 0, final4: Number(sc.final4) || 0 };
+      const prizes = Array.isArray(body.prizes) && body.prizes.length ? body.prizes : [
+        { key: '1', tag: '1.º', name: '1.º lugar', value: 0, kind: 'rank', rank: 1 },
+        { key: '2', tag: '2.º', name: '2.º lugar', value: 0, kind: 'rank', rank: 2 },
+        { key: '3', tag: '3.º', name: '3.º lugar', value: 0, kind: 'rank', rank: 3 },
+      ];
+      const competition = { id, name, edition, tagline: edition, format, scoring, entry: Number(body.entry) || 0, prizes, markets: [] };
+      const seed = {
+        meta: { tournament: name, players: 0, note: 'Conteúdo neutro: apostas, resultados e pontos.' },
+        groups, groupOrder: groupIds, teams,
+        results: { groups: Object.fromEntries(groupIds.map((g) => [g, []])) }, windowOpen: true, bets: [],
+      };
+      const dir = compDir(id);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'competition.json'), JSON.stringify(competition, null, 2));
+      writeFileSync(join(dir, 'groups.json'), JSON.stringify(groups, null, 2));
+      writeFileSync(join(dir, 'bracket.json'), JSON.stringify({ rounds: [], matches: {} }, null, 2));
+      writeFileSync(join(dir, 'seed.json'), JSON.stringify(seed, null, 2));
+      writeFileSync(join(dir, 'results_source.json'), JSON.stringify({ groups: {} }, null, 2));
+      registry.competitions.push({ id, name, edition, status: 'created' });
+      saveRegistry();
+      return json(res, 200, { ok: true, id, teams: Object.keys(teams).length, groups: groupIds.length });
+    }
+
     if (path === '/api/admin/window' && method === 'POST') {
       const body = await readBody(req);
       const round = body.round || 'grupos';
@@ -351,6 +614,17 @@ async function api(req, res, path) {
       if (round === 'grupos') store.windowOpen = !!body.open;
       saveStore();
       return json(res, 200, { windows: store.windows });
+    }
+
+    // resolver um mercado extra (ex.: melhor marcador) — guarda o vencedor
+    if (path === '/api/admin/market' && method === 'POST') {
+      const body = await readBody(req);
+      if (!(COMP.markets || []).some((m) => m.id === body.id)) return json(res, 400, { error: 'Mercado desconhecido.' });
+      snapshotRanks();
+      if (body.winner) store.marketResults[body.id] = String(body.winner);
+      else delete store.marketResults[body.id];
+      saveStore();
+      return json(res, 200, { ok: true });
     }
 
     // resultado de um jogo do mata-mata (vencedor + fase)
@@ -409,7 +683,7 @@ async function api(req, res, path) {
     // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
     if (path === '/api/admin/fetch' && method === 'POST') {
       let loaded;
-      try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: COMP.source }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: { ...COMP.source, file: COMP.sourceFile } }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];
@@ -457,6 +731,12 @@ function normalizeGroups(groups) {
     const p = (groups || {})[g] || {};
     out[g] = { first: p.first || null, second: p.second || null, third: p.third || null };
   }
+  return out;
+}
+// mantém só picks de mercados que a competição define
+function sanitizeMarkets(m) {
+  const out = {};
+  for (const mk of COMP.markets || []) if (m && typeof m[mk.id] === 'string' && m[mk.id].trim()) out[mk.id] = m[mk.id].trim();
   return out;
 }
 
