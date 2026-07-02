@@ -36,9 +36,10 @@ cd roni-roni-web
 npm start
 ```
 
-Fica disponível em `http://localhost:4026`. No primeiro arranque cria `data/store.json` a partir de
-`data/seed.json`. Para voltar ao estado inicial, apaga esse ficheiro. Para regenerar os
-dados-semente a partir das fontes originais, corre `npm run seed`.
+Fica disponível em `http://localhost:4026`. No primeiro arranque cria o `store.json` da competição
+ativa a partir do `seed.json` respetivo (em `data/competitions/<id>/`). Para voltar ao estado
+inicial, apaga esse ficheiro. Para regenerar os dados-semente a partir das fontes originais, corre
+`npm run seed`.
 
 ## Configuração
 
@@ -90,10 +91,14 @@ Só entram jogos terminados. O mesmo trabalho dá-se pela linha de comandos com
 roni-roni-web/
 ├── server.mjs              servidor HTTP, API e persistência em JSON
 ├── data/
-│   ├── groups.json         as 48 seleções por grupo (A–L)
-│   ├── bracket.json        cruzamento oficial do mata-mata
-│   ├── field_2026_real.csv apostas reais (origem dos dados-semente)
-│   └── seed.json           estado inicial gerado
+│   ├── registry.json       competições existentes e qual está ativa
+│   └── competitions/
+│       └── wc2026/         uma pasta por edição:
+│           ├── groups.json         as 48 seleções por grupo (A–L)
+│           ├── bracket.json        cruzamento oficial do mata-mata
+│           ├── competition.json    formato, pontos, fonte e prémios
+│           ├── field_2026_real.csv apostas reais (origem dos dados-semente)
+│           └── seed.json           estado inicial gerado
 ├── src/
 │   ├── scoring.mjs         pontuação de grupos e mata-mata, com testes
 │   ├── bracket.mjs         resolução dos cruzamentos do mata-mata
@@ -106,17 +111,19 @@ As decisões de design da interface estão em [`DESIGN_WEB.md`](DESIGN_WEB.md).
 
 ## Configurar uma competição
 
-O que é específico de cada edição vive em três ficheiros, e o motor lê tudo a partir deles:
+O que é específico de cada edição vive na pasta `data/competitions/<id>/`, e o motor lê tudo a
+partir dela:
 
-- [`data/competition.json`](data/competition.json): nome e edição, formato (`qualifiersPerGroup`,
-  `bestThirds`, `groupGames`), pontos (`champion`, `final4`), fonte de resultados
-  (`espnLeague` e datas) e os prémios (entrada e valores).
-- `data/groups.json`: as seleções por grupo.
-- `data/bracket.json`: o cruzamento do mata-mata (o número de slots de 3.º define quantos terceiros
+- [`competition.json`](data/competitions/wc2026/competition.json): nome e edição, formato
+  (`qualifiersPerGroup`, `bestThirds`, `groupGames`), pontos (`champion`, `final4`), fonte de
+  resultados (`espnLeague` e datas) e os prémios (entrada e valores).
+- `groups.json`: as seleções por grupo.
+- `bracket.json`: o cruzamento do mata-mata (o número de slots de 3.º define quantos terceiros
   apuram).
 
 Para uma edição nova (por exemplo o Euro 2028: 6 grupos, 4 melhores 3.os, fonte `uefa.euro`) basta
-trocar estes três ficheiros. Os nomes/códigos das seleções estão em
+criar uma pasta nova com estes ficheiros e apontá-la no `data/registry.json` — ou usar o construtor
+de competições na administração. Os nomes/códigos das seleções estão em
 [`scripts/teams_meta.mjs`](scripts/teams_meta.mjs).
 
 ## Testes
