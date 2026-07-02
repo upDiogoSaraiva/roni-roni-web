@@ -988,16 +988,38 @@ async function pageAdmin() {
   // editor de resultados do mata-mata
   host.appendChild(el('div', { class: 'section-label' }, 'Resultados do mata-mata'));
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', marginTop: '-4px' } }, 'Define vencedor + fase. "Buscar resultados" também tenta preenchê-los pela ESPN.'));
-  const bracket = await api('/api/bracket');
+  let bracket = await api('/api/bracket');
   const koRoundSel = el('select', { class: 'select', 'aria-label': 'Ronda do mata-mata', onchange: (e) => paintKo(e.target.value) },
     ...STATE.koRounds.map((r) => el('option', { value: r.id }, r.label)));
   host.appendChild(el('div', { class: 'toolbar' }, koRoundSel));
   const koHost = el('div', {});
   host.appendChild(koHost);
+  // repinta só esta secção (não salta para o topo) e refresca os emparelhamentos das rondas seguintes
+  async function refreshKo(rid) {
+    try { bracket = await api('/api/bracket'); } catch {}
+    paintKo(rid);
+  }
   function paintKo(rid) {
     clear(koHost);
+    const editors = [];
     const r = bracket.rounds.find((x) => x.id === rid);
-    for (const mid of r.matches) koHost.appendChild(koResultEditor(String(mid), bracket.resolved[String(mid)]));
+    for (const mid of r.matches) koHost.appendChild(koResultEditor(String(mid), bracket.resolved[String(mid)], editors, refreshKo));
+    if (!editors.length) return;
+    const allBtn = el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '10px' } }, icon('check'), 'Gravar todos os preenchidos');
+    allBtn.onclick = async () => {
+      // grava só os jogos com vencedor escolhido e diferente do que está guardado
+      const dirty = editors.filter((e) => e.state.winner && (e.state.winner !== (e.m.winner || null) || (e.state.method || null) !== (e.m.method || null)));
+      if (!dirty.length) return toast('Preenche pelo menos um jogo (novo ou alterado).', true);
+      allBtn.disabled = true;
+      try {
+        for (const e of dirty) {
+          await api('/api/admin/knockout', { method: 'POST', body: { match: e.mid, home: e.m.home.team, away: e.m.away.team, homeGoals: null, awayGoals: null, winner: e.state.winner, method: e.state.method } });
+        }
+        toast(`${dirty.length} jogo(s) gravado(s). Classificação recalculada.`);
+        refreshKo(rid);
+      } catch (err) { toast(err.message, true); allBtn.disabled = false; }
+    };
+    koHost.appendChild(allBtn);
   }
   paintKo(STATE.koRounds[0].id);
 
@@ -1061,7 +1083,7 @@ function resultEditor(g, results, repaint) {
   return card;
 }
 
-function koResultEditor(mid, m) {
+function koResultEditor(mid, m, registry, onSaved) {
   const teams = [m.home.team, m.away.team].filter(Boolean);
   const card = el('div', { class: 'card', style: { padding: '14px', marginTop: '8px' } });
   card.appendChild(el('div', { class: 'ko-bet-head' }, el('span', { class: 'num jn' }, 'Jogo ' + mid),
@@ -1071,6 +1093,7 @@ function koResultEditor(mid, m) {
   if (teams.length < 2) { card.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', margin: '6px 0 0' } }, 'Aguarda os emparelhamentos (fim dos grupos).')); return card; }
 
   const state = { winner: m.winner || null, method: m.method || null };
+  if (registry) registry.push({ mid, m, state });
   const winWrap = el('div', { class: 'ko-pick' });
   const methWrap = el('div', { class: 'ko-seg' });
   const repaint = () => {
@@ -1091,7 +1114,8 @@ function koResultEditor(mid, m) {
     try {
       await api('/api/admin/knockout', { method: 'POST', body: { match: mid, home: m.home.team, away: m.away.team, homeGoals: null, awayGoals: null, winner: state.winner, method: state.method } });
       toast(`Jogo ${mid} gravado.`);
-      render();
+      // repinta só a secção do mata-mata (mantém a posição na página)
+      if (onSaved) onSaved(m.round); else render();
     } catch (e) { toast(e.message, true); }
   }
   return card;
