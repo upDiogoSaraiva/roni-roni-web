@@ -64,7 +64,7 @@ function readCompetition(id) {
   if (existsSync(storePath)) st = JSON.parse(readFileSync(storePath, 'utf8'));
   else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
   if (!st.windows) { st.windows = { grupos: s.windowOpen !== false }; for (const r of koRounds) st.windows[r] = false; }
-  if (!st.knockouts) st.knockouts = {};
+  if (!st.knockouts) st.knockouts = structuredClone(s.knockouts || {});
   if (!st.marketResults) st.marketResults = {}; // vencedores dos mercados extra (melhor marcador, etc.)
   for (const b of st.bets) { if (!b.knockouts) b.knockouts = {}; if (!b.jokers) b.jokers = []; if (!b.markets) b.markets = {}; }
   return {

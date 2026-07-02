@@ -447,6 +447,34 @@
           "homeGoals": 2,
           "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Chéquia",
+          "away": "África do Sul",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "México",
+          "away": "Coreia do Sul",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Chéquia",
+          "away": "México",
+          "homeGoals": 0,
+          "awayGoals": 3,
+          "matchday": 3
+        },
+        {
+          "home": "África do Sul",
+          "away": "Coreia do Sul",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 3
         }
       ],
       "B": [
@@ -463,6 +491,34 @@
           "homeGoals": 1,
           "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Suíça",
+          "away": "Bósnia-Herzegovina",
+          "homeGoals": 4,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Canadá",
+          "away": "Catar",
+          "homeGoals": 6,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Bósnia-Herzegovina",
+          "away": "Catar",
+          "homeGoals": 3,
+          "awayGoals": 1,
+          "matchday": 3
+        },
+        {
+          "home": "Suíça",
+          "away": "Canadá",
+          "homeGoals": 2,
+          "awayGoals": 1,
+          "matchday": 3
         }
       ],
       "C": [
@@ -474,11 +530,39 @@
           "matchday": 1
         },
         {
-          "home": "Escócia",
-          "away": "Haiti",
-          "homeGoals": 1,
-          "awayGoals": 0,
+          "home": "Haiti",
+          "away": "Escócia",
+          "homeGoals": 0,
+          "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Escócia",
+          "away": "Marrocos",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Brasil",
+          "away": "Haiti",
+          "homeGoals": 3,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Marrocos",
+          "away": "Haiti",
+          "homeGoals": 4,
+          "awayGoals": 2,
+          "matchday": 3
+        },
+        {
+          "home": "Escócia",
+          "away": "Brasil",
+          "homeGoals": 0,
+          "awayGoals": 3,
+          "matchday": 3
         }
       ],
       "D": [
@@ -495,6 +579,34 @@
           "homeGoals": 2,
           "awayGoals": 0,
           "matchday": 1
+        },
+        {
+          "home": "EUA",
+          "away": "Austrália",
+          "homeGoals": 2,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Turquia",
+          "away": "Paraguai",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Paraguai",
+          "away": "Austrália",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 3
+        },
+        {
+          "home": "Turquia",
+          "away": "EUA",
+          "homeGoals": 3,
+          "awayGoals": 2,
+          "matchday": 3
         }
       ],
       "E": [
@@ -511,6 +623,34 @@
           "homeGoals": 1,
           "awayGoals": 0,
           "matchday": 1
+        },
+        {
+          "home": "Alemanha",
+          "away": "Costa do Marfim",
+          "homeGoals": 2,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Equador",
+          "away": "Curaçao",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Curaçao",
+          "away": "Costa do Marfim",
+          "homeGoals": 0,
+          "awayGoals": 2,
+          "matchday": 3
+        },
+        {
+          "home": "Equador",
+          "away": "Alemanha",
+          "homeGoals": 2,
+          "awayGoals": 1,
+          "matchday": 3
         }
       ],
       "F": [
@@ -527,6 +667,34 @@
           "homeGoals": 2,
           "awayGoals": 2,
           "matchday": 1
+        },
+        {
+          "home": "Holanda",
+          "away": "Suécia",
+          "homeGoals": 5,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Tunísia",
+          "away": "Japão",
+          "homeGoals": 0,
+          "awayGoals": 4,
+          "matchday": 2
+        },
+        {
+          "home": "Japão",
+          "away": "Suécia",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 3
+        },
+        {
+          "home": "Tunísia",
+          "away": "Holanda",
+          "homeGoals": 1,
+          "awayGoals": 3,
+          "matchday": 3
         }
       ],
       "G": [
@@ -543,6 +711,34 @@
           "homeGoals": 2,
           "awayGoals": 2,
           "matchday": 1
+        },
+        {
+          "home": "Bélgica",
+          "away": "Irão",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Nova Zelândia",
+          "away": "Egito",
+          "homeGoals": 1,
+          "awayGoals": 3,
+          "matchday": 2
+        },
+        {
+          "home": "Egito",
+          "away": "Irão",
+          "homeGoals": 1,
+          "awayGoals": 1,
+          "matchday": 3
+        },
+        {
+          "home": "Nova Zelândia",
+          "away": "Bélgica",
+          "homeGoals": 1,
+          "awayGoals": 5,
+          "matchday": 3
         }
       ],
       "H": [
@@ -559,6 +755,34 @@
           "homeGoals": 1,
           "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Espanha",
+          "away": "Arábia Saudita",
+          "homeGoals": 4,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Uruguai",
+          "away": "Cabo Verde",
+          "homeGoals": 2,
+          "awayGoals": 2,
+          "matchday": 2
+        },
+        {
+          "home": "Cabo Verde",
+          "away": "Arábia Saudita",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 3
+        },
+        {
+          "home": "Uruguai",
+          "away": "Espanha",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "matchday": 3
         }
       ],
       "I": [
@@ -570,11 +794,39 @@
           "matchday": 1
         },
         {
-          "home": "Noruega",
-          "away": "Iraque",
-          "homeGoals": 4,
-          "awayGoals": 1,
+          "home": "Iraque",
+          "away": "Noruega",
+          "homeGoals": 1,
+          "awayGoals": 4,
           "matchday": 1
+        },
+        {
+          "home": "França",
+          "away": "Iraque",
+          "homeGoals": 3,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Noruega",
+          "away": "Senegal",
+          "homeGoals": 3,
+          "awayGoals": 2,
+          "matchday": 2
+        },
+        {
+          "home": "Noruega",
+          "away": "França",
+          "homeGoals": 1,
+          "awayGoals": 4,
+          "matchday": 3
+        },
+        {
+          "home": "Senegal",
+          "away": "Iraque",
+          "homeGoals": 5,
+          "awayGoals": 0,
+          "matchday": 3
         }
       ],
       "J": [
@@ -591,14 +843,42 @@
           "homeGoals": 3,
           "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Argentina",
+          "away": "Áustria",
+          "homeGoals": 2,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Jordânia",
+          "away": "Argélia",
+          "homeGoals": 1,
+          "awayGoals": 2,
+          "matchday": 2
+        },
+        {
+          "home": "Argélia",
+          "away": "Áustria",
+          "homeGoals": 3,
+          "awayGoals": 3,
+          "matchday": 3
+        },
+        {
+          "home": "Jordânia",
+          "away": "Argentina",
+          "homeGoals": 1,
+          "awayGoals": 3,
+          "matchday": 3
         }
       ],
       "K": [
         {
-          "home": "Colômbia",
-          "away": "Uzbequistão",
-          "homeGoals": 3,
-          "awayGoals": 1,
+          "home": "Uzbequistão",
+          "away": "Colômbia",
+          "homeGoals": 1,
+          "awayGoals": 3,
           "matchday": 1
         },
         {
@@ -607,6 +887,34 @@
           "homeGoals": 1,
           "awayGoals": 1,
           "matchday": 1
+        },
+        {
+          "home": "Portugal",
+          "away": "Uzbequistão",
+          "homeGoals": 5,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Colômbia",
+          "away": "Congo",
+          "homeGoals": 1,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Colômbia",
+          "away": "Portugal",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 3
+        },
+        {
+          "home": "Congo",
+          "away": "Uzbequistão",
+          "homeGoals": 3,
+          "awayGoals": 1,
+          "matchday": 3
         }
       ],
       "L": [
@@ -623,6 +931,34 @@
           "homeGoals": 1,
           "awayGoals": 0,
           "matchday": 1
+        },
+        {
+          "home": "Inglaterra",
+          "away": "Gana",
+          "homeGoals": 0,
+          "awayGoals": 0,
+          "matchday": 2
+        },
+        {
+          "home": "Panamá",
+          "away": "Croácia",
+          "homeGoals": 0,
+          "awayGoals": 1,
+          "matchday": 2
+        },
+        {
+          "home": "Croácia",
+          "away": "Gana",
+          "homeGoals": 2,
+          "awayGoals": 1,
+          "matchday": 3
+        },
+        {
+          "home": "Panamá",
+          "away": "Inglaterra",
+          "homeGoals": 0,
+          "awayGoals": 2,
+          "matchday": 3
         }
       ]
     }
@@ -703,7 +1039,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "PROL"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "74",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Ana Portugal",
@@ -779,7 +1187,76 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "África do Sul",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "Suécia",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Costa do Marfim",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "Bósnia-Herzegovina",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Austrália",
+          "method": "TR"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "António Gameiro",
@@ -855,7 +1332,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "África do Sul",
+          "method": "PROL"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "PROL"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "PEN"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [
+        "74",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Benavente",
@@ -910,28 +1459,100 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Áustria",
-          "third": "Argélia"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Gana"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "74",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Bernardo Macara",
@@ -1007,7 +1628,76 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Austrália",
+          "method": "PROL"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Bernardo Rodrigues",
@@ -1083,7 +1773,78 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PEN"
+        },
+        "76": {
+          "winner": "Japão",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "Equador",
+          "method": "PEN"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "PROL"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "PROL"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PEN"
+        }
+      },
+      "jokers": [
+        "74"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Bruna Araujo",
@@ -1118,7 +1879,8 @@
         "E": {
           "first": "Alemanha",
           "second": "Equador",
-          "third": null
+          "third": "Costa do Marfim",
+          "mexido": true
         },
         "F": {
           "first": "Holanda",
@@ -1128,7 +1890,8 @@
         "G": {
           "first": "Bélgica",
           "second": "Egito",
-          "third": "Irão"
+          "third": null,
+          "mexido": true
         },
         "H": {
           "first": "Espanha",
@@ -1153,13 +1916,86 @@
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": null
+          "third": "Gana",
+          "mexido": true
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [
+        "80",
+        "77"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Carolina",
@@ -1229,13 +2065,85 @@
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Panamá"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Costa do Marfim",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "México",
+          "method": "PEN"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "PROL"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [
+        "84",
+        "81"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Diogo Saraiva",
@@ -1309,9 +2217,84 @@
         }
       },
       "locked": true,
-      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "submittedAt": "2026-06-24T19:25:57.291Z",
       "pin": null,
-      "seed": true
+      "seed": false,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "84",
+        "86"
+      ],
+      "markets": {
+        "surpresa": "Portugal",
+        "desilusao": "Brasil"
+      },
+      "groupJoker": null
     },
     {
       "player": "Ezequiel Fonseca",
@@ -1325,8 +2308,9 @@
       "groups": {
         "A": {
           "first": "México",
-          "second": "Chéquia",
-          "third": null
+          "second": "Coreia do Sul",
+          "third": null,
+          "mexido": true
         },
         "B": {
           "first": "Suíça",
@@ -1336,12 +2320,14 @@
         "C": {
           "first": "Brasil",
           "second": "Marrocos",
-          "third": "Escócia"
+          "third": null,
+          "mexido": true
         },
         "D": {
           "first": "Turquia",
-          "second": "Paraguai",
-          "third": "EUA"
+          "second": "EUA",
+          "third": "Austrália",
+          "mexido": true
         },
         "E": {
           "first": "Alemanha",
@@ -1376,7 +2362,8 @@
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": null
+          "third": "Congo",
+          "mexido": true
         },
         "L": {
           "first": "Inglaterra",
@@ -1387,7 +2374,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "PEN"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PEN"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Costa do Marfim",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "74",
+        "80"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Francisco Mendes",
@@ -1402,7 +2461,7 @@
         "A": {
           "first": "México",
           "second": "Chéquia",
-          "third": "Chéquia"
+          "third": "Coreia do Sul"
         },
         "B": {
           "first": "Suíça",
@@ -1442,28 +2501,100 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Áustria",
           "second": "Argentina",
-          "third": "Argélia"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Gana"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "84",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Gonçalo Carvalho",
@@ -1539,7 +2670,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "Equador",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "86",
+        "77"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Guilherme Líbano",
@@ -1615,7 +2818,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Costa do Marfim",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "Equador",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "77",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Jay Dee",
@@ -1691,7 +2966,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "77",
+        "84"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Joao morais",
@@ -1746,28 +3093,97 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Áustria",
-          "third": "Argélia"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Panamá"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "África do Sul",
+          "method": "PROL"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PEN"
+        },
+        "86": {
+          "winner": "Cabo Verde",
+          "method": "PEN"
+        },
+        "87": {
+          "winner": "Gana",
+          "method": "PROL"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PEN"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "José Malaquias",
@@ -1822,28 +3238,100 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Áustria",
-          "third": "Argélia"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Uzbequistão"
+          "third": null
         },
         "L": {
           "first": "Croácia",
           "second": "Inglaterra",
-          "third": "Gana"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "PROL"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PEN"
+        }
+      },
+      "jokers": [
+        "77",
+        "84"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Manel",
@@ -1888,7 +3376,8 @@
         "G": {
           "first": "Bélgica",
           "second": "Irão",
-          "third": "Nova Zelândia"
+          "third": "Egito",
+          "mexido": true
         },
         "H": {
           "first": "Espanha",
@@ -1919,7 +3408,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "PROL"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PEN"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [
+        "77",
+        "80"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Mariana Leonardo",
@@ -1995,7 +3556,76 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Croácia",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Austrália",
+          "method": "TR"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Master PD",
@@ -2071,7 +3701,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "PEN"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PEN"
+        }
+      },
+      "jokers": [
+        "74",
+        "77"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Miguel Diniz",
@@ -2101,12 +3803,14 @@
         "D": {
           "first": "Turquia",
           "second": "EUA",
-          "third": null
+          "third": "Austrália",
+          "mexido": true
         },
         "E": {
           "first": "Alemanha",
           "second": "Costa do Marfim",
-          "third": "Equador"
+          "third": null,
+          "mexido": true
         },
         "F": {
           "first": "Holanda",
@@ -2121,12 +3825,14 @@
         "H": {
           "first": "Espanha",
           "second": "Uruguai",
-          "third": null
+          "third": "Cabo Verde",
+          "mexido": true
         },
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null,
+          "mexido": true
         },
         "J": {
           "first": "Argentina",
@@ -2147,7 +3853,79 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "México",
+          "method": "PROL"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Argélia",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Austrália",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "77",
+        "74"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Pedro Matos",
@@ -2202,28 +3980,97 @@
         "I": {
           "first": "França",
           "second": "Senegal",
-          "third": "Noruega"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Argélia",
-          "third": "Áustria"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Panamá"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "África do Sul",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Japão",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "Bósnia-Herzegovina",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Piloto",
@@ -2278,28 +4125,99 @@
         "I": {
           "first": "França",
           "second": "Senegal",
-          "third": "Noruega"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Áustria",
-          "third": "Jordânia"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Panamá"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PEN"
+        },
+        "76": {
+          "winner": "Japão",
+          "method": "PROL"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Congo",
+          "method": "PROL"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PEN"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "76"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Rafael Benavente",
@@ -2375,7 +4293,76 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PEN"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "PEN"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "Equador",
+          "method": "PEN"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "PROL"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Ricardo Tenreiro",
@@ -2430,28 +4417,100 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Argélia",
-          "third": "Áustria"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Gana"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "TR"
+        }
+      },
+      "jokers": [
+        "77",
+        "86"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Tio Didi",
@@ -2525,9 +4584,81 @@
         }
       },
       "locked": true,
-      "submittedAt": "2026-06-08T00:00:00.000Z",
+      "submittedAt": "2026-06-24T19:33:14.497Z",
       "pin": null,
-      "seed": true
+      "seed": false,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "PROL"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Costa do Marfim",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Congo",
+          "method": "PEN"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "PROL"
+        },
+        "88": {
+          "winner": "Austrália",
+          "method": "PEN"
+        }
+      },
+      "jokers": [
+        "77",
+        "74"
+      ],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Vasco Diniz",
@@ -2603,7 +4734,76 @@
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "TR"
+        },
+        "76": {
+          "winner": "Japão",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PROL"
+        }
+      },
+      "jokers": [],
+      "markets": {},
+      "groupJoker": null
     },
     {
       "player": "Zé Diniz",
@@ -2658,28 +4858,214 @@
         "I": {
           "first": "França",
           "second": "Noruega",
-          "third": "Senegal"
+          "third": null
         },
         "J": {
           "first": "Argentina",
           "second": "Argélia",
-          "third": "Áustria"
+          "third": null
         },
         "K": {
           "first": "Portugal",
           "second": "Colômbia",
-          "third": "Congo"
+          "third": null
         },
         "L": {
           "first": "Inglaterra",
           "second": "Croácia",
-          "third": "Gana"
+          "third": null
         }
       },
       "locked": true,
       "submittedAt": "2026-06-08T00:00:00.000Z",
       "pin": null,
-      "seed": true
+      "seed": true,
+      "knockouts": {
+        "73": {
+          "winner": "África do Sul",
+          "method": "PROL"
+        },
+        "74": {
+          "winner": "Alemanha",
+          "method": "TR"
+        },
+        "75": {
+          "winner": "Holanda",
+          "method": "PROL"
+        },
+        "76": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "77": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "78": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "79": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "80": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "81": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "82": {
+          "winner": "Senegal",
+          "method": "PROL"
+        },
+        "83": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "84": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "85": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "86": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "87": {
+          "winner": "Colômbia",
+          "method": "PROL"
+        },
+        "88": {
+          "winner": "Egito",
+          "method": "PEN"
+        }
+      },
+      "jokers": [
+        "86",
+        "80"
+      ],
+      "markets": {},
+      "groupJoker": null
     }
-  ]
+  ],
+  "knockouts": {
+    "73": {
+      "home": "África do Sul",
+      "away": "Canadá",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Canadá",
+      "method": "TR"
+    },
+    "74": {
+      "home": "Alemanha",
+      "away": "Paraguai",
+      "winner": "Paraguai",
+      "method": "PEN"
+    },
+    "75": {
+      "home": "Holanda",
+      "away": "Marrocos",
+      "winner": "Marrocos",
+      "method": "PEN"
+    },
+    "76": {
+      "home": "Brasil",
+      "away": "Japão",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Brasil",
+      "method": "TR"
+    },
+    "77": {
+      "home": "França",
+      "away": "Suécia",
+      "winner": "França",
+      "method": "TR"
+    },
+    "78": {
+      "home": "Costa do Marfim",
+      "away": "Noruega",
+      "winner": "Noruega",
+      "method": "TR"
+    },
+    "79": {
+      "home": "México",
+      "away": "Equador",
+      "winner": "México",
+      "method": "TR"
+    },
+    "80": {
+      "home": "Inglaterra",
+      "away": "Congo",
+      "winner": "Inglaterra",
+      "method": "TR"
+    },
+    "81": {
+      "home": "EUA",
+      "away": "Bósnia-Herzegovina",
+      "winner": "EUA",
+      "method": "TR"
+    },
+    "82": {
+      "home": "Bélgica",
+      "away": "Senegal",
+      "winner": "Bélgica",
+      "method": "PROL"
+    },
+    "83": {
+      "home": "Portugal",
+      "away": "Croácia",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Portugal",
+      "method": "TR"
+    },
+    "84": {
+      "home": "Espanha",
+      "away": "Áustria",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Espanha",
+      "method": "TR"
+    },
+    "85": {
+      "home": "Suíça",
+      "away": "Argélia",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Suíça",
+      "method": "TR"
+    },
+    "86": {
+      "home": "Argentina",
+      "away": "Cabo Verde",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Argentina",
+      "method": "TR"
+    },
+    "87": {
+      "home": "Colômbia",
+      "away": "Gana",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Colômbia",
+      "method": "TR"
+    },
+    "88": {
+      "home": "Austrália",
+      "away": "Egito",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Egito",
+      "method": "TR"
+    }
+  }
 }
