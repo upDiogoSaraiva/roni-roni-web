@@ -99,336 +99,384 @@
       "iso": "MX",
       "code": "MEX",
       "flag": "🇲🇽",
-      "flagFile": "mx"
+      "flagFile": "mx",
+      "fifa": 1687.48
     },
     "África do Sul": {
       "name": "África do Sul",
       "iso": "ZA",
       "code": "RSA",
       "flag": "🇿🇦",
-      "flagFile": "za"
+      "flagFile": "za",
+      "fifa": 1491
     },
     "Coreia do Sul": {
       "name": "Coreia do Sul",
       "iso": "KR",
       "code": "KOR",
       "flag": "🇰🇷",
-      "flagFile": "kr"
+      "flagFile": "kr",
+      "fifa": 1591.63
     },
     "Chéquia": {
       "name": "Chéquia",
       "iso": "CZ",
       "code": "CZE",
       "flag": "🇨🇿",
-      "flagFile": "cz"
+      "flagFile": "cz",
+      "fifa": 1505.74
     },
     "Canadá": {
       "name": "Canadá",
       "iso": "CA",
       "code": "CAN",
       "flag": "🇨🇦",
-      "flagFile": "ca"
+      "flagFile": "ca",
+      "fifa": 1559.48
     },
     "Bósnia-Herzegovina": {
       "name": "Bósnia-Herzegovina",
       "iso": "BA",
       "code": "BIH",
       "flag": "🇧🇦",
-      "flagFile": "ba"
+      "flagFile": "ba",
+      "fifa": 1524
     },
     "Catar": {
       "name": "Catar",
       "iso": "QA",
       "code": "QAT",
       "flag": "🇶🇦",
-      "flagFile": "qa"
+      "flagFile": "qa",
+      "fifa": 1456
     },
     "Suíça": {
       "name": "Suíça",
       "iso": "CH",
       "code": "SUI",
       "flag": "🇨🇭",
-      "flagFile": "ch"
+      "flagFile": "ch",
+      "fifa": 1650.07
     },
     "Brasil": {
       "name": "Brasil",
       "iso": "BR",
       "code": "BRA",
       "flag": "🇧🇷",
-      "flagFile": "br"
+      "flagFile": "br",
+      "fifa": 1765.86
     },
     "Marrocos": {
       "name": "Marrocos",
       "iso": "MA",
       "code": "MAR",
       "flag": "🇲🇦",
-      "flagFile": "ma"
+      "flagFile": "ma",
+      "fifa": 1755.44
     },
     "Haiti": {
       "name": "Haiti",
       "iso": "HT",
       "code": "HAI",
       "flag": "🇭🇹",
-      "flagFile": "ht"
+      "flagFile": "ht",
+      "fifa": 1284
     },
     "Escócia": {
       "name": "Escócia",
       "iso": "GB",
       "code": "SCO",
       "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-      "flagFile": "gb-sct"
+      "flagFile": "gb-sct",
+      "fifa": 1503.34
     },
     "EUA": {
       "name": "EUA",
       "iso": "US",
       "code": "USA",
       "flag": "🇺🇸",
-      "flagFile": "us"
+      "flagFile": "us",
+      "fifa": 1671.24
     },
     "Paraguai": {
       "name": "Paraguai",
       "iso": "PY",
       "code": "PAR",
       "flag": "🇵🇾",
-      "flagFile": "py"
+      "flagFile": "py",
+      "fifa": 1505.35
     },
     "Austrália": {
       "name": "Austrália",
       "iso": "AU",
       "code": "AUS",
       "flag": "🇦🇺",
-      "flagFile": "au"
+      "flagFile": "au",
+      "fifa": 1579.34
     },
     "Turquia": {
       "name": "Turquia",
       "iso": "TR",
       "code": "TUR",
       "flag": "🇹🇷",
-      "flagFile": "tr"
+      "flagFile": "tr",
+      "fifa": 1530
     },
     "Alemanha": {
       "name": "Alemanha",
       "iso": "DE",
       "code": "GER",
       "flag": "🇩🇪",
-      "flagFile": "de"
+      "flagFile": "de",
+      "fifa": 1735.77
     },
     "Curaçao": {
       "name": "Curaçao",
       "iso": "CW",
       "code": "CUW",
       "flag": "🇨🇼",
-      "flagFile": "cw"
+      "flagFile": "cw",
+      "fifa": 1370
     },
     "Costa do Marfim": {
       "name": "Costa do Marfim",
       "iso": "CI",
       "code": "CIV",
       "flag": "🇨🇮",
-      "flagFile": "ci"
+      "flagFile": "ci",
+      "fifa": 1540.87
     },
     "Equador": {
       "name": "Equador",
       "iso": "EC",
       "code": "ECU",
       "flag": "🇪🇨",
-      "flagFile": "ec"
+      "flagFile": "ec",
+      "fifa": 1598.51
     },
     "Holanda": {
       "name": "Holanda",
       "iso": "NL",
       "code": "NED",
       "flag": "🇳🇱",
-      "flagFile": "nl"
+      "flagFile": "nl",
+      "fifa": 1751.09
     },
     "Japão": {
       "name": "Japão",
       "iso": "JP",
       "code": "JPN",
       "flag": "🇯🇵",
-      "flagFile": "jp"
+      "flagFile": "jp",
+      "fifa": 1661.58
     },
     "Suécia": {
       "name": "Suécia",
       "iso": "SE",
       "code": "SWE",
       "flag": "🇸🇪",
-      "flagFile": "se"
+      "flagFile": "se",
+      "fifa": 1509.79
     },
     "Tunísia": {
       "name": "Tunísia",
       "iso": "TN",
       "code": "TUN",
       "flag": "🇹🇳",
-      "flagFile": "tn"
+      "flagFile": "tn",
+      "fifa": 1476.4
     },
     "Bélgica": {
       "name": "Bélgica",
       "iso": "BE",
       "code": "BEL",
       "flag": "🇧🇪",
-      "flagFile": "be"
+      "flagFile": "be",
+      "fifa": 1742.23
     },
     "Egito": {
       "name": "Egito",
       "iso": "EG",
       "code": "EGY",
       "flag": "🇪🇬",
-      "flagFile": "eg"
+      "flagFile": "eg",
+      "fifa": 1562.37
     },
     "Irão": {
       "name": "Irão",
       "iso": "IR",
       "code": "IRN",
       "flag": "🇮🇷",
-      "flagFile": "ir"
+      "flagFile": "ir",
+      "fifa": 1619.58
     },
     "Nova Zelândia": {
       "name": "Nova Zelândia",
       "iso": "NZ",
       "code": "NZL",
       "flag": "🇳🇿",
-      "flagFile": "nz"
+      "flagFile": "nz",
+      "fifa": 1226
     },
     "Espanha": {
       "name": "Espanha",
       "iso": "ES",
       "code": "ESP",
       "flag": "🇪🇸",
-      "flagFile": "es"
+      "flagFile": "es",
+      "fifa": 1873.02
     },
     "Cabo Verde": {
       "name": "Cabo Verde",
       "iso": "CV",
       "code": "CPV",
       "flag": "🇨🇻",
-      "flagFile": "cv"
+      "flagFile": "cv",
+      "fifa": 1390
     },
     "Arábia Saudita": {
       "name": "Arábia Saudita",
       "iso": "SA",
       "code": "KSA",
       "flag": "🇸🇦",
-      "flagFile": "sa"
+      "flagFile": "sa",
+      "fifa": 1490
     },
     "Uruguai": {
       "name": "Uruguai",
       "iso": "UY",
       "code": "URU",
       "flag": "🇺🇾",
-      "flagFile": "uy"
+      "flagFile": "uy",
+      "fifa": 1673.07
     },
     "França": {
       "name": "França",
       "iso": "FR",
       "code": "FRA",
       "flag": "🇫🇷",
-      "flagFile": "fr"
+      "flagFile": "fr",
+      "fifa": 1869.43
     },
     "Senegal": {
       "name": "Senegal",
       "iso": "SN",
       "code": "SEN",
       "flag": "🇸🇳",
-      "flagFile": "sn"
+      "flagFile": "sn",
+      "fifa": 1686.41
     },
     "Iraque": {
       "name": "Iraque",
       "iso": "IQ",
       "code": "IRQ",
       "flag": "🇮🇶",
-      "flagFile": "iq"
+      "flagFile": "iq",
+      "fifa": 1483
     },
     "Noruega": {
       "name": "Noruega",
       "iso": "NO",
       "code": "NOR",
       "flag": "🇳🇴",
-      "flagFile": "no"
+      "flagFile": "no",
+      "fifa": 1557.44
     },
     "Argentina": {
       "name": "Argentina",
       "iso": "AR",
       "code": "ARG",
       "flag": "🇦🇷",
-      "flagFile": "ar"
+      "flagFile": "ar",
+      "fifa": 1876.11
     },
     "Argélia": {
       "name": "Argélia",
       "iso": "DZ",
       "code": "ALG",
       "flag": "🇩🇿",
-      "flagFile": "dz"
+      "flagFile": "dz",
+      "fifa": 1571.04
     },
     "Áustria": {
       "name": "Áustria",
       "iso": "AT",
       "code": "AUT",
       "flag": "🇦🇹",
-      "flagFile": "at"
+      "flagFile": "at",
+      "fifa": 1597.41
     },
     "Jordânia": {
       "name": "Jordânia",
       "iso": "JO",
       "code": "JOR",
       "flag": "🇯🇴",
-      "flagFile": "jo"
+      "flagFile": "jo",
+      "fifa": 1392
     },
     "Portugal": {
       "name": "Portugal",
       "iso": "PT",
       "code": "POR",
       "flag": "🇵🇹",
-      "flagFile": "pt"
+      "flagFile": "pt",
+      "fifa": 1766.17
     },
     "Congo": {
       "name": "Congo",
       "iso": "CD",
       "code": "COD",
       "flag": "🇨🇩",
-      "flagFile": "cd"
+      "flagFile": "cd",
+      "fifa": 1412
     },
     "Uzbequistão": {
       "name": "Uzbequistão",
       "iso": "UZ",
       "code": "UZB",
       "flag": "🇺🇿",
-      "flagFile": "uz"
+      "flagFile": "uz",
+      "fifa": 1437
     },
     "Colômbia": {
       "name": "Colômbia",
       "iso": "CO",
       "code": "COL",
       "flag": "🇨🇴",
-      "flagFile": "co"
+      "flagFile": "co",
+      "fifa": 1698.35
     },
     "Inglaterra": {
       "name": "Inglaterra",
       "iso": "GB",
       "code": "ENG",
       "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "flagFile": "gb-eng"
+      "flagFile": "gb-eng",
+      "fifa": 1827.05
     },
     "Croácia": {
       "name": "Croácia",
       "iso": "HR",
       "code": "CRO",
       "flag": "🇭🇷",
-      "flagFile": "hr"
+      "flagFile": "hr",
+      "fifa": 1714.87
     },
     "Gana": {
       "name": "Gana",
       "iso": "GH",
       "code": "GHA",
       "flag": "🇬🇭",
-      "flagFile": "gh"
+      "flagFile": "gh",
+      "fifa": 1482
     },
     "Panamá": {
       "name": "Panamá",
       "iso": "PA",
       "code": "PAN",
       "flag": "🇵🇦",
-      "flagFile": "pa"
+      "flagFile": "pa",
+      "fifa": 1539.15
     }
   },
   "results": {

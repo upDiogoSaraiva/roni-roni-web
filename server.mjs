@@ -100,7 +100,7 @@ function competitionSummary(id) {
   const c = id === activeId
     ? { GROUPS, BRACKET, COMP, store, groupOf, TEAMS, GROUP_ORDER }
     : readCompetition(id);
-  const w = computeWorldState(c.GROUPS, c.store.results.groups, { bracket: c.BRACKET, knockoutResults: c.store.knockouts }, c.COMP);
+  const w = computeWorldState(c.GROUPS, c.store.results.groups, { bracket: c.BRACKET, knockoutResults: c.store.knockouts }, { ...c.COMP, teams: c.TEAMS });
   const lb = leaderboard(c.store.bets, w, (t) => c.groupOf[t] || null);
   const meta = registry.competitions.find((x) => x.id === id) || { id, name: c.COMP.name, edition: c.COMP.edition, status: 'active' };
   return { meta, competition: { name: c.COMP.name, edition: c.COMP.edition, entry: c.COMP.entry, prizes: c.COMP.prizes }, leaderboard: lb, teams: c.TEAMS, groupOrder: c.GROUP_ORDER, matchesPlayed: w.matchesPlayed, bets: Object.fromEntries(c.store.bets.map((b) => [b.player, publicBet(b)])) };
@@ -164,7 +164,7 @@ function validateBet(b) {
 
 // estado do mundo + leaderboard, recalculado a cada pedido (barato: 27 apostas)
 function world() {
-  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, COMP);
+  return computeWorldState(GROUPS, store.results.groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, { ...COMP, teams: TEAMS });
 }
 // guarda as posições atuais para calcular o indicador de movimento após a próxima mudança
 function snapshotRanks() {
@@ -387,7 +387,7 @@ async function api(req, res, path) {
       }
       if (!any) continue;
       matchdays.push(md);
-      const w = computeWorldState(GROUPS, cut, { bracket: BRACKET, knockoutResults: {}, marketResults: {} }, COMP);
+      const w = computeWorldState(GROUPS, cut, { bracket: BRACKET, knockoutResults: {}, marketResults: {} }, { ...COMP, teams: TEAMS });
       const lb = leaderboard(store.bets, w, teamGroup);
       for (const r of lb) series.get(r.player)?.points.push({ md, rank: r.rank, total: r.score.total });
     }
@@ -412,7 +412,7 @@ async function api(req, res, path) {
       if (idx < 0) list.push(match); else list[idx] = match;
     }
     const rankNow = Object.fromEntries(leaderboard(store.bets, world(), teamGroup).map((r) => [r.player, r.rank]));
-    const wHyp = computeWorldState(GROUPS, groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, COMP);
+    const wHyp = computeWorldState(GROUPS, groups, { bracket: BRACKET, knockoutResults: store.knockouts, marketResults: store.marketResults }, { ...COMP, teams: TEAMS });
     const lbHyp = leaderboard(store.bets, wHyp, teamGroup);
     for (const r of lbHyp) { const p = rankNow[r.player]; r.movement = p == null ? 0 : p - r.rank; r.baselineRank = p ?? null; }
     return json(res, 200, { leaderboard: lbHyp, matchesPlayed: wHyp.matchesPlayed });
