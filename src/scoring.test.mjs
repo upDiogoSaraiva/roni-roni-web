@@ -198,6 +198,16 @@ test('detalhe não credita apuramento duas vezes para a mesma equipa', () => {
   assert.equal(d.qualification, 2);
 });
 
+test('3.º duplicado (mesma equipa noutro slot do grupo) não pontua posição', () => {
+  const world = computeWorldState(groups, results);
+  // Charlie é o 3.º real do A e entra nos 8 melhores; repetido como 2.º e 3.º só o apuramento conta
+  const bet = { groups: { A: { first: 'Alfa', second: 'Charlie', third: 'Charlie' } } };
+  const d = scoreBet(bet, world, () => 'A');
+  assert.equal(d.qualification, 2); // Alfa + Charlie (uma vez)
+  assert.equal(d.position, 1); // só Alfa (1.º certo); o 3.º duplicado não pontua posição
+  assert.equal(d.groups.A.picks.third.position, 0);
+});
+
 test('não há dupla contagem quando a mesma equipa aparece em dois slots', () => {
   const world = computeWorldState(groups, results);
   // Alfa como 1.º E como 3.º (dado real tem quirks destes). Apura uma só vez.

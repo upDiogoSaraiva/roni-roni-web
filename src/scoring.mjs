@@ -281,7 +281,9 @@ export function scoreBet(bet, world, groupOf) {
       let position = 0;
       if (!mexido) {
         if (slot === 'third') {
-          if (rankOf(standings, g, team) === 3 && thirds.set.has(team)) position = 1;
+          // equipa repetida no mesmo grupo (também 1.º ou 2.º): o 3.º duplicado não pontua posição
+          const dup = team === pick.first || team === pick.second;
+          if (!dup && rankOf(standings, g, team) === 3 && thirds.set.has(team)) position = 1;
         } else if (rankOf(standings, g, team) === expectedRank) position = 1;
       }
       groupPos += position;
