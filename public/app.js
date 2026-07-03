@@ -1963,6 +1963,8 @@ function formSteps() {
 function countThirds() { return STATE.groupOrder.filter((g) => draft.groups[g].third).length; }
 
 async function pageApostar() {
+  // re-busca as janelas ao servidor: um separador antigo não pode decidir com estado velho
+  try { await refreshState(); } catch { /* sem rede, decide com o que há */ }
   // mata-mata tem prioridade quando uma ronda eliminatória está aberta (aposta-se ronda a ronda)
   const koOpen = STATE.koRounds.filter((r) => STATE.windows[r.id]).map((r) => r.id);
   if (koOpen.length) return renderKoBetting(koOpen);
