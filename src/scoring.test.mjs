@@ -50,6 +50,24 @@ test('desempate por confronto direto (Mundial 2026), não por diferença de golo
   assert.equal(quim.rank, 2);
 });
 
+test('desempate a 3 por confronto direto: mini-liga decide contra a DG geral', () => {
+  // Ciclo: Um 1-0 Dois, Dois 3-0 Tres, Tres 2-0 Um — trio com 6 pts (todos batem o Quatro).
+  // Mini-liga: Dois gd+2 (1.º), Tres e Um gd-1 mas GM 2 vs 1 (Tres à frente).
+  // A DG GERAL diria o contrário (Um goleou o Quatro por 10) — o confronto direto manda.
+  const teams = ['Um', 'Dois', 'Tres', 'Quatro'];
+  const games = [
+    { home: 'Um', away: 'Dois', homeGoals: 1, awayGoals: 0 },
+    { home: 'Dois', away: 'Tres', homeGoals: 3, awayGoals: 0 },
+    { home: 'Tres', away: 'Um', homeGoals: 2, awayGoals: 0 },
+    { home: 'Um', away: 'Quatro', homeGoals: 10, awayGoals: 0 },
+    { home: 'Dois', away: 'Quatro', homeGoals: 1, awayGoals: 0 },
+    { home: 'Tres', away: 'Quatro', homeGoals: 1, awayGoals: 0 },
+  ];
+  const s = standingsForGroup(teams, games);
+  assert.deepEqual(s.map((r) => r.team), ['Dois', 'Tres', 'Um', 'Quatro']);
+  assert.ok(s.find((r) => r.team === 'Um').gd > s.find((r) => r.team === 'Dois').gd); // DG geral contradiz — e perde
+});
+
 test('clinching: 1.º garantido e eliminado, calculados com os jogos que faltam', () => {
   // A vence tudo (9 pts, terminou); D perde tudo (0 pts, terminou); B e C ainda jogam entre si.
   const games = [

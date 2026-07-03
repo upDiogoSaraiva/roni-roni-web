@@ -20,8 +20,8 @@ function normalize(raw) {
   if (raw && raw.groups) return raw.groups;
   const groups = {};
   for (const [g, info] of Object.entries(raw?.grupos_resultados || {})) {
-    groups[g] = (info.jogos || []).map(([home, away, hg, ag]) => ({
-      home, away, homeGoals: hg, awayGoals: ag, matchday: info.jornadas || 1,
+    groups[g] = (info.jogos || []).map(([home, away, hg, ag, md]) => ({
+      home, away, homeGoals: hg, awayGoals: ag, matchday: md || 1,
     }));
   }
   return groups;
@@ -31,7 +31,7 @@ function normalize(raw) {
 // ctx = { codeToTeam: {COD:'Congo',...}, teamGroup: (nome)=>grupo, source: {espnLeague, groupStageDates} }
 export async function fetchEspnGroupResults({ codeToTeam, teamGroup, source }) {
   const src = source || DEFAULT_SOURCE;
-  const res = await fetch(espnUrl(src, src.groupStageDates), { headers: { accept: 'application/json' } });
+  const res = await fetch(espnUrl(src, src.groupStageDates), { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`ESPN respondeu ${res.status}`);
   const data = await res.json();
   const byGroup = {};
@@ -92,7 +92,7 @@ function bestMatchFor(bracket, resolved, assigned, teams) {
 // Busca os jogos do mata-mata terminados e mapeia-os aos IDs do bracket. ctx inclui standings.
 export async function fetchEspnKnockout({ codeToTeam, teamGroup, bracket, standings, source }) {
   const src = source || DEFAULT_SOURCE;
-  const res = await fetch(espnUrl(src, src.knockoutDates), { headers: { accept: 'application/json' } });
+  const res = await fetch(espnUrl(src, src.knockoutDates), { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(10_000) });
   if (!res.ok) throw new Error(`ESPN respondeu ${res.status}`);
   const data = await res.json();
   const events = [];
@@ -140,7 +140,7 @@ export async function fetchEspnKnockout({ codeToTeam, teamGroup, bracket, standi
 export async function loadResultsSource(ctx) {
   const url = process.env.RESULTS_SOURCE_URL;
   if (url) {
-    const res = await fetch(url, { headers: { accept: 'application/json' } });
+    const res = await fetch(url, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(10_000) });
     if (!res.ok) throw new Error(`fonte respondeu ${res.status}`);
     return { groups: normalize(await res.json()), source: url };
   }

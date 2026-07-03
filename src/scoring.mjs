@@ -123,9 +123,16 @@ function remainingFixtures(teams, games) {
 // Margens extremas (BIG) cobrem qualquer desempate por diferença de golos. Devolve por equipa:
 // 'winner' (sempre 1.º), 'qualified' (sempre top-2), 'eliminated' (sempre último) ou null.
 const BIG = 20;
-const GAME_OUTCOMES = [[BIG, 0], [1, 0], [0, 0], [0, 1], [0, BIG]];
+// inclui empate com muitos golos e vitórias tangenciais com muitos golos: GM é critério de
+// desempate, por isso resultados que sobem golos sem mudar DG também têm de ser enumerados
+const GAME_OUTCOMES = [[BIG, 0], [1, 0], [0, 0], [0, 1], [0, BIG], [BIG, BIG], [BIG + 1, BIG], [BIG, BIG + 1]];
+const clinchCache = new Map(); // função pura de (teams, games) e cara — memoiza por estado do grupo
 export function clinchStatus(teams, games) {
+  const key = teams.join('\0') + '|' + JSON.stringify(games);
+  if (clinchCache.has(key)) return clinchCache.get(key);
+  if (clinchCache.size > 200) clinchCache.clear();
   const out = Object.fromEntries(teams.map((t) => [t, null]));
+  clinchCache.set(key, out);
   const rem = remainingFixtures(teams, games);
   if (rem.length > 4) return out; // cedo demais: nada garantido num grupo de 4
   const ranksOf = new Map(teams.map((t) => [t, new Set()]));
@@ -211,14 +218,23 @@ export function computeKnockout(bracket, koResults) {
     if (!r || !r.winner) continue;
     results[id] = { winner: r.winner, method: r.method || null, round: matchRound[id] };
   }
-  // Final 4 = os 4 semifinalistas = participantes das meias-finais (jogos 101 e 102)
+  // Final 4 = os 4 semifinalistas = participantes das meias-finais (ids lidos do bracket,
+  // não hardcoded — um Euro pode numerar diferente). Se as meias ainda não têm emparelhamento
+  // guardado, cai para os vencedores dos quartos (slots winnerOf) — os semifinalistas ficam
+  // definidos quando os quartos acabam, não quando as meias são jogadas.
+  const sfIds = (bracket?.rounds?.find((r) => r.id === 'sf')?.matches || [101, 102]).map(String);
+  const finalId = String((bracket?.rounds?.find((r) => r.id === 'final')?.matches || [104])[0]);
   const final4 = [];
-  for (const sf of ['101', '102']) {
+  for (const sf of sfIds) {
     const m = koResults?.[sf];
-    if (m?.home) final4.push(m.home);
-    if (m?.away) final4.push(m.away);
+    const slot = bracket?.matches?.[sf] || {};
+    const fromFeeder = (s) => (s?.type === 'winnerOf' ? koResults?.[String(s.match)]?.winner : null);
+    const home = m?.home || fromFeeder(slot.home);
+    const away = m?.away || fromFeeder(slot.away);
+    if (home) final4.push(home);
+    if (away) final4.push(away);
   }
-  const champion = koResults?.['104']?.winner || null;
+  const champion = koResults?.[finalId]?.winner || null;
   return { roundPts, matchRound, results, final4, champion };
 }
 
@@ -305,7 +321,8 @@ export function scoreBet(bet, world, groupOf) {
   if (ko) {
     if (bet.champion && ko.champion && bet.champion === ko.champion) detail.champion = P.champion;
     if (Array.isArray(bet.final4) && ko.final4.length) {
-      for (const t of bet.final4) if (ko.final4.includes(t)) detail.final4 += P.final4;
+      // Set: uma seleção repetida na aposta não pontua duas vezes
+      for (const t of new Set(bet.final4)) if (ko.final4.includes(t)) detail.final4 += P.final4;
     }
     const jokers = new Set((bet.jokers || []).map(String));
     for (const [id, pick] of Object.entries(bet.knockouts || {})) {

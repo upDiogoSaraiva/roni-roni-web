@@ -13,8 +13,8 @@ const files = [...new Set(flagFiles())];
 let ok = 0;
 for (const f of files) {
   const dest = join(out, `${f}.svg`);
-  if (existsSync(dest) && f !== 'pt') { /* já existe */ }
-  const res = await fetch(`https://flagcdn.com/${f}.svg`);
+  if (existsSync(dest) && f !== 'pt') continue; // já existe — não re-descarrega nem reescreve
+  const res = await fetch(`https://flagcdn.com/${f}.svg`, { signal: AbortSignal.timeout(15_000) });
   if (!res.ok) { console.error('FALHOU', f, res.status); continue; }
   const svg = await res.text();
   writeFileSync(dest, svg);
