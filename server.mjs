@@ -699,8 +699,12 @@ async function api(req, res, path) {
 
     if (path === '/api/admin/knockout' && method === 'DELETE') {
       const body = await readBody(req);
+      const cur = store.knockouts[body.match];
+      if (!cur) return json(res, 404, { error: 'Esse jogo não tem registo.' });
       snapshotRanks();
-      delete store.knockouts[body.match];
+      // limpa só o RESULTADO; o emparelhamento (home/away) mantém-se — é o oficial, não se re-deduz
+      if (cur.home || cur.away) store.knockouts[body.match] = { home: cur.home || null, away: cur.away || null, homeGoals: null, awayGoals: null, winner: null, method: null };
+      else delete store.knockouts[body.match];
       saveStore();
       return json(res, 200, { ok: true });
     }
@@ -737,7 +741,7 @@ async function api(req, res, path) {
       const startedId = activeId; // se a competição ativa trocar durante os awaits, aborta
       let loaded;
       try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: { ...COMP.source, file: COMP.sourceFile } }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
-      if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch — repete.' });
+      if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch. Repete.' });
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];
@@ -751,7 +755,7 @@ async function api(req, res, path) {
       try {
         const standings = world().standings;
         const ko = await fetchEspnKnockout({ codeToTeam, teamGroup, bracket: BRACKET, standings, source: COMP.source });
-        if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch — repete.' });
+        if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch. Repete.' });
         for (const [mid, m] of Object.entries(ko)) { store.knockouts[mid] = { ...(store.knockouts[mid] || {}), ...m }; koImported++; }
       } catch (e) { errors.push('mata-mata: ' + e.message); }
       saveStore();

@@ -136,6 +136,8 @@ button { font: inherit; cursor: pointer; }
 /* ---------- nav de chips (páginas de drama) ---------- */
 .engage-nav { display: flex; gap: var(--s2); overflow-x: auto; margin: 0 0 var(--s5); padding-bottom: 2px; scrollbar-width: none; }
 .engage-nav::-webkit-scrollbar { display: none; }
+/* em ecrã largo (rato, sem swipe) as chips quebram linha em vez de ficarem cortadas */
+@media (min-width: 720px) { .engage-nav { flex-wrap: wrap; overflow-x: visible; } }
 .chip-nav { flex: none; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface); color: var(--text-soft); font-size: 13px; font-weight: 600; }
 .chip-nav.on { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
 

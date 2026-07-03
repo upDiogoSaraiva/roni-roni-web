@@ -188,7 +188,7 @@ function flag(name) {
   return el('img', { class: 'flag-img', src: `flags/${f}.svg`, alt: '', 'aria-hidden': 'true', loading: 'lazy', width: '20', height: '14' });
 }
 function teamChip(name, { code = false } = {}) {
-  if (!name) return el('span', { class: 'muted' }, '—');
+  if (!name) return el('span', { class: 'muted' }, '-');
   return el('span', { class: 'team' }, flag(name),
     el('span', { class: 'nm' }, code ? STATE.teams[name]?.code || name : name));
 }
@@ -531,11 +531,11 @@ function pointBadges(pick) {
   const b = el('span', { class: 'pt-badges' });
   if (!pick) return b;
   // 3.º acima do teto de 8 (por ordem alfabética dos grupos): não conta
-  if (pick.capped) { b.appendChild(el('span', { class: 'pt-chip out', title: 'Fora do teto de 8 terceiros — não conta' }, '8+')); return b; }
+  if (pick.capped) { b.appendChild(el('span', { class: 'pt-chip out', title: 'Fora do teto de 8 terceiros, não conta' }, '8+')); return b; }
   if (pick.credited) b.appendChild(el('span', { class: 'pt-chip apura', title: 'Apurou (+1)' }, '+1'));
   if (pick.position) b.appendChild(el('span', { class: 'pt-chip pos', title: 'Posição certa (+1)' }, '+1'));
   if (pick.qualifies && !pick.credited) b.appendChild(el('span', { class: 'pt-chip dup', title: 'Apurou, mas já contada noutro lugar' }, '✓'));
-  if (!pick.qualifies) b.appendChild(el('span', { class: 'pt-chip out', title: 'Não apurou' }, '—'));
+  if (!pick.qualifies) b.appendChild(el('span', { class: 'pt-chip out', title: 'Não apurou' }, '-'));
   return b;
 }
 function sheetLine(label, team, pick) {
@@ -622,7 +622,7 @@ async function pageEvolucao() {
   let me = localStorage.getItem('roni-me') || '';
   const sel = el('select', { class: 'select', style: { width: '100%' },
     onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); paint(); } },
-    el('option', { value: '' }, '— destacar um jogador —'),
+    el('option', { value: '' }, 'Destacar um jogador…'),
     ...[...players].sort((a, b) => a.player.localeCompare(b.player, 'pt'))
       .map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
   host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
@@ -815,7 +815,7 @@ async function pageSimular() {
 
   const meSel = el('select', { class: 'select', style: { width: '100%' },
     onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); if (resHost.childElementCount) simulate(); } },
-    el('option', { value: '' }, '— destacar um jogador —'),
+    el('option', { value: '' }, 'Destacar um jogador…'),
     ...[...STATE.players].sort((a, b) => a.player.localeCompare(b.player, 'pt'))
       .map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
   host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
@@ -935,7 +935,7 @@ function histCard(buckets) {
 }
 async function pageReveal() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Reveal'),
-    el('p', {}, 'Como o grupo apostou — o consenso e a coragem de cada um.')));
+    el('p', {}, 'Como o grupo apostou: o consenso e a coragem de cada um.')));
   MAIN.appendChild(engageNav('reveal'));
   const host = el('div', {});
   MAIN.append(host);
@@ -997,7 +997,7 @@ async function pageReveal() {
 /* ---------------- PÁGINA: FRENTE A FRENTE (H2H) ---------------- */
 function h2hTrio(bet, g) {
   const p = bet.groups?.[g] || {};
-  return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '—';
+  return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '-';
 }
 function h2hRow(label, a, b, eq, win) {
   return el('div', { class: 'h2h-row' + (eq ? ' eq' : '') },
@@ -1009,12 +1009,12 @@ function h2hRow(label, a, b, eq, win) {
 function h2hWin(x, y, hi = true) { return x === y ? null : ((hi ? x > y : x < y) ? 'a' : 'b'); }
 async function pageH2H() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Frente a frente'),
-    el('p', {}, 'Compara dois jogadores lado a lado — quem lidera e onde diferem.')));
+    el('p', {}, 'Compara dois jogadores lado a lado: quem lidera e onde diferem.')));
   MAIN.appendChild(engageNav('h2h'));
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(6));
-  const data = await api('/api/leaderboard');
+  const [data, br] = await Promise.all([api('/api/leaderboard'), api('/api/bracket').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard;
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
@@ -1059,6 +1059,31 @@ async function pageH2H() {
     card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
     for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));
     body.appendChild(card);
+
+    // playoffs: pontos do mata-mata, jokers e as escolhas jogo a jogo (verde = acertou)
+    if (br?.rounds) {
+      const gameRows = [];
+      for (const r of br.rounds) {
+        for (const mid of r.matches) {
+          const m = br.resolved[String(mid)];
+          const pa = ba.knockouts?.[mid]?.winner || null;
+          const pb = bb.knockouts?.[mid]?.winner || null;
+          if (!pa && !pb) continue;
+          const win = m?.winner ? ((pa === m.winner) === (pb === m.winner) ? null : (pa === m.winner ? 'a' : 'b')) : null;
+          const lbl = m?.home?.team ? `${codeOf(m.home.team)}-${codeOf(m.away.team)}` : `Jogo ${mid}`;
+          gameRows.push(h2hRow(lbl, pa ? codeOf(pa) : '-', pb ? codeOf(pb) : '-', !!pa && pa === pb, win));
+        }
+      }
+      if (gameRows.length) {
+        body.appendChild(el('div', { class: 'section-label' }, 'Mata-mata'));
+        const kcard = el('div', { class: 'card', style: { padding: '4px 0' } });
+        kcard.appendChild(h2hRow('Pontos', '+' + (ra.score.knockout || 0), '+' + (rb.score.knockout || 0), false, h2hWin(ra.score.knockout || 0, rb.score.knockout || 0)));
+        kcard.appendChild(h2hRow('Vitórias certas', ra.score.correctWinners || 0, rb.score.correctWinners || 0, false, h2hWin(ra.score.correctWinners || 0, rb.score.correctWinners || 0)));
+        kcard.appendChild(h2hRow('Jokers', (ba.jokers || []).map((j) => 'J' + j).join(' ') || '-', (bb.jokers || []).map((j) => 'J' + j).join(' ') || '-', false));
+        for (const r of gameRows) kcard.appendChild(r);
+        body.appendChild(kcard);
+      }
+    }
   }
   paint();
 }
@@ -1172,8 +1197,8 @@ async function pageCartao() {
       const blob = await cardToPng(preview.querySelector('svg'));
       const file = new File([blob], `roni-${me}.png`, { type: 'image/png' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Roni Roni', text: `${me} — ${byPlayer[me].rank}.º no Torneio Roni Roni` });
-      } else { toast('Partilha direta indisponível aqui — a descarregar.'); downloadCard(); }
+        await navigator.share({ files: [file], title: 'Roni Roni', text: `${me}, ${byPlayer[me].rank}.º no Torneio Roni Roni` });
+      } else { toast('Partilha direta indisponível aqui, a descarregar.'); downloadCard(); }
     } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); } // só o cancelar da partilha é silencioso
   }
   paint();
@@ -1292,7 +1317,7 @@ async function pageConquistas() {
 /* ---------------- PÁGINA: HALL DA FAMA ---------------- */
 async function pageHallOfFame() {
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Hall da Fama'),
-    el('p', {}, 'O palmarés do grupo — títulos, pódios e recordes de todas as edições.')));
+    el('p', {}, 'O palmarés do grupo: títulos, pódios e recordes de todas as edições.')));
   MAIN.appendChild(engageNav('halloffame'));
   const host = el('div', {});
   MAIN.append(host);
@@ -1329,8 +1354,8 @@ async function pageHallOfFame() {
       el('div', { class: 'lb-player' }, monogram(p.player),
         el('div', { style: { minWidth: '0' } }, el('div', { class: 'nm' }, p.player),
           el('div', { class: 'sub' }, `${p.editions} edição(ões) · melhor ${p.bestRank}.º`))),
-      el('span', { class: 'num c' }, p.titles || '—'),
-      el('span', { class: 'num c' }, p.podiums || '—'),
+      el('span', { class: 'num c' }, p.titles || '-'),
+      el('span', { class: 'num c' }, p.podiums || '-'),
       el('span', { class: 'num c' }, p.points)));
   });
   host.appendChild(card);
@@ -1399,7 +1424,7 @@ function buildStoryCard(kind, c) {
     const fgA = placeFlag(c.flagAEl, cx - 320, 620, 170, 113); if (fgA) svg.appendChild(fgA);
     const fgB = placeFlag(c.flagBEl, cx + 150, 620, 170, 113); if (fgB) svg.appendChild(fgB);
     svg.appendChild(txt(cx, 850, 116, P.text, `${c.a}  vs  ${c.b}`, { a: 'middle', w: 500 }));
-    svg.appendChild(txt(cx, 960, 36, P.mut, 'quem o grupo vê em 1.º do Grupo ' + c.group, { a: 'middle' }));
+    svg.appendChild(txt(cx, 960, 36, P.mut, c.sub || ('quem o grupo vê em 1.º do Grupo ' + c.group), { a: 'middle' }));
     const total = (c.na + c.nb) || 1, barW = 840, x0 = cx - barW / 2, y0 = 1030, h = 44, wa = Math.round(barW * c.na / total);
     svg.appendChild(svgEl('rect', { x: x0, y: y0, width: wa, height: h, fill: P.ember, rx: 10 }));
     svg.appendChild(svgEl('rect', { x: x0 + wa, y: y0, width: barW - wa, height: h, fill: P.gold, rx: 10 }));
@@ -1522,7 +1547,7 @@ async function pagePartilhar() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(4));
-  const [data, tl, res] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null), api('/api/results').catch(() => null)]);
+  const [data, tl, res, br] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null), api('/api/results').catch(() => null), api('/api/bracket').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard, bets = data.bets;
   if (!lb.length) { host.appendChild(emptyState('Ainda sem apostas', 'Os cartões de partilha aparecem quando houver folhas submetidas.')); return; }
@@ -1541,7 +1566,19 @@ async function pagePartilhar() {
     return { group: g, a: codeOf(a), b: codeOf(b), aName: a, bName: b, na: firsts.filter((x) => x === a).length, nb: firsts.filter((x) => x === b).length };
   };
   const jogoCtx = () => {
-    // próximo jogo por disputar do calendário canónico de cada grupo (J1: 0-1,2-3 · J2: 0-2,3-1 · J3: 0-3,1-2)
+    // em modo playoff: o próximo jogo do mata-mata por decidir (emparelhamento conhecido, sem vencedor)
+    if (br?.rounds) {
+      for (const r of br.rounds) {
+        for (const mid of r.matches) {
+          const m = br.resolved[String(mid)];
+          if (!m?.home?.team || !m?.away?.team || m.winner) continue;
+          const na = Object.values(bets).filter((b) => b.knockouts?.[mid]?.winner === m.home.team).length;
+          const nb = Object.values(bets).filter((b) => b.knockouts?.[mid]?.winner === m.away.team).length;
+          return { group: r.label || r.id, a: codeOf(m.home.team), b: codeOf(m.away.team), aName: m.home.team, bName: m.away.team, na, nb, sub: 'quem o grupo vê a ganhar · ' + (roundLabel(r.id) || '') };
+        }
+      }
+    }
+    // fase de grupos: próximo jogo por disputar do calendário canónico (J1: 0-1,2-3 · J2: 0-2,3-1 · J3: 0-3,1-2)
     const played = (g, a, b) => (res?.results?.[g] || []).some((m) => (m.home === a && m.away === b) || (m.home === b && m.away === a));
     for (const g of STATE.groupOrder) {
       const t = STATE.groups[g];
@@ -1556,9 +1593,20 @@ async function pagePartilhar() {
       const margin = counts[0].n - counts[1].n;
       if (!best || margin < best.margin) best = { ...consensus(g, counts[0].team, counts[1].team), margin };
     }
-    return best || { group: STATE.groupOrder[0], a: '—', b: '—', na: 0, nb: 0 };
+    return best || { group: STATE.groupOrder[0], a: '-', b: '-', na: 0, nb: 0 };
   };
   const acertoCtx = (row) => {
+    // em modo playoff: o acerto mais recente no mata-mata (vencedor certo, jogo de id mais alto)
+    const kd = row.score.knockoutDetail || {};
+    let best = null;
+    for (const [mid, d] of Object.entries(kd)) {
+      if (d.winnerCorrect && (!best || +mid > +best.mid)) best = { mid, d };
+    }
+    if (best && br?.resolved) {
+      const m = br.resolved[best.mid];
+      const round = roundLabel(m?.round) || 'mata-mata';
+      return { label: `Vencedor certo · ${round}`, team: m?.winner || bets[me]?.knockouts?.[best.mid]?.winner, pts: best.d.pts, player: me };
+    }
     const ord = { first: '1.º', second: '2.º', third: '3.º' };
     for (const g of STATE.groupOrder) {
       const picks = row.score.groups?.[g]?.picks || {};
@@ -1742,7 +1790,7 @@ async function pagePremios() {
     el('div', { class: 'kv' }, el('b', {}, 'Em prémios'), el('span', { class: 'v' }, totalPrizes + '€'))));
   if (data.provisional) {
     host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '0 0 12px' } },
-      'Provisório — quem lidera cada prémio com os resultados de agora.'));
+      'Provisório: quem lidera cada prémio com os resultados de agora.'));
   }
 
   // resolve o titular de cada prémio a partir do tipo definido na config da competição
@@ -1828,7 +1876,7 @@ function identityCard(refresh) {
   }
   card.appendChild(el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Sou eu (neste dispositivo)'));
   const claimSel = el('select', { class: 'select', style: { width: '100%' } },
-    el('option', { value: '' }, '— escolher o teu nome —'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
+    el('option', { value: '' }, 'Escolher o teu nome…'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
   card.appendChild(el('div', { class: 'field' }, el('label', {}, 'Reivindicar o meu nome'), claimSel,
     el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '8px' }, onclick: async () => {
       if (!claimSel.value) return toast('Escolhe o teu nome.', true);
@@ -1841,7 +1889,7 @@ function identityCard(refresh) {
     } }, 'Reivindicar')));
   card.appendChild(el('div', { class: 'section-label' }, 'ou ligar este dispositivo'));
   const linkName = el('select', { class: 'select', style: { width: '100%' } },
-    el('option', { value: '' }, '— o teu nome —'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
+    el('option', { value: '' }, 'O teu nome…'), ...STATE.players.map((p) => el('option', { value: p.player }, p.player)));
   const linkCode = el('input', { class: 'input num', placeholder: 'código de 6 dígitos', inputmode: 'numeric', maxlength: '6' });
   card.appendChild(el('div', { class: 'field' }, el('label', {}, 'Já me reivindiquei noutro dispositivo'), linkName, linkCode,
     el('button', { class: 'btn btn-ghost btn-block', style: { marginTop: '8px' }, onclick: async () => {
@@ -1863,7 +1911,7 @@ async function pagePessoal() {
   host.appendChild(identityCard(() => render()));
   let me = localStorage.getItem('roni-me') || '';
   const sel = el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { me = e.target.value; if (me) localStorage.setItem('roni-me', me); load(); } },
-    el('option', { value: '' }, '— escolher jogador —'),
+    el('option', { value: '' }, 'Escolher jogador…'),
     ...STATE.players.map((p) => el('option', { value: p.player, selected: p.player === me }, p.player)));
   host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, el('div', { class: 'field', style: { margin: 0 } }, el('label', {}, 'Quem és'), sel)));
   const body = el('div', { class: 'mt4' });
@@ -1971,7 +2019,7 @@ function renderIdent(body) {
   // Jogadores não têm bandeira; um <select> nativo é o controlo certo (acessível e fiável).
   const sel = el('select', { class: 'select', id: 'pick-player', style: { width: '100%' },
     onchange: (e) => { if (e.target.value) loadExisting(e.target.value); } },
-    el('option', { value: '' }, '— escolher jogador —'),
+    el('option', { value: '' }, 'Escolher jogador…'),
     ...STATE.players.map((p) => el('option', { value: p.player, selected: draft.editing && draft.player === p.player }, p.player + (p.hasPin ? ' 🔒' : ''))));
   body.appendChild(el('div', { class: 'field' }, el('label', { for: 'pick-player' }, 'Jogador existente (editar)'), sel));
 
@@ -2103,7 +2151,7 @@ function renderMarkets(body) {
       m.sub ? el('div', { class: 'hint', style: { marginTop: '-4px', marginBottom: '6px' } }, m.sub) : null,
       m.options?.length
         ? el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { draft.markets[m.id] = e.target.value || undefined; } },
-          el('option', { value: '' }, '— escolher —'), ...m.options.map((o) => el('option', { value: o, selected: draft.markets[m.id] === o }, o)))
+          el('option', { value: '' }, 'Escolher…'), ...m.options.map((o) => el('option', { value: o, selected: draft.markets[m.id] === o }, o)))
         : combobox({ value: draft.markets[m.id], options: allTeams(), placeholder: 'Escolher seleção…', onChange: (t) => { draft.markets[m.id] = t; } })));
   }
   body.appendChild(navButtons({ onNext: goNext, nextLabel: 'Rever aposta' }));
@@ -2121,7 +2169,7 @@ function renderReview(body) {
     el('div', { class: 'sheet-top' },
       el('div', { class: 'kv' }, el('b', {}, 'Jogador'), draft.player),
       el('div', { class: 'kv' }, el('b', {}, 'Campeão'), teamChip(draft.champion)),
-      el('div', { class: 'kv' }, el('b', {}, 'PIN'), draft.pin ? '•••' : '—')),
+      el('div', { class: 'kv' }, el('b', {}, 'PIN'), draft.pin ? '•••' : '-')),
     el('div', { class: 'section-label' }, 'Final 4'),
     el('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap' } }, ...draft.final4.map((t) => el('span', { class: 'pill' }, teamChip(t))))));
 
@@ -2148,7 +2196,7 @@ function renderReview(body) {
     el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Joker de grupo (opcional)'),
     el('p', { class: 'hint', style: { marginTop: '-4px', marginBottom: '8px' } }, 'Duplica os pontos de posição de um grupo à tua escolha.'),
     el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => { draft.groupJoker = e.target.value || null; } },
-      el('option', { value: '' }, '— sem joker —'),
+      el('option', { value: '' }, 'Sem joker'),
       ...STATE.groupOrder.map((g) => el('option', { value: g, selected: draft.groupJoker === g }, 'Grupo ' + g)))));
 
   body.appendChild(navButtons({
@@ -2307,8 +2355,8 @@ async function bracketSection(host) {
   host.appendChild(noteEl);
   const data = await api('/api/bracket');
   noteEl.textContent = data.groupStageComplete
-    ? 'Fase de grupos terminada — estes são os jogos do mata-mata.'
-    : 'Provisório — se a fase de grupos acabasse agora, seriam estes os jogos (8 melhores 3.os incluídos). Atualiza a cada resultado.';
+    ? 'Fase de grupos terminada: estes são os jogos do mata-mata.'
+    : 'Provisório: se a fase de grupos acabasse agora, seriam estes os jogos (8 melhores 3.os incluídos). Atualiza a cada resultado.';
   for (const r of data.rounds) {
     const card = el('div', { class: 'card', style: { padding: '8px 0', marginTop: '8px' } });
     card.appendChild(el('div', { class: 'ko-round' }, r.label, STATE.windows[r.id] ? el('span', { class: 'pill open', style: { marginLeft: '8px' } }, el('span', { class: 'dot' }), 'apostas abertas') : null));
@@ -2321,7 +2369,7 @@ async function bracketSection(host) {
 let koBet = null; // { player, pin, round, picks:{mid:{winner,method}}, jokers:[mid], resolved }
 async function renderKoBetting(openRounds) {
   clear(MAIN);
-  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Apostas — mata-mata'),
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Apostas · mata-mata'),
     el('p', {}, 'Escolhe o vencedor e a fase (tempo reg., prolongamento ou penáltis) de cada jogo.')));
   if (!koBet) koBet = { player: '', pin: '', round: openRounds[0], picks: {}, jokers: [], resolved: null };
 
@@ -2329,7 +2377,7 @@ async function renderKoBetting(openRounds) {
   const ctrl = el('div', { class: 'card', style: { padding: '16px' } });
   const sel = el('select', { class: 'select', style: { width: '100%' },
     onchange: (e) => { koBet.player = e.target.value; } },
-    el('option', { value: '' }, '— escolher jogador —'),
+    el('option', { value: '' }, 'Escolher jogador…'),
     ...STATE.players.map((p) => el('option', { value: p.player, selected: koBet.player === p.player }, p.player + (p.hasPin ? ' 🔒' : ''))));
   ctrl.appendChild(el('div', { class: 'field' }, el('label', { for: '' }, 'Jogador'), sel));
   if (openRounds.length > 1) {
@@ -2366,7 +2414,7 @@ async function renderKoBetting(openRounds) {
     const wrap = el('div', {});
     if (jokerEligible()) {
       wrap.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px' } },
-        `Jokers: ${koBet.jokers.length}/2 — duplicam os pontos do jogo (16-avos/8-avos/quartos).`));
+        `Jokers: ${koBet.jokers.length}/2, duplicam os pontos do jogo (16-avos/8-avos/quartos).`));
     }
     for (const mid of koBet.roundMatches) {
       const m = koBet.resolved[mid];
@@ -2445,7 +2493,7 @@ async function adminCompetitions(host) {
   host.appendChild(list);
 
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '10px 0 6px' } },
-    'Importar edição passada — classificação final, uma linha por jogador: nome, pontos.'));
+    'Importar edição passada: classificação final, uma linha por jogador (nome, pontos).'));
   const nm = el('input', { class: 'input', placeholder: 'Nome', value: 'Torneio Roni Roni' });
   const ed = el('input', { class: 'input', placeholder: 'Edição (ex.: Euro 2024)' });
   const csv = el('textarea', { class: 'input', rows: '5', placeholder: 'Diogo Saraiva, 84\nManel, 80', style: { resize: 'vertical', fontFamily: 'var(--font-num)' } });
@@ -2457,7 +2505,7 @@ async function adminCompetitions(host) {
 
   // criar competição NOVA (fase de grupos)
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '12.5px', margin: '16px 0 6px' } },
-    'Criar competição nova — uma linha por grupo: "A: Equipa1, Equipa2, Equipa3, Equipa4".'));
+    'Criar competição nova. Uma linha por grupo: "A: Equipa1, Equipa2, Equipa3, Equipa4".'));
   const cName = el('input', { class: 'input', placeholder: 'Nome', value: 'Torneio Roni Roni' });
   const cEd = el('input', { class: 'input', placeholder: 'Edição (ex.: Euro 2028)' });
   const cGroups = el('textarea', { class: 'input', rows: '6', placeholder: 'A: Portugal, Espanha, Itália, França\nB: Inglaterra, Alemanha, Croácia, Países Baixos', style: { resize: 'vertical' } });
@@ -2640,7 +2688,7 @@ async function pageAdmin() {
       };
       const picker = m.options?.length
         ? el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => save(e.target.value) },
-          el('option', { value: '' }, '— por decidir —'), ...m.options.map((o) => el('option', { value: o, selected: cur === o }, o)))
+          el('option', { value: '' }, 'Por decidir'), ...m.options.map((o) => el('option', { value: o, selected: cur === o }, o)))
         : combobox({ value: cur, options: allTeams(), placeholder: 'Vencedor…', onChange: save });
       mcard.appendChild(el('div', { class: 'field' }, el('label', {}, `${m.name} · ${m.points || 0} pts`), picker));
     }
@@ -2733,6 +2781,17 @@ function koResultEditor(mid, m, registry, onSaved) {
   card.appendChild(el('div', { class: 'ko-lbl' }, 'Acaba em'));
   card.appendChild(methWrap);
   card.appendChild(el('button', { class: 'btn btn-primary btn-block', style: { marginTop: '12px' }, onclick: save }, icon('check'), 'Gravar jogo ' + mid));
+  if (m.winner) {
+    card.appendChild(el('button', { class: 'btn btn-ghost btn-block', style: { marginTop: '8px' }, onclick: clearResult }, 'Limpar resultado'));
+  }
+
+  async function clearResult() {
+    try {
+      await api('/api/admin/knockout', { method: 'DELETE', body: { match: mid } });
+      toast(`Resultado do jogo ${mid} removido. Classificação recalculada.`);
+      if (onSaved) onSaved(m.round); else render();
+    } catch (e) { toast(e.message, true); }
+  }
 
   async function save() {
     if (!state.winner) return toast('Escolhe o vencedor.', true);
@@ -2773,13 +2832,13 @@ function betsGrid(bets) {
         const p = b.groups[g] || {};
         tr.appendChild(el('td', {}, cell(p.first)));
         tr.appendChild(el('td', {}, cell(p.second)));
-        tr.appendChild(el('td', {}, p.third ? cell(p.third) : el('span', { class: 'muted' }, '—')));
+        tr.appendChild(el('td', {}, p.third ? cell(p.third) : el('span', { class: 'muted' }, '-')));
       }
       tbody.appendChild(tr);
     });
     scroll.appendChild(el('table', { class: 'bets-grid' }, el('thead', {}, head), tbody));
   }
-  function cell(name) { return name ? el('span', { class: 'team' }, flag(name), el('span', {}, STATE.teams[name]?.code || name)) : el('span', { class: 'muted' }, '—'); }
+  function cell(name) { return name ? el('span', { class: 'team' }, flag(name), el('span', {}, STATE.teams[name]?.code || name)) : el('span', { class: 'muted' }, '-'); }
   paint();
   return wrap;
 }
