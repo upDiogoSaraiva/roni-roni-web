@@ -2,9 +2,9 @@
 // Serve a SPA em public/ e uma API neutra (apostas, resultados, pontos). Nada do motor.
 
 import { createServer } from 'node:http';
-import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync, copyFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, statSync, createReadStream, mkdirSync, copyFileSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, normalize, extname } from 'node:path';
+import { dirname, join, normalize, extname, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { computeWorldState, leaderboard } from './src/scoring.mjs';
 import { loadResultsSource, fetchEspnKnockout } from './src/results_source.mjs';
@@ -33,10 +33,13 @@ function defaultWindows(groupsOpen) {
   for (const r of KO_ROUNDS) w[r] = false;
   return w;
 }
-// escreve com cópia de segurança .bak antes de cada gravação (nunca perder dados)
+// escreve com cópia de segurança .bak antes de cada gravação (nunca perder dados);
+// a escrita é atómica (temporário + rename) para um crash a meio não truncar o ficheiro
 function backupThenWrite(path, data) {
   try { if (existsSync(path)) copyFileSync(path, path + '.bak'); } catch { /* backup best-effort */ }
-  writeFileSync(path, data);
+  const tmp = path + '.tmp';
+  writeFileSync(tmp, data);
+  renameSync(tmp, path);
 }
 const saveStore = () => backupThenWrite(STORE_PATH, JSON.stringify(store, null, 2));
 
@@ -61,8 +64,15 @@ function readCompetition(id) {
   for (const [name, meta] of Object.entries(s.teams)) c2t[meta.code] = name;
   const storePath = join(dir, 'store.json');
   let st;
-  if (existsSync(storePath)) st = JSON.parse(readFileSync(storePath, 'utf8'));
-  else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
+  if (existsSync(storePath)) {
+    // se o store estiver corrompido (crash a meio de uma escrita antiga), cai para o .bak
+    try { st = JSON.parse(readFileSync(storePath, 'utf8')); }
+    catch (e) {
+      if (!existsSync(storePath + '.bak')) throw e;
+      console.error(`store.json de ${id} ilegível (${e.message}) — a recuperar do .bak`);
+      st = JSON.parse(readFileSync(storePath + '.bak', 'utf8'));
+    }
+  } else st = { windowOpen: s.windowOpen !== false, results: structuredClone(s.results), bets: structuredClone(s.bets) };
   if (!st.windows) { st.windows = { grupos: s.windowOpen !== false }; for (const r of koRounds) st.windows[r] = false; }
   if (!st.knockouts) st.knockouts = structuredClone(s.knockouts || {});
   if (!st.marketResults) st.marketResults = {}; // vencedores dos mercados extra (melhor marcador, etc.)
@@ -106,8 +116,30 @@ function competitionSummary(id) {
   return { meta, competition: { name: c.COMP.name, edition: c.COMP.edition, entry: c.COMP.entry, prizes: c.COMP.prizes }, leaderboard: lb, teams: c.TEAMS, groupOrder: c.GROUP_ORDER, matchesPlayed: w.matchesPlayed, bets: Object.fromEntries(c.store.bets.map((b) => [b.player, publicBet(b)])) };
 }
 
-// tokens de admin válidos (memória; nível protótipo)
-const adminTokens = new Set();
+// tokens de admin válidos (memória; nível protótipo) — expiram ao fim de 12 h
+const adminTokens = new Map(); // token -> expiry (ms)
+const ADMIN_TOKEN_TTL = 12 * 60 * 60 * 1000;
+
+// limite de tentativas por IP para endpoints sensíveis (login, PINs, códigos de identidade):
+// janela deslizante em memória, 10 tentativas falhadas por 15 minutos
+const strikes = new Map(); // `${bucket}:${ip}` -> [timestamps]
+const STRIKE_MAX = 10;
+const STRIKE_WINDOW = 15 * 60 * 1000;
+const clientIp = (req) => req.headers['cf-connecting-ip'] || req.socket.remoteAddress || '?';
+function rateLimited(req, bucket) {
+  const key = `${bucket}:${clientIp(req)}`;
+  const now = Date.now();
+  const list = (strikes.get(key) || []).filter((t) => now - t < STRIKE_WINDOW);
+  strikes.set(key, list);
+  return list.length >= STRIKE_MAX;
+}
+function registerStrike(req, bucket) {
+  const key = `${bucket}:${clientIp(req)}`;
+  const list = strikes.get(key) || [];
+  list.push(Date.now());
+  strikes.set(key, list);
+  if (strikes.size > 5000) strikes.clear(); // trava de memória; pior caso: perdoa strikes
+}
 
 // ---------- helpers ----------
 const json = (res, code, body) => {
@@ -119,7 +151,7 @@ const readBody = (req) =>
     let data = '';
     req.on('data', (c) => {
       data += c;
-      if (data.length > 1e6) reject(new Error('payload demasiado grande'));
+      if (data.length > 1e6) { req.destroy(); data = ''; reject(new Error('payload demasiado grande')); }
     });
     req.on('end', () => {
       try {
@@ -131,12 +163,20 @@ const readBody = (req) =>
     req.on('error', reject);
   });
 
-const isAdmin = (req) => adminTokens.has(req.headers['x-admin-token']);
+const isAdmin = (req) => {
+  const t = req.headers['x-admin-token'];
+  const exp = adminTokens.get(t);
+  if (!exp) return false;
+  if (Date.now() > exp) { adminTokens.delete(t); return false; }
+  return true;
+};
 
 // equipas que o jogador deixou fora do grupo certo / outras validações
 function validateBet(b) {
   const errors = [];
   if (!b || typeof b.player !== 'string' || !b.player.trim()) errors.push('Nome do jogador em falta.');
+  else if (b.player.trim().length > 40) errors.push('Nome demasiado longo (máx. 40 caracteres).');
+  if (b && b.pin != null && b.pin !== '' && !/^\d{4,8}$/.test(String(b.pin))) errors.push('O PIN tem de ter 4 a 8 dígitos.');
   const valid = (t) => typeof t === 'string' && !!TEAMS[t];
   if (!valid(b.champion)) errors.push('Campeão inválido.');
   if (!Array.isArray(b.final4) || b.final4.length !== 4) errors.push('Final 4 tem de ter 4 seleções.');
@@ -276,9 +316,12 @@ async function api(req, res, path) {
   // ---------- identidade (token de dispositivo, sem password) ----------
   // reivindicar um nome: emite token + código de 6 dígitos para ligar outros dispositivos
   if (path === '/api/identity/claim' && method === 'POST') {
+    if (rateLimited(req, 'identity')) return json(res, 429, { error: 'Demasiadas tentativas. Espera 15 minutos.' });
     const body = await readBody(req);
     const player = (body.player || '').trim();
     if (!player) return json(res, 400, { error: 'Indica o teu nome.' });
+    // só nomes de jogadores que existem na edição (evita squatting de nomes arbitrários)
+    if (!store.bets.some((b) => b.player === player)) { registerStrike(req, 'identity'); return json(res, 404, { error: 'Esse nome não tem aposta nesta edição.' }); }
     if (identities.byPlayer[player]) return json(res, 409, { error: 'Este nome já foi reivindicado. No outro dispositivo usa "Ligar dispositivo" com o código.' });
     const token = randomUUID();
     const code = (randomUUID().replace(/[^0-9]/g, '') + '000000').slice(0, 6);
@@ -289,11 +332,12 @@ async function api(req, res, path) {
   }
   // ligar este dispositivo a um nome já reivindicado, com o código
   if (path === '/api/identity/link' && method === 'POST') {
+    if (rateLimited(req, 'identity')) return json(res, 429, { error: 'Demasiadas tentativas. Espera 15 minutos.' });
     const body = await readBody(req);
     const player = (body.player || '').trim();
     const code = (body.code || '').trim();
     const rec = identities.byPlayer[player];
-    if (!rec || rec.code !== code) return json(res, 403, { error: 'Nome ou código errado.' });
+    if (!rec || rec.code !== code) { registerStrike(req, 'identity'); return json(res, 403, { error: 'Nome ou código errado.' }); }
     const token = randomUUID();
     rec.tokens.push(token);
     identities.byToken[token] = player;
@@ -439,6 +483,8 @@ async function api(req, res, path) {
       // editar exige janela aberta e (se houver PIN) o PIN correto
       if (!store.windowOpen && !isAdmin(req)) return json(res, 403, { errors: ['A janela de submissões está fechada.'] });
       if (existing.pin && existing.pin !== (body.pin || '') && !isAdmin(req)) {
+        if (rateLimited(req, 'pin')) return json(res, 429, { errors: ['Demasiadas tentativas de PIN. Espera 15 minutos.'] });
+        registerStrike(req, 'pin');
         return json(res, 403, { errors: ['PIN incorreto para editar esta aposta.'] });
       }
       existing.champion = body.champion;
@@ -454,6 +500,7 @@ async function api(req, res, path) {
     }
 
     if (!store.windowOpen && !isAdmin(req)) return json(res, 403, { errors: ['A janela de submissões está fechada.'] });
+    if (store.bets.length >= 200) return json(res, 400, { errors: ['Limite de jogadores da edição atingido.'] });
     const bet = {
       player: body.player.trim(),
       champion: body.champion,
@@ -479,6 +526,8 @@ async function api(req, res, path) {
     if (!KO_ROUNDS.includes(round)) return json(res, 400, { errors: ['Ronda inválida.'] });
     if (!store.windows[round] && !isAdmin(req)) return json(res, 403, { errors: [`A janela de apostas (${round}) está fechada.`] });
     if (existing.pin && existing.pin !== (body.pin || '') && !isAdmin(req)) {
+      if (rateLimited(req, 'pin')) return json(res, 429, { errors: ['Demasiadas tentativas de PIN. Espera 15 minutos.'] });
+      registerStrike(req, 'pin');
       return json(res, 403, { errors: ['PIN incorreto para editar esta aposta.'] });
     }
     const w = world();
@@ -514,10 +563,11 @@ async function api(req, res, path) {
 
   // ---------- admin ----------
   if (path === '/api/admin/login' && method === 'POST') {
+    if (rateLimited(req, 'login')) return json(res, 429, { error: 'Demasiadas tentativas. Espera 15 minutos.' });
     const body = await readBody(req);
-    if (body.password !== ADMIN_PASSWORD) return json(res, 401, { error: 'Password incorreta.' });
+    if (body.password !== ADMIN_PASSWORD) { registerStrike(req, 'login'); return json(res, 401, { error: 'Password incorreta.' }); }
     const token = randomUUID();
-    adminTokens.add(token);
+    adminTokens.set(token, Date.now() + ADMIN_TOKEN_TTL);
     return json(res, 200, { token });
   }
 
@@ -632,8 +682,10 @@ async function api(req, res, path) {
       const body = await readBody(req);
       const { match, home, away, homeGoals, awayGoals, winner, method } = body;
       if (!BRACKET.matches[match]) return json(res, 400, { error: 'Jogo inválido.' });
+      if ((home && !TEAMS[home]) || (away && !TEAMS[away])) return json(res, 400, { error: 'Equipa desconhecida.' });
       if (winner && winner !== home && winner !== away) return json(res, 400, { error: 'Vencedor tem de ser uma das equipas.' });
       if (method && !['TR', 'PROL', 'PEN'].includes(method)) return json(res, 400, { error: 'Fase inválida.' });
+      if ((homeGoals != null && !Number.isInteger(Number(homeGoals))) || (awayGoals != null && !Number.isInteger(Number(awayGoals)))) return json(res, 400, { error: 'Golos inválidos.' });
       snapshotRanks();
       store.knockouts[match] = {
         home: home || null, away: away || null,
@@ -682,8 +734,10 @@ async function api(req, res, path) {
 
     // buscar resultados da fonte (RESULTS_SOURCE_URL ou data/results_source.json) e sincronizar
     if (path === '/api/admin/fetch' && method === 'POST') {
+      const startedId = activeId; // se a competição ativa trocar durante os awaits, aborta
       let loaded;
       try { loaded = await loadResultsSource({ codeToTeam, teamGroup, source: { ...COMP.source, file: COMP.sourceFile } }); } catch (e) { return json(res, 502, { error: 'Falha a buscar a fonte: ' + e.message }); }
+      if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch — repete.' });
       snapshotRanks();
       const counts = { novo: 0, atualizado: 0, igual: 0 };
       const errors = [];
@@ -697,6 +751,7 @@ async function api(req, res, path) {
       try {
         const standings = world().standings;
         const ko = await fetchEspnKnockout({ codeToTeam, teamGroup, bracket: BRACKET, standings, source: COMP.source });
+        if (activeId !== startedId) return json(res, 409, { error: 'A competição ativa mudou durante o fetch — repete.' });
         for (const [mid, m] of Object.entries(ko)) { store.knockouts[mid] = { ...(store.knockouts[mid] || {}), ...m }; koImported++; }
       } catch (e) { errors.push('mata-mata: ' + e.message); }
       saveStore();
@@ -706,6 +761,7 @@ async function api(req, res, path) {
     if (path === '/api/admin/result' && method === 'DELETE') {
       const body = await readBody(req);
       const { group, home, away } = body;
+      if (!store.results.groups[group]) return json(res, 400, { error: `Grupo inválido: ${group}` });
       snapshotRanks();
       const list = store.results.groups[group] || [];
       store.results.groups[group] = list.filter(
@@ -733,10 +789,10 @@ function normalizeGroups(groups) {
   }
   return out;
 }
-// mantém só picks de mercados que a competição define
+// mantém só picks de mercados que a competição define (com teto de tamanho)
 function sanitizeMarkets(m) {
   const out = {};
-  for (const mk of COMP.markets || []) if (m && typeof m[mk.id] === 'string' && m[mk.id].trim()) out[mk.id] = m[mk.id].trim();
+  for (const mk of COMP.markets || []) if (m && typeof m[mk.id] === 'string' && m[mk.id].trim()) out[mk.id] = m[mk.id].trim().slice(0, 60);
   return out;
 }
 
@@ -752,22 +808,28 @@ const MIME = {
   '.png': 'image/png',
   '.ico': 'image/x-icon',
 };
+// stream com tratamento de erro: um ficheiro bloqueado/apagado a meio não pode derrubar o processo
+function streamFile(res, filePath) {
+  const s = createReadStream(filePath);
+  s.on('error', () => { if (!res.headersSent) res.writeHead(500); res.end(); });
+  s.pipe(res);
+}
 function serveStatic(req, res, urlPath) {
   let rel = decodeURIComponent(urlPath.split('?')[0]);
   if (rel === '/' || rel === '') rel = '/index.html';
   const filePath = normalize(join(PUBLIC, rel));
-  if (!filePath.startsWith(PUBLIC)) return json(res, 403, { error: 'forbidden' });
+  // o separador no prefixo impede escapar para irmãos tipo "public-backup/"
+  if (filePath !== PUBLIC && !filePath.startsWith(PUBLIC + sep)) return json(res, 403, { error: 'forbidden' });
   if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
     // SPA fallback para rotas do cliente
-    const idx = join(PUBLIC, 'index.html');
     res.writeHead(200, { 'content-type': MIME['.html'] });
-    return createReadStream(idx).pipe(res);
+    return streamFile(res, join(PUBLIC, 'index.html'));
   }
   const ext = extname(filePath);
   // bandeiras/fontes podem cachear; HTML/JS/CSS revalidam sempre (iteração fiável + sem stale no pitch)
   const cache = ext === '.svg' || ext === '.woff2' || ext === '.png' ? 'public, max-age=86400' : 'no-cache';
   res.writeHead(200, { 'content-type': MIME[ext] || 'application/octet-stream', 'cache-control': cache });
-  createReadStream(filePath).pipe(res);
+  streamFile(res, filePath);
 }
 
 const server = createServer(async (req, res) => {
@@ -781,5 +843,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Roni Roni a correr em http://${HOST}:${PORT}  (admin password: ${ADMIN_PASSWORD})`);
+  console.log(`Roni Roni a correr em http://${HOST}:${PORT}`);
 });
