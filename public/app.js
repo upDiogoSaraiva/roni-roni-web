@@ -20,6 +20,7 @@ function el(tag, props = {}, ...kids) {
     else if (k === 'style' && typeof v === 'object') Object.assign(node.style, v);
     else if (k === 'for') node.htmlFor = v;
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k.startsWith('on')) continue; // nunca deixar chegar um handler-string ao setAttribute
     else if (PROP_AS_PROPERTY.has(k)) node[k] = v;
     else node.setAttribute(k, v);
   }
@@ -334,7 +335,9 @@ function setActiveTab() {
     else t.removeAttribute('aria-current');
   });
 }
+let renderSeq = 0; // geração da renderização: invalida erros/pinturas de navegações antigas
 async function render() {
+  const my = ++renderSeq;
   setActiveTab();
   clear(MAIN);
   MAIN.scrollTop = 0;
@@ -358,6 +361,7 @@ async function render() {
     else if (r === 'conquistas') await pageConquistas();
     else if (r === 'folha') await pageFolha();
   } catch (e) {
+    if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
   }
 }
@@ -1136,6 +1140,7 @@ async function pageCartao() {
   const data = await api('/api/leaderboard');
   clear(host);
   const lb = data.leaderboard;
+  if (!lb.length) { host.appendChild(emptyState('Ainda sem apostas', 'O cartão aparece quando houver folhas submetidas.')); return; }
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
   const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
   const meName = localStorage.getItem('roni-me');
@@ -1169,7 +1174,7 @@ async function pageCartao() {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Roni Roni', text: `${me} — ${byPlayer[me].rank}.º no Torneio Roni Roni` });
       } else { toast('Partilha direta indisponível aqui — a descarregar.'); downloadCard(); }
-    } catch (e) { /* partilha cancelada pelo utilizador */ }
+    } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); } // só o cancelar da partilha é silencioso
   }
   paint();
 }
@@ -1242,6 +1247,7 @@ async function pageConquistas() {
   const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard;
+  if (!lb.length) { host.appendChild(emptyState('Ainda sem apostas', 'As conquistas aparecem quando houver folhas submetidas.')); return; }
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
   const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
   const champCounts = new Map();
@@ -1519,6 +1525,7 @@ async function pagePartilhar() {
   const [data, tl, res] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null), api('/api/results').catch(() => null)]);
   clear(host);
   const lb = data.leaderboard, bets = data.bets;
+  if (!lb.length) { host.appendChild(emptyState('Ainda sem apostas', 'Os cartões de partilha aparecem quando houver folhas submetidas.')); return; }
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
   const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
   const meName = localStorage.getItem('roni-me');
@@ -1790,7 +1797,9 @@ async function pageHistorico() {
   async function openEdition(id) {
     clear(detail);
     detail.appendChild(skeletonList(5));
-    const sum = await api('/api/history/' + encodeURIComponent(id));
+    let sum;
+    try { sum = await api('/api/history/' + encodeURIComponent(id)); }
+    catch (e) { clear(detail); detail.appendChild(errorState(e.message, () => openEdition(id))); return; }
     clear(detail);
     detail.appendChild(el('div', { class: 'section-label' }, sum.competition.edition + ' · classificação'));
     const card = el('div', { class: 'card' });
@@ -1864,7 +1873,9 @@ async function pagePessoal() {
     if (!me) { clear(body); body.appendChild(emptyState('Escolhe o teu nome', 'Para veres o teu historial.', 'search')); return; }
     clear(body);
     body.appendChild(skeletonList(3));
-    const { editions } = await api('/api/player/' + encodeURIComponent(me));
+    let editions;
+    try { ({ editions } = await api('/api/player/' + encodeURIComponent(me))); }
+    catch (e) { clear(body); body.appendChild(errorState(e.message, load)); return; }
     clear(body);
     body.appendChild(el('div', { class: 'profile-hd' }, monogram(me),
       el('div', {}, el('div', { class: 'profile-name' }, me), el('div', { class: 'muted', style: { fontSize: '12.5px' } }, editions.length + ' edição(ões)'))));
@@ -2184,7 +2195,7 @@ function renderSuccess(updated) {
     el('div', { class: 'row-actions', style: { maxWidth: '360px', margin: '0 auto' } },
       el('button', { class: 'btn btn-ghost', onclick: () => { stepIdx = 0; paintForm(); } }, icon('edit'), 'Editar de novo'),
       el('button', { class: 'btn btn-primary', onclick: () => navigate('geral') }, 'Ver classificação'))));
-  draft = null; stepIdx = 0;
+  stepIdx = 0; // o draft mantém-se vivo para o "Editar de novo"; limpa-se ao sair da rota (hashchange)
 }
 
 /* ---------------- PÁGINA: RESULTADOS ---------------- */
@@ -2426,7 +2437,7 @@ async function adminCompetitions(host) {
       ? el('span', { class: 'badge ok' }, 'Ativa')
       : (c.kind === 'archive'
         ? el('span', { class: 'badge seed' }, 'Arquivada')
-        : el('button', { class: 'btn btn-ghost', style: { minHeight: '36px', padding: '6px 12px' }, onclick: async () => { try { await api('/api/admin/competition/active', { method: 'POST', body: { id: c.id } }); toast('Ativa: ' + c.edition); render(); } catch (e) { toast(e.message, true); } } }, 'Tornar ativa'));
+        : el('button', { class: 'btn btn-ghost', style: { minHeight: '36px', padding: '6px 12px' }, onclick: async () => { try { await api('/api/admin/competition/active', { method: 'POST', body: { id: c.id } }); await refreshState(); toast('Ativa: ' + c.edition); render(); } catch (e) { toast(e.message, true); } } }, 'Tornar ativa'));
     list.appendChild(el('div', { class: 'res-row', style: { gridTemplateColumns: '1fr auto' } },
       el('div', {}, el('div', { style: { fontWeight: '700' } }, c.edition), el('div', { class: 'muted', style: { fontSize: '12px' } }, c.id)),
       right));
@@ -2492,6 +2503,7 @@ async function adminCompetitions(host) {
         format: { qualifiersPerGroup: cQual.value, bestThirds: cThirds.value, groupGames: cGames.value },
         scoring: { qualify: cQ.value, position: cP.value, champion: cChamp.value, final4: cF4.value },
       } });
+      await refreshState();
       toast(`Criada: ${cEd.value} (${r.groups} grupos, ${r.teams} equipas).`);
       render();
     } catch (e) { toast(e.message, true); }
@@ -2537,7 +2549,7 @@ async function pageAdmin() {
   for (const r of winRounds) {
     const open = status.windows[r.id];
     winRow.appendChild(el('button', { class: 'win-toggle' + (open ? ' open' : ''), 'aria-pressed': open ? 'true' : 'false',
-      onclick: async () => { await api('/api/admin/window', { method: 'POST', body: { round: r.id, open: !open } }); toast(`${r.label}: ${!open ? 'aberta' : 'fechada'}`); render(); } },
+      onclick: async () => { try { await api('/api/admin/window', { method: 'POST', body: { round: r.id, open: !open } }); await refreshState(); toast(`${r.label}: ${!open ? 'aberta' : 'fechada'}`); render(); } catch (e) { toast(e.message, true); } } },
       el('span', { class: 'dot' }), r.label, ' · ', open ? 'aberta' : 'fechada'));
   }
   host.appendChild(winRow);
@@ -2688,7 +2700,8 @@ function resultEditor(g, results, repaint) {
         const m = { home: p.home, away: p.away, homeGoals: p.homeGoals, awayGoals: p.awayGoals, matchday: p.matchday };
         if (idx >= 0) existing[idx] = m; else existing.push(m);
       }
-      toast(`${res.saved} resultado(s) gravado(s) no Grupo ${g}. Classificação recalculada.`);
+      if (res.errors?.length) toast(`${res.saved} gravado(s), ${res.errors.length} com erro: ${res.errors[0]}`, true);
+      else toast(`${res.saved} resultado(s) gravado(s) no Grupo ${g}. Classificação recalculada.`);
       repaint(g);
     } catch (e) { toast(e.message, true); saveBtn.disabled = false; }
   }
@@ -2772,6 +2785,7 @@ function betsGrid(bets) {
 }
 
 function renderAdminLogin() {
+  clear(MAIN); // pode chegar aqui a meio de pageAdmin (401) — limpa o skeleton e o cabeçalho duplicado
   MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Administração')));
   const input = el('input', { class: 'input', type: 'password', placeholder: 'Password', 'aria-label': 'Password de administração',
     onkeydown: (e) => { if (e.key === 'Enter') doLogin(); } });
@@ -2817,6 +2831,14 @@ function paintWindowPill() {
 }
 
 /* ---------------- boot ---------------- */
+// recarrega o STATE global do servidor (equipas/grupos/janelas/jogadores) após mutações
+// de admin que mudam a competição ativa ou as janelas — senão a UI fica a ver a edição antiga
+async function refreshState() {
+  Object.assign(STATE, await api('/api/state'));
+  paintWindowPill();
+  if (STATE.competition?.tagline) { const s = $('.brand-name small'); if (s) s.textContent = STATE.competition.tagline; }
+}
+
 async function boot() {
   applyTheme(localStorage.getItem('roni-theme') || 'dark');
   applyContrast(localStorage.getItem('roni-hc') === '1');
@@ -2834,7 +2856,8 @@ async function boot() {
     return;
   }
   window.addEventListener('hashchange', () => { if (currentRoute() !== 'apostar') { draft = null; stepIdx = 0; } render(); });
-  if (!location.hash) navigate('geral');
+  // replaceState não dispara hashchange — evita a renderização dupla no primeiro load
+  if (!location.hash) history.replaceState(null, '', '#/geral');
   render();
 }
 boot();
