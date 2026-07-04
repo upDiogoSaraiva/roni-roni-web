@@ -2,6 +2,7 @@
 node_modules/
 
 # estado mutável gerado em runtime (recriado a partir do seed no 1.º arranque)
+data/registry.json
 data/store.json
 data/competitions/*/store.json
 
@@ -19,3 +20,6 @@ data/identities.json
 .DS_Store
 Thumbs.db
 DESIGN_motor_ref.md
+
+# a edição real do grupo (nomes dos jogadores) vive fora do repo público
+data/competitions/wc2026/

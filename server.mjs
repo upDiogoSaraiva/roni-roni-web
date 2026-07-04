@@ -19,7 +19,13 @@ const REGISTRY_PATH = join(root, 'data/registry.json');
 const compDir = (id) => join(root, 'data/competitions', id);
 
 // --- registo de competições (qual é a ativa, quais existem) ---
-let registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+// num clone fresco não há registry: arranca com a edição de demonstração incluída no repo
+let registry;
+if (existsSync(REGISTRY_PATH)) registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
+else {
+  registry = { activeId: 'demo', competitions: [{ id: 'demo', name: 'Roni Roni', edition: 'Mundial 2026', status: 'active' }] };
+  writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
+}
 const saveRegistry = () => writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2));
 
 // --- competição ATIVA: estes valores são recarregados ao trocar de competição ---

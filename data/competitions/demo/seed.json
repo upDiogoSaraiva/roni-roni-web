@@ -3,7 +3,8 @@
     "tournament": "Torneio Roni Roni 2026",
     "players": 27,
     "generatedFrom": "field_2026_real.csv + estado_atual_ref.json",
-    "note": "Conteúdo neutro: apostas, resultados e pontos. Sem outputs do motor de decisão."
+    "note": "Conteúdo neutro: apostas, resultados e pontos. Sem outputs do motor de decisão.",
+    "fonte": "edição de demonstração com jogadores fictícios"
   },
   "groups": {
     "A": [
@@ -1014,7 +1015,7 @@
   "windowOpen": true,
   "bets": [
     {
-      "player": "Afonso Luís",
+      "player": "Rui Tavares",
       "champion": "Portugal",
       "final4": [
         "Brasil",
@@ -1162,7 +1163,7 @@
       "groupJoker": null
     },
     {
-      "player": "Ana Portugal",
+      "player": "Marta Vieira",
       "champion": "Brasil",
       "final4": [
         "Portugal",
@@ -1307,7 +1308,7 @@
       "groupJoker": null
     },
     {
-      "player": "António Gameiro",
+      "player": "Nuno Guerreiro",
       "champion": "Espanha",
       "final4": [
         "Espanha",
@@ -1455,7 +1456,7 @@
       "groupJoker": null
     },
     {
-      "player": "Benavente",
+      "player": "Inês Camacho",
       "champion": "Portugal",
       "final4": [
         "Argentina",
@@ -1603,7 +1604,7 @@
       "groupJoker": null
     },
     {
-      "player": "Bernardo Macara",
+      "player": "Tiago Antunes",
       "champion": "Espanha",
       "final4": [
         "Alemanha",
@@ -1748,7 +1749,7 @@
       "groupJoker": null
     },
     {
-      "player": "Bernardo Rodrigues",
+      "player": "Sofia Baptista",
       "champion": "Portugal",
       "final4": [
         "Espanha",
@@ -1895,7 +1896,7 @@
       "groupJoker": null
     },
     {
-      "player": "Bruna Araujo",
+      "player": "Duarte Melo",
       "champion": "Argentina",
       "final4": [
         "Argentina",
@@ -2046,7 +2047,7 @@
       "groupJoker": null
     },
     {
-      "player": "Carolina",
+      "player": "Leonor Pinheiro",
       "champion": "Espanha",
       "final4": [
         "Espanha",
@@ -2194,7 +2195,7 @@
       "groupJoker": null
     },
     {
-      "player": "Diogo Saraiva",
+      "player": "Hugo Valente",
       "champion": "Espanha",
       "final4": [
         "Espanha",
@@ -2345,7 +2346,7 @@
       "groupJoker": null
     },
     {
-      "player": "Ezequiel Fonseca",
+      "player": "Beatriz Serra",
       "champion": "Espanha",
       "final4": [
         "França",
@@ -2497,7 +2498,7 @@
       "groupJoker": null
     },
     {
-      "player": "Francisco Mendes",
+      "player": "André Coutinho",
       "champion": "Portugal",
       "final4": [
         "França",
@@ -2645,7 +2646,7 @@
       "groupJoker": null
     },
     {
-      "player": "Gonçalo Carvalho",
+      "player": "Catarina Lousada",
       "champion": "França",
       "final4": [
         "França",
@@ -2793,7 +2794,7 @@
       "groupJoker": null
     },
     {
-      "player": "Guilherme Líbano",
+      "player": "Fábio Neves",
       "champion": "Espanha",
       "final4": [
         "Espanha",
@@ -2941,7 +2942,7 @@
       "groupJoker": null
     },
     {
-      "player": "Jay Dee",
+      "player": "Helena Brito",
       "champion": "Espanha",
       "final4": [
         "França",
@@ -3089,7 +3090,7 @@
       "groupJoker": null
     },
     {
-      "player": "Joao morais",
+      "player": "Ivo Salgado",
       "champion": "Inglaterra",
       "final4": [
         "Portugal",
@@ -3234,7 +3235,7 @@
       "groupJoker": null
     },
     {
-      "player": "José Malaquias",
+      "player": "Joana Peixoto",
       "champion": "França",
       "final4": [
         "Alemanha",
@@ -3382,7 +3383,7 @@
       "groupJoker": null
     },
     {
-      "player": "Manel",
+      "player": "Lucas Faria",
       "champion": "Portugal",
       "final4": [
         "Portugal",
@@ -3531,7 +3532,7 @@
       "groupJoker": null
     },
     {
-      "player": "Mariana Leonardo",
+      "player": "Madalena Cruz",
       "champion": "Argentina",
       "final4": [
         "Alemanha",
@@ -3676,7 +3677,7 @@
       "groupJoker": null
     },
     {
-      "player": "Master PD",
+      "player": "Octávio Ramos",
       "champion": "França",
       "final4": [
         "Portugal",
@@ -3824,7 +3825,7 @@
       "groupJoker": null
     },
     {
-      "player": "Miguel Diniz",
+      "player": "Patrícia Vale",
       "champion": "Espanha",
       "final4": [
         "França",
@@ -3976,7 +3977,7 @@
       "groupJoker": null
     },
     {
-      "player": "Pedro Matos",
+      "player": "Quim Barroso",
       "champion": "Espanha",
       "final4": [
         "Portugal",
@@ -4121,7 +4122,7 @@
       "groupJoker": null
     },
     {
-      "player": "Piloto",
+      "player": "Rita Meireles",
       "champion": "Portugal",
       "final4": [
         "Espanha",
@@ -4268,7 +4269,7 @@
       "groupJoker": null
     },
     {
-      "player": "Rafael Benavente",
+      "player": "Salvador Pontes",
       "champion": "Portugal",
       "final4": [
         "França",
@@ -4413,7 +4414,7 @@
       "groupJoker": null
     },
     {
-      "player": "Ricardo Tenreiro",
+      "player": "Teresa Aguiar",
       "champion": "Espanha",
       "final4": [
         "Inglaterra",
@@ -4561,7 +4562,7 @@
       "groupJoker": null
     },
     {
-      "player": "Tio Didi",
+      "player": "Válter Simões",
       "champion": "Portugal",
       "final4": [
         "Brasil",
@@ -4709,7 +4710,7 @@
       "groupJoker": null
     },
     {
-      "player": "Vasco Diniz",
+      "player": "Xavier Domingues",
       "champion": "Portugal",
       "final4": [
         "Alemanha",
@@ -4854,7 +4855,7 @@
       "groupJoker": null
     },
     {
-      "player": "Zé Diniz",
+      "player": "Zulmira Costa",
       "champion": "Portugal",
       "final4": [
         "Portugal",

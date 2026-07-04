@@ -8,7 +8,9 @@ import { dirname, join } from 'node:path';
 import { loadResultsSource } from '../src/results_source.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const compId = process.argv[2] || 'wc2026';
+const registryPath = join(root, 'data/registry.json');
+const activeId = existsSync(registryPath) ? JSON.parse(readFileSync(registryPath, 'utf8')).activeId : 'demo';
+const compId = process.argv[2] || activeId;
 const compRoot = `data/competitions/${compId}`;
 const read = (p) => JSON.parse(readFileSync(join(root, p), 'utf8'));
 
