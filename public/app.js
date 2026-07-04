@@ -640,7 +640,7 @@ async function pageEvolucao() {
     const full = players.filter((p) => p.points.length === data.matchdays.length);
     if (full.length) {
       const champJ = full.map((p) => ({ player: p.player, gain: p.points[lastK].total - p.points[lastK - 1].total })).reduce((b, m) => (m.gain > b.gain ? m : b));
-      if (champJ.gain > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, `Campeão da J${data.matchdays[lastK]}`), el('span', { class: 'v' }, `${champJ.player} · +${champJ.gain} pts`)));
+      if (champJ.gain > 0) kvs.push(el('div', { class: 'kv' }, el('b', {}, `Campeão · ${stageLabel(data, lastK)}`), el('span', { class: 'v' }, `${champJ.player} · +${champJ.gain} pts`)));
     }
     if (kvs.length) host.appendChild(el('div', { class: 'pot', style: { marginTop: '12px' } }, ...kvs));
   }
@@ -648,7 +648,7 @@ async function pageEvolucao() {
   const chartCard = el('div', { class: 'card', style: { padding: '14px 10px 10px', marginTop: '12px', overflow: 'hidden' } });
   host.appendChild(chartCard);
   host.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', marginTop: '10px' } },
-    'Passa o rato por uma linha para ver o jogador. Posição recalculada como se a fase de grupos terminasse no fim de cada jornada (provisório).'));
+    'Passa o rato por uma linha para ver o jogador. Posição recalculada ao fim de cada jornada e de cada ronda do mata-mata (provisório).'));
 
   const recaps = buildRecaps(data);
   if (recaps.length) {
@@ -678,6 +678,13 @@ function shortName(name) {
   return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0]}.` : parts[0];
 }
 
+// rótulo de uma etapa da linha temporal (jornada ou ronda do mata-mata), com forma curta p/ eixos
+function stageLabel(data, k, short = false) {
+  const lbl = data.labels?.[k] || ('J' + (data.matchdays?.[k] ?? k + 1));
+  if (!short) return lbl;
+  const SHORT = { 'Quartos de final': 'Quartos', 'Meias-finais': 'Meias', '3.º / 4.º lugar': '3.º/4.º' };
+  return SHORT[lbl] || lbl;
+}
 function buildEvolutionChart(data, players, me) {
   const W = 700, H = 380, padL = 32, padR = 104, padT = 18, padB = 30;
   const plotW = W - padL - padR, plotH = H - padT - padB;
@@ -691,10 +698,10 @@ function buildEvolutionChart(data, players, me) {
 
   // grelha + eixos (topo = 1.º; cada coluna = uma jornada)
   const axis = svgEl('g', { class: 'ev-axis' });
-  for (const md of mds) {
+  mds.forEach((md, i) => {
     axis.appendChild(svgEl('line', { class: 'ev-grid', x1: X(md), y1: padT, x2: X(md), y2: padT + plotH }));
-    axis.appendChild(svgEl('text', { class: 'ev-xlab', x: X(md), y: H - 10, 'text-anchor': 'middle' }, 'J' + md));
-  }
+    axis.appendChild(svgEl('text', { class: 'ev-xlab', x: X(md), y: H - 10, 'text-anchor': 'middle' }, stageLabel(data, i, true)));
+  });
   axis.appendChild(svgEl('text', { class: 'ev-ylab', x: padL - 8, y: Y(1) + 3, 'text-anchor': 'end' }, '1.º'));
   axis.appendChild(svgEl('text', { class: 'ev-ylab', x: padL - 8, y: Y(data.count) + 3, 'text-anchor': 'end' }, data.count + '.º'));
   svg.appendChild(axis);
@@ -754,7 +761,7 @@ function buildRecaps(data) {
     if (leader) parts.push(leader.prev === 1 ? `${leader.player} manteve a liderança` : `${leader.player} assumiu a liderança (era ${leader.prev}.º)`);
     if (climber && climber.d > 0) parts.push(`${climber.player} foi quem mais subiu (+${climber.d})`);
     if (faller && faller.d < 0) parts.push(`${faller.player} quem mais caiu (${faller.d})`);
-    lines.push({ title: `J${prev}→J${cur}`, text: parts.join('; ') + '.' });
+    lines.push({ title: `${stageLabel(data, i - 1, true)}→${stageLabel(data, i, true)}`, text: parts.join('; ') + '.' });
   }
   return lines;
 }
@@ -1621,6 +1628,14 @@ async function pagePartilhar() {
     if (k === 'acerto') return acertoCtx(row);
     if (k === 'jogo') return jogoCtx();
     if (k === 'wrapped') {
+      // frase do nome da etapa (jornada ou ronda do mata-mata) para os subtítulos
+      const stagePhrase = (i) => {
+        const l = tl?.labels?.[i];
+        if (!l || /^J\d+$/.test(l)) return 'na jornada ' + (l ? l.slice(1) : i + 1);
+        if (l === 'Meias-finais') return 'nas ' + l;
+        if (l === 'Final') return 'na ' + l;
+        return 'nos ' + l;
+      };
       let jump = 0, jumpMd = 0;
       if (series) for (let i = 1; i < series.points.length; i++) {
         const d = series.points[i].total - series.points[i - 1].total;
@@ -1692,8 +1707,8 @@ async function pagePartilhar() {
         { wrapLabel: 'PONTOS NA ÉPOCA', wrapValue: String(row.score.total), wrapSub: qual + ' apuramentos · ' + pos + ' posições' },
         qual ? { wrapLabel: 'APURAMENTOS CERTOS', wrapValue: String(qual), wrapSub: 'seleções que viste passar' } : null,
         pos ? { wrapLabel: 'POSIÇÕES EXATAS', wrapValue: String(pos), wrapSub: 'no sítio certo da tabela' } : null,
-        jump ? { wrapLabel: 'MAIS PONTOS NUMA JORNADA', wrapValue: '+' + jump, wrapTone: 'gold', wrapSub: jumpMd ? 'na jornada ' + jumpMd : 'numa só jornada' } : null,
-        drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapTone: 'ember', wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' na jornada ' + dropMd : '') } : null,
+        jump ? { wrapLabel: 'MAIS PONTOS NUMA RONDA', wrapValue: '+' + jump, wrapTone: 'gold', wrapSub: jumpMd ? stagePhrase(jumpMd - 1) : 'numa só ronda' } : null,
+        drop ? { wrapLabel: 'A MAIOR QUEDA', wrapValue: '-' + drop, wrapTone: 'ember', wrapSub: (drop === 1 ? 'lugar' : 'lugares') + (dropMd ? ' ' + stagePhrase(dropMd - 1) : '') } : null,
         (ranks.length > 1 && climb !== 0) ? { wrapLabel: 'DO ARRANQUE ATÉ AGORA', wrapValue: (climb > 0 ? '+' + climb : String(climb)), wrapTone: climb > 0 ? 'gold' : 'ember', wrapSub: (Math.abs(climb) === 1 ? 'posição' : 'posições') + (climb > 0 ? ' que subiste' : ' na tabela') } : null,
         gem ? { wrapLabel: 'GOLPE DE GÉNIO', wrapValue: gem.team, wrapTeam: gem.team, wrapTone: 'gold', wrapSub: gem.back <= 1 ? 'ninguém mais acertou' : 'só tu e mais ' + (gem.back - 1) + ' acertaram' } : null,
         lucky ? { wrapLabel: 'A TUA SELEÇÃO DA SORTE', wrapValue: lucky.team, wrapTeam: lucky.team, wrapSub: 'deu-te ' + lucky.v + (lucky.v === 1 ? ' ponto' : ' pontos') } : null,

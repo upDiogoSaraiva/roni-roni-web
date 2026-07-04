@@ -427,7 +427,15 @@ async function api(req, res, path) {
     let maxMd = 0;
     for (const g of GROUP_ORDER) for (const m of store.results.groups[g] || []) maxMd = Math.max(maxMd, m.matchday || 1);
     const matchdays = [];
+    const labels = [];
     const series = new Map(store.bets.map((b) => [b.player, { player: b.player, seed: !!b.seed, points: [] }]));
+    const pushStage = (md, label, groupsCut, koCut) => {
+      matchdays.push(md);
+      labels.push(label);
+      const w = computeWorldState(GROUPS, groupsCut, { bracket: BRACKET, knockoutResults: koCut, marketResults: {} }, { ...COMP, teams: TEAMS });
+      const lb = leaderboard(store.bets, w, teamGroup);
+      for (const r of lb) series.get(r.player)?.points.push({ md, rank: r.rank, total: r.score.total });
+    };
     for (let md = 1; md <= maxMd; md++) {
       const cut = {};
       let any = false;
@@ -436,12 +444,21 @@ async function api(req, res, path) {
         if (cut[g].length) any = true;
       }
       if (!any) continue;
-      matchdays.push(md);
-      const w = computeWorldState(GROUPS, cut, { bracket: BRACKET, knockoutResults: {}, marketResults: {} }, { ...COMP, teams: TEAMS });
-      const lb = leaderboard(store.bets, w, teamGroup);
-      for (const r of lb) series.get(r.player)?.points.push({ md, rank: r.rank, total: r.score.total });
+      pushStage(md, 'J' + md, cut, {});
     }
-    return json(res, 200, { matchdays, groupGames: COMP.format?.groupGames || 3, count: store.bets.length, players: [...series.values()] });
+    // cada ronda do mata-mata com jogos decididos é mais uma etapa (cumulativa sobre as anteriores)
+    let nextMd = maxMd;
+    const koSoFar = {};
+    for (const r of BRACKET.rounds) {
+      let any = false;
+      for (const [mid, k] of Object.entries(store.knockouts || {})) {
+        if (matchRound[mid] !== r.id) continue;
+        koSoFar[mid] = k;
+        if (k.winner) any = true;
+      }
+      if (any) pushStage(++nextMd, r.label || r.id, store.results.groups, { ...koSoFar });
+    }
+    return json(res, 200, { matchdays, labels, groupGames: COMP.format?.groupGames || 3, count: store.bets.length, players: [...series.values()] });
   }
 
   // simulador "e se?" — sobrepõe resultados hipotéticos aos reais e devolve a classificação
