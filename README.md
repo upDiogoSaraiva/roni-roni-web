@@ -181,4 +181,4 @@ A edição incluída é de demonstração: os jogadores são fictícios e qualqu
 original é só nos pontos. Os dados reais de um pool (nomes, apostas, PINs) vivem fora do git, na
 pasta da edição real e no registry locais. As bandeiras vêm do
 [flag-icons](https://github.com/lipis/flag-icons) (domínio público). Não há logótipos nem marcas
-oficiais do torneio.
+oficiais do torneio. O código é [MIT](LICENSE).
