@@ -2578,15 +2578,20 @@ async function adminCompetitions(host) {
   const cName = el('input', { class: 'input', placeholder: 'Nome', value: 'Torneio Roni Roni' });
   const cEd = el('input', { class: 'input', placeholder: 'Edição (ex.: Euro 2028)' });
   const cGroups = el('textarea', { class: 'input', rows: '6', placeholder: 'A: Portugal, Espanha, Itália, França\nB: Inglaterra, Alemanha, Croácia, Países Baixos', style: { resize: 'vertical' } });
-  const num = (v) => el('input', { class: 'input num', type: 'number', value: String(v) });
+  const num = (v) => el('input', { class: 'input num', type: 'number', value: String(v), oninput: updatePreview });
   const cQual = num(2); const cThirds = num(0); const cGames = num(3);
   const cQ = num(1); const cP = num(1); const cChamp = num(8); const cF4 = num(3);
+  const cKoWin = num(2); const cKoMethod = num(1);
+  const cKoJoker = el('input', { type: 'checkbox', class: 'chk', checked: true });
+  const cEntry = num(0); const cP1 = num(0); const cP2 = num(0); const cP3 = num(0);
+  const koPreview = el('div', { class: 'ko-preview muted' });
   const presets = {
     'Mundial 2026': { qualify: 1, position: 1, champion: 8, final4: 3, bestThirds: 8, qualifiersPerGroup: 2 },
     'Euro (sem 3.os)': { qualify: 1, position: 1, champion: 6, final4: 3, bestThirds: 0, qualifiersPerGroup: 2 },
   };
-  const presetSel = el('select', { class: 'select', onchange: (e) => { const p = presets[e.target.value]; if (!p) return; cQ.value = p.qualify; cP.value = p.position; cChamp.value = p.champion; cF4.value = p.final4; cThirds.value = p.bestThirds; cQual.value = p.qualifiersPerGroup; } },
+  const presetSel = el('select', { class: 'select', onchange: (e) => { const p = presets[e.target.value]; if (!p) return; cQ.value = p.qualify; cP.value = p.position; cChamp.value = p.champion; cF4.value = p.final4; cThirds.value = p.bestThirds; cQual.value = p.qualifiersPerGroup; updatePreview(); } },
     el('option', { value: '' }, 'Preset de pontuação…'), ...Object.keys(presets).map((k) => el('option', { value: k }, k)));
+  cGroups.addEventListener('input', updatePreview);
   host.appendChild(el('div', { class: 'card', style: { padding: '14px' } },
     el('div', { class: 'field' }, el('label', {}, 'Nome'), cName),
     el('div', { class: 'field' }, el('label', {}, 'Edição'), cEd),
@@ -2596,12 +2601,53 @@ async function adminCompetitions(host) {
       el('div', { class: 'field' }, el('label', {}, 'Apuram/grupo'), cQual),
       el('div', { class: 'field' }, el('label', {}, 'Melhores 3.os'), cThirds),
       el('div', { class: 'field' }, el('label', {}, 'Jornadas'), cGames)),
+    koPreview,
+    el('p', { class: 'muted builder-sec' }, 'Pontos por aposta'),
     el('div', { class: 'builder-grid' },
       el('div', { class: 'field' }, el('label', {}, 'Apuramento'), cQ),
       el('div', { class: 'field' }, el('label', {}, 'Posição'), cP),
       el('div', { class: 'field' }, el('label', {}, 'Campeão'), cChamp),
       el('div', { class: 'field' }, el('label', {}, 'Final 4'), cF4)),
+    el('p', { class: 'muted builder-sec' }, 'Mata-mata (por jogo acertado)'),
+    el('div', { class: 'builder-grid' },
+      el('div', { class: 'field' }, el('label', {}, 'Vitória'), cKoWin),
+      el('div', { class: 'field' }, el('label', {}, 'Método'), cKoMethod),
+      el('label', { class: 'field chk-field' }, cKoJoker, el('span', {}, 'Joker duplica'))),
+    el('p', { class: 'muted builder-sec' }, 'Dinheiro (opcional)'),
+    el('div', { class: 'builder-grid' },
+      el('div', { class: 'field' }, el('label', {}, 'Inscrição €'), cEntry),
+      el('div', { class: 'field' }, el('label', {}, '1.º €'), cP1),
+      el('div', { class: 'field' }, el('label', {}, '2.º €'), cP2),
+      el('div', { class: 'field' }, el('label', {}, '3.º €'), cP3)),
     el('button', { class: 'btn btn-primary btn-block', onclick: doCreate }, icon('plus'), 'Criar competição')));
+  updatePreview();
+
+  function countGroups() {
+    let n = 0;
+    for (const line of cGroups.value.split('\n')) {
+      const i = line.indexOf(':');
+      if (i > 0 && line.slice(i + 1).split(',').filter((t) => t.trim()).length >= 2) n++;
+    }
+    return n;
+  }
+  const isPow2 = (x) => x >= 2 && (x & (x - 1)) === 0;
+  function updatePreview() {
+    const G = countGroups();
+    const qpg = Number(cQual.value) || 0;
+    const thirds = Number(cThirds.value) || 0;
+    const Q = G * qpg + thirds;
+    if (!G) { koPreview.textContent = 'Define os grupos para prever o mata-mata.'; koPreview.classList.remove('ok'); return; }
+    const clean = isPow2(Q) && thirds === 0 && (qpg === 1 || qpg === 2) && isPow2(G);
+    if (clean) {
+      const names = { 32: '16-avos', 16: '8-avos', 8: 'Quartos', 4: 'Meias', 2: 'Final' };
+      const rounds = []; let t = Q; while (t >= 2) { rounds.push(names[t] || `${t} equipas`); t /= 2; }
+      koPreview.textContent = `${Q} apurados → ${rounds.join(' · ')} (+ 3.º/4.º). Mata-mata gerado automaticamente.`;
+      koPreview.classList.add('ok');
+    } else {
+      koPreview.textContent = `${Q} apurados → sem mata-mata automático (corre como liga). Para gerar: 1 ou 2 por grupo, nº de grupos potência de 2 (2/4/8/16) e sem melhores 3.os.`;
+      koPreview.classList.remove('ok');
+    }
+  }
 
   async function doCreate() {
     const groups = {};
@@ -2614,14 +2660,22 @@ async function adminCompetitions(host) {
     }
     if (!cEd.value.trim()) return toast('Indica a edição.', true);
     if (!Object.keys(groups).length) return toast('Define os grupos (ex.: "A: Eq1, Eq2").', true);
+    const prizes = [
+      { key: '1', tag: '1.º', name: '1.º lugar', value: Number(cP1.value) || 0, kind: 'rank', rank: 1 },
+      { key: '2', tag: '2.º', name: '2.º lugar', value: Number(cP2.value) || 0, kind: 'rank', rank: 2 },
+      { key: '3', tag: '3.º', name: '3.º lugar', value: Number(cP3.value) || 0, kind: 'rank', rank: 3 },
+    ];
     try {
       const r = await api('/api/admin/create', { method: 'POST', body: {
         name: cName.value, edition: cEd.value, groups,
         format: { qualifiersPerGroup: cQual.value, bestThirds: cThirds.value, groupGames: cGames.value },
-        scoring: { qualify: cQ.value, position: cP.value, champion: cChamp.value, final4: cF4.value },
+        scoring: { qualify: cQ.value, position: cP.value, champion: cChamp.value, final4: cF4.value, koWin: cKoWin.value, koMethod: cKoMethod.value, koJoker: cKoJoker.checked },
+        entry: cEntry.value, prizes,
       } });
       await refreshState();
-      toast(`Criada: ${cEd.value} (${r.groups} grupos, ${r.teams} equipas).`);
+      const b = r.bracket || {};
+      const ko = b.generated ? `mata-mata: ${b.rounds.join(' · ')}` : 'sem mata-mata (corre como liga)';
+      toast(`Criada: ${cEd.value} (${r.groups} grupos, ${r.teams} equipas; ${ko}).`);
       render();
     } catch (e) { toast(e.message, true); }
   }

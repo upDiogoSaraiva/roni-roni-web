@@ -205,6 +205,11 @@ button { font: inherit; cursor: pointer; }
 /* ---------- construtor de competições ---------- */
 .builder-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px 12px; }
 .builder-grid .field { margin: 0; }
+.builder-sec { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin: 14px 0 4px; }
+.ko-preview { font-size: 12.5px; margin: 8px 0 2px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--hairline); }
+.ko-preview.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.chk-field { display: flex; align-items: center; gap: 7px; align-self: end; padding-bottom: 8px; }
+.chk-field .chk { width: 17px; height: 17px; accent-color: var(--brand); }
 
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }

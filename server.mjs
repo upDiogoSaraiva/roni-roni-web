@@ -8,7 +8,7 @@ import { dirname, join, normalize, extname, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { computeWorldState, leaderboard } from './src/scoring.mjs';
 import { loadResultsSource, fetchEspnKnockout } from './src/results_source.mjs';
-import { resolveBracket, groupStageComplete } from './src/bracket.mjs';
+import { resolveBracket, groupStageComplete, generateBracket } from './src/bracket.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(root, 'public');
@@ -656,6 +656,14 @@ async function api(req, res, path) {
       const format = { qualifiersPerGroup: Number(fmt.qualifiersPerGroup) || 2, bestThirds: Number(fmt.bestThirds) || 0, groupGames: Number(fmt.groupGames) || 3 };
       const sc = body.scoring || {};
       const scoring = { qualify: Number(sc.qualify) || 1, position: Number(sc.position) || 1, champion: Number(sc.champion) || 0, final4: Number(sc.final4) || 0 };
+      // gerar o quadro de mata-mata a partir do formato + pontuação de eliminatória
+      const bracket = generateBracket(groupIds, {
+        qualifiersPerGroup: format.qualifiersPerGroup,
+        bestThirds: format.bestThirds,
+        koWin: Number(sc.koWin) || 2,
+        koMethod: Number(sc.koMethod) || 1,
+        koJoker: sc.koJoker !== false,
+      });
       const prizes = Array.isArray(body.prizes) && body.prizes.length ? body.prizes : [
         { key: '1', tag: '1.º', name: '1.º lugar', value: 0, kind: 'rank', rank: 1 },
         { key: '2', tag: '2.º', name: '2.º lugar', value: 0, kind: 'rank', rank: 2 },
@@ -671,12 +679,15 @@ async function api(req, res, path) {
       mkdirSync(dir, { recursive: true });
       writeFileSync(join(dir, 'competition.json'), JSON.stringify(competition, null, 2));
       writeFileSync(join(dir, 'groups.json'), JSON.stringify(groups, null, 2));
-      writeFileSync(join(dir, 'bracket.json'), JSON.stringify({ rounds: [], matches: {} }, null, 2));
+      writeFileSync(join(dir, 'bracket.json'), JSON.stringify({ rounds: bracket.rounds, matches: bracket.matches }, null, 2));
       writeFileSync(join(dir, 'seed.json'), JSON.stringify(seed, null, 2));
       writeFileSync(join(dir, 'results_source.json'), JSON.stringify({ groups: {} }, null, 2));
       registry.competitions.push({ id, name, edition, status: 'created' });
       saveRegistry();
-      return json(res, 200, { ok: true, id, teams: Object.keys(teams).length, groups: groupIds.length });
+      return json(res, 200, {
+        ok: true, id, teams: Object.keys(teams).length, groups: groupIds.length,
+        bracket: { generated: bracket.generated, qualified: bracket.qualified, rounds: bracket.rounds.map((r) => r.label) },
+      });
     }
 
     if (path === '/api/admin/window' && method === 'POST') {

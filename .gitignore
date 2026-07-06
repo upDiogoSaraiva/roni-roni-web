@@ -16,6 +16,7 @@ data/identities.json
 # screenshots de teste e artefactos do browser
 /*.png
 .playwright-mcp/
+.claude/
 
 .DS_Store
 Thumbs.db

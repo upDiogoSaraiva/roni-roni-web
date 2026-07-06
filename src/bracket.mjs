@@ -112,3 +112,76 @@ export function resolveBracket(bracket, standings, knockoutResults = {}, teams =
 export function matchTeams(resolvedMatch) {
   return [resolvedMatch.home.team, resolvedMatch.away.team].filter(Boolean);
 }
+
+// Gera um quadro de mata-mata padrão a partir da ordem dos grupos.
+// Suporta os casos "limpos": 2 apurados/grupo (cruzamento 1.º x 2.º) ou 1 apurado/grupo (só vencedores),
+// com o total de apurados a ser potência de 2 e sem melhores 3.os. Caso contrário devolve um quadro
+// vazio ({ rounds: [], matches: {} }) — a competição corre como liga, sem mata-mata.
+// Devolve também `generated` (bool) e `qualified` (nº de apurados) para o chamador informar o admin.
+const KO_TEAMS_ID = { 32: 'r32', 16: 'r16', 8: 'qf', 4: 'sf', 2: 'final' };
+const KO_TEAMS_LABEL = { 32: '16-avos', 16: '8-avos', 8: 'Quartos de final', 4: 'Meias-finais', 2: 'Final' };
+
+export function generateBracket(groupOrder, opts = {}) {
+  const qpg = Number(opts.qualifiersPerGroup) || 2;
+  const thirds = Number(opts.bestThirds) || 0;
+  const winPts = Number(opts.koWin) || 2;
+  const methodPts = Number(opts.koMethod) || 1;
+  const joker = opts.koJoker !== false;
+  const G = groupOrder.length;
+  const Q = G * qpg + thirds;
+  const isPow2 = (x) => x >= 2 && (x & (x - 1)) === 0;
+  const clean = isPow2(Q) && thirds === 0 && (qpg === 1 || qpg === 2) && isPow2(G);
+  if (!clean) return { rounds: [], matches: {}, generated: false, qualified: Q };
+
+  // Ronda 1: emparelhamentos a partir dos grupos.
+  let r1;
+  if (qpg === 1) {
+    r1 = [];
+    for (let i = 0; i < G; i += 2) r1.push([{ type: 'winner', group: groupOrder[i] }, { type: 'winner', group: groupOrder[i + 1] }]);
+  } else {
+    // Duos (a, b): X = 1.º de a x 2.º de b vai para a 1.ª metade do quadro;
+    // Y = 1.º de b x 2.º de a vai para a 2.ª metade. Assim as duas equipas do mesmo
+    // duo só se podem reencontrar na final (evita repetição precoce de grupo).
+    const X = []; const Y = [];
+    for (let i = 0; i < G; i += 2) {
+      const a = groupOrder[i]; const b = groupOrder[i + 1];
+      X.push([{ type: 'winner', group: a }, { type: 'runnerup', group: b }]);
+      Y.push([{ type: 'winner', group: b }, { type: 'runnerup', group: a }]);
+    }
+    r1 = X.concat(Y);
+  }
+
+  const matches = {};
+  let mid = 1;
+  let cur = r1.map((slots) => {
+    const id = mid++;
+    matches[id] = { round: null, home: slots[0], away: slots[1] };
+    return id;
+  });
+  const roundOrder = [{ teams: cur.length * 2, ids: cur }];
+  while (cur.length > 1) {
+    const next = [];
+    for (let i = 0; i < cur.length; i += 2) {
+      const id = mid++;
+      matches[id] = { round: null, home: { type: 'winnerOf', match: cur[i] }, away: { type: 'winnerOf', match: cur[i + 1] } };
+      next.push(id);
+    }
+    cur = next;
+    roundOrder.push({ teams: cur.length * 2, ids: cur });
+  }
+
+  const rounds = [];
+  for (const r of roundOrder) {
+    const id = KO_TEAMS_ID[r.teams];
+    for (const m of r.ids) matches[m].round = id;
+    rounds.push({ id, label: KO_TEAMS_LABEL[r.teams], matches: r.ids, winPts, methodPts, joker });
+  }
+  // 3.º/4.º lugar: perdedores das meias-finais (a ronda de 4 equipas). Fica antes da final.
+  const sf = roundOrder.find((r) => r.teams === 4);
+  if (sf && sf.ids.length === 2) {
+    const id = mid++;
+    matches[id] = { round: 'third', home: { type: 'loserOf', match: sf.ids[0] }, away: { type: 'loserOf', match: sf.ids[1] } };
+    rounds.splice(rounds.length - 1, 0, { id: 'third', label: '3.º/4.º lugar', matches: [id], winPts, methodPts, joker: false });
+  }
+  return { rounds, matches, generated: true, qualified: Q };
+}
