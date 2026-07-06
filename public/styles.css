@@ -476,8 +476,20 @@ button { font: inherit; cursor: pointer; }
 .sheet-fold > summary:hover { color: var(--text); }
 .sheet-fold .sf-pts { color: var(--brand); font-weight: 500; letter-spacing: 0; }
 .sheet-fold .sf-body { padding: 0 12px 12px; }
-.ko-sheet-round { font-size: 11px; font-weight: 700; color: var(--text-soft); margin: 10px 0 2px; }
-.ko-sheet-round:first-child { margin-top: 4px; }
+/* grelha compacta dos jogos do mata-mata (várias colunas em ecrã largo) */
+.ko-grid { display: grid; grid-template-columns: 1fr; gap: 2px 18px; align-items: center; }
+@media (min-width: 400px) { .ko-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 720px) { .ko-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.ko-round { grid-column: 1 / -1; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); margin: 10px 0 2px; }
+.ko-round:first-child { margin-top: 2px; }
+.ko-cell { display: grid; grid-template-columns: 58px 1fr auto auto; align-items: center; gap: 6px; padding: 3px 0; font-size: 12.5px; }
+.ko-cell.faded { opacity: 0.5; }
+.ko-cell .ko-ctx { font-family: var(--font-num); font-size: 10px; color: var(--text-soft); }
+.ko-cell .team.mini .nm { font-size: 12px; }
+.ko-cell .ko-m { font-size: 10px; color: var(--text-soft); }
+.pt-chip.pend { color: var(--text-soft); }
+.ko-init { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--hairline); font-size: 12.5px; }
+.ko-init-lbl { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-soft); }
 .pt-badges { display: inline-flex; gap: 4px; margin-left: auto; flex: none; }
 .pt-chip {
   display: inline-flex; align-items: center; justify-content: center; min-width: 22px;

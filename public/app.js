@@ -572,25 +572,22 @@ function sheetFold(title, pts, open, body) {
   d.appendChild(el('div', { class: 'sf-body' }, body));
   return d;
 }
-// uma linha de um jogo do mata-mata: adversários · quem apostou (+ forma) · pontos ganhos
+// uma célula de um jogo do mata-mata: adversários · quem apostou (+ forma) · pontos ganhos
 function koSheetLine(mid, match, pick, detail, isJoker) {
   const ctx = match && match.home?.team && match.away?.team ? `${codeOf(match.home.team)}–${codeOf(match.away.team)}` : 'Jogo ' + mid;
-  const badges = el('span', { class: 'pt-badges' });
+  let badge;
   if (detail) {
-    if (detail.pts > 0) {
-      badges.appendChild(el('span', { class: 'pt-chip apura', title: detail.methodCorrect ? 'Vencedor e forma certos' : 'Vencedor certo' }, '+' + detail.pts));
-      if (isJoker) badges.appendChild(el('span', { class: 'pt-chip dup', title: 'Joker (pontos a dobrar)' }, '★'));
-    } else {
-      badges.appendChild(el('span', { class: 'pt-chip out', title: 'Falhou' }, '—'));
-    }
+    badge = detail.pts > 0
+      ? el('span', { class: 'pt-chip apura', title: detail.methodCorrect ? 'Vencedor e forma certos' : 'Vencedor certo' }, '+' + detail.pts + (isJoker ? '★' : ''))
+      : el('span', { class: 'pt-chip out', title: 'Falhou' }, '—');
   } else {
-    badges.appendChild(el('span', { class: 'pt-chip', style: { color: 'var(--text-soft)' }, title: 'Ainda por jogar' }, '·'));
+    badge = el('span', { class: 'pt-chip pend', title: 'Ainda por jogar' }, '·');
   }
-  const method = pick.method ? el('span', { class: 'ko-sheet-m num' }, METHOD_SHORT[pick.method] || '') : null;
-  return el('div', { class: 'sheet-line' + (detail && detail.pts === 0 ? ' faded' : '') },
-    el('span', { class: 'pos ko' }, ctx),
-    el('span', { class: 'team' }, teamChip(pick.winner), method),
-    badges);
+  return el('div', { class: 'ko-cell' + (detail && detail.pts === 0 ? ' faded' : '') },
+    el('span', { class: 'ko-ctx' }, ctx),
+    teamMini(pick.winner),
+    pick.method ? el('span', { class: 'ko-m num' }, METHOD_SHORT[pick.method] || '') : el('span', {}),
+    badge);
 }
 function sheetDetail(bet, score, bracket) {
   const box = el('div', { class: 'lb-detail' });
@@ -636,22 +633,23 @@ function sheetDetail(bet, score, bracket) {
   const jokers = new Set((bet.jokers || []).map(String));
   const kd = (score && score.knockoutDetail) || {};
   const koBody = el('div', {});
+  const koGrid = el('div', { class: 'ko-grid' });
   for (const r of (STATE.koRounds || [])) {
     const rows = (r.matches || []).filter((mid) => koPicks[String(mid)]?.winner);
     if (!rows.length) continue;
-    koBody.appendChild(el('div', { class: 'ko-sheet-round' }, r.label));
+    koGrid.appendChild(el('div', { class: 'ko-round' }, r.label));
     for (const mid of rows) {
       const m = bracket && bracket.resolved ? bracket.resolved[String(mid)] : null;
-      koBody.appendChild(koSheetLine(String(mid), m, koPicks[String(mid)], kd[String(mid)], jokers.has(String(mid))));
+      koGrid.appendChild(koSheetLine(String(mid), m, koPicks[String(mid)], kd[String(mid)], jokers.has(String(mid))));
     }
   }
-  // campeão + Final 4 resolvem no fim; mostram-se aqui como parte do mata-mata
-  koBody.appendChild(el('div', { class: 'ko-sheet-round' }, 'Aposta inicial (resolve no fim)'));
-  koBody.appendChild(el('div', { class: 'sheet-line' },
-    el('span', { class: 'pos ko' }, 'Campeão'), el('span', { class: 'team' }, teamChip(bet.champion)),
-    score?.champion ? el('span', { class: 'pt-badges' }, el('span', { class: 'pt-chip apura' }, '+' + score.champion)) : null));
-  for (const t of (bet.final4 || [])) koBody.appendChild(el('div', { class: 'sheet-line' },
-    el('span', { class: 'pos ko' }, 'Final 4'), el('span', { class: 'team' }, teamChip(t))));
+  if (Object.keys(koPicks).length) koBody.appendChild(koGrid);
+  // campeão + Final 4 resolvem no fim; linha compacta com códigos
+  koBody.appendChild(el('div', { class: 'ko-init' },
+    el('span', { class: 'ko-init-lbl' }, 'Campeão'), teamChip(bet.champion, { code: true }),
+    score?.champion ? el('span', { class: 'pt-chip apura' }, '+' + score.champion) : null,
+    el('span', { class: 'ko-init-lbl', style: { marginLeft: '8px' } }, 'Final 4'),
+    ...(bet.final4 || []).map((t) => teamChip(t, { code: true }))));
   box.appendChild(sheetFold('Mata-mata', score ? (score.knockout || 0) + (score.champion || 0) + (score.final4 || 0) : null, hasKoPicks, koBody));
   return box;
 }
