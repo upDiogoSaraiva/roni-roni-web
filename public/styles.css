@@ -211,6 +211,26 @@ button { font: inherit; cursor: pointer; }
 .chk-field { display: flex; align-items: center; gap: 7px; align-self: end; padding-bottom: 8px; }
 .chk-field .chk { width: 17px; height: 17px; accent-color: var(--brand); }
 
+/* ---------- quadro do mata-mata (bracket) ---------- */
+.bk-scroll { overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+.bk-tree { display: flex; gap: 12px; align-items: stretch; min-width: min-content; }
+.bk-round { display: flex; flex-direction: column; flex: 0 0 auto; min-width: 128px; }
+.bk-round-head { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-soft); text-align: center; margin-bottom: 8px; }
+.bk-round-body { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 8px; }
+.bk-match { background: var(--surface-2); border: 1px solid var(--hairline); border-radius: 9px; padding: 5px 7px; display: grid; gap: 3px; }
+.bk-match.played { border-color: color-mix(in srgb, var(--brand) 35%, var(--hairline)); }
+.bk-team { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12.5px; }
+.bk-team.win { font-weight: 700; }
+.bk-team.win .code { color: var(--ok); }
+.bk-team.lose { opacity: .48; }
+.bk-nm { display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
+.bk-nm .code { letter-spacing: .02em; }
+.bk-nm.slot { color: var(--text-soft); font-size: 11px; font-style: italic; }
+.bk-g { font-size: 12px; opacity: .85; }
+.bk-method { text-align: right; font-size: 9.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-soft); }
+.bk-third { margin-top: 16px; max-width: 220px; }
+.bk-third .bk-round-head { text-align: left; }
+
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }

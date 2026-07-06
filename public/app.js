@@ -300,7 +300,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -309,7 +309,7 @@ function navigate(route) { location.hash = '#/' + route; }
 
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
-  ['geral', 'Tabela'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
+  ['geral', 'Tabela'], ['quadro', 'Quadro'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
   ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
@@ -360,6 +360,7 @@ async function render() {
     else if (r === 'halloffame') await pageHallOfFame();
     else if (r === 'conquistas') await pageConquistas();
     else if (r === 'folha') await pageFolha();
+    else if (r === 'quadro') await pageQuadro();
   } catch (e) {
     if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
@@ -1261,6 +1262,55 @@ async function pageCartao() {
     } catch (e) { if (e.name !== 'AbortError') toast(e.message, true); } // só o cancelar da partilha é silencioso
   }
   paint();
+}
+
+/* ---------------- PÁGINA: QUADRO (árvore do mata-mata) ---------------- */
+// uma equipa de um jogo: bandeira + código (ou o rótulo do slot, ex.: "1.º A") + golos.
+function bkTeam(side, isWin, played, goals) {
+  const name = side && side.team;
+  const nm = name
+    ? el('span', { class: 'bk-nm' }, flag(name), el('span', { class: 'code num' }, codeOf(name)))
+    : el('span', { class: 'bk-nm slot' }, (side && side.label) || '?');
+  return el('div', { class: 'bk-team' + (isWin ? ' win' : (played ? ' lose' : '')) },
+    nm,
+    (played && goals != null) ? el('span', { class: 'bk-g num' }, String(goals)) : el('span', { class: 'bk-g' }));
+}
+function bkMatch(m) {
+  if (!m) return el('div', { class: 'bk-match' });
+  const played = !!m.winner;
+  const card = el('div', { class: 'bk-match' + (played ? ' played' : '') },
+    bkTeam(m.home, played && m.winner === m.home.team, played, m.homeGoals),
+    bkTeam(m.away, played && m.winner === m.away.team, played, m.awayGoals));
+  if (played && m.method) card.appendChild(el('div', { class: 'bk-method num' }, METHOD_SHORT[m.method] || m.method));
+  return card;
+}
+function bkRound(round, resolved) {
+  const body = el('div', { class: 'bk-round-body' });
+  for (const id of round.matches) body.appendChild(bkMatch(resolved[id]));
+  return el('div', { class: 'bk-round' }, el('div', { class: 'bk-round-head' }, round.label), body);
+}
+async function pageQuadro() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Quadro'),
+    el('p', {}, 'O mata-mata da competição, ronda a ronda, com os resultados reais.')));
+  MAIN.appendChild(engageNav('quadro'));
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  host.appendChild(skeletonList(3));
+  let data;
+  try { data = await api('/api/bracket'); }
+  catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar o quadro.', render)); return; }
+  clear(host);
+  const rounds = (data.rounds || []).filter((r) => r.matches && r.matches.length);
+  if (!rounds.length) { host.appendChild(emptyState('Sem mata-mata', 'Esta competição corre como liga, sem eliminatória.', 'trophy')); return; }
+  const main = rounds.filter((r) => r.id !== 'third');
+  const third = rounds.find((r) => r.id === 'third');
+  const tree = el('div', { class: 'bk-tree' });
+  for (const r of main) tree.appendChild(bkRound(r, data.resolved));
+  host.appendChild(el('div', { class: 'bk-scroll' }, tree));
+  if (third) {
+    host.appendChild(el('div', { class: 'bk-third' },
+      el('div', { class: 'bk-round-head' }, third.label), bkMatch(data.resolved[third.matches[0]])));
+  }
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
