@@ -230,6 +230,16 @@ button { font: inherit; cursor: pointer; }
 .bk-method { text-align: right; font-size: 9.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--text-soft); }
 .bk-third { margin-top: 16px; max-width: 220px; }
 .bk-third .bk-round-head { text-align: left; }
+.bk-picker { margin-bottom: 12px; }
+.bk-picker .bk-sel { max-width: 320px; }
+.bk-pick { display: flex; align-items: center; gap: 5px; margin-top: 3px; padding-top: 4px; border-top: 1px dashed var(--hairline); font-size: 11px; }
+.bk-pick .bk-pick-lbl { color: var(--text-soft); text-transform: uppercase; letter-spacing: .03em; font-size: 9.5px; }
+.bk-pick .team.mini { font-size: 11px; }
+.bk-pick .bk-pick-mk { margin-left: auto; font-weight: 700; }
+.bk-pick.ok .bk-pick-mk { color: var(--ok); }
+.bk-pick.miss { opacity: .65; }
+.bk-pick.miss .bk-pick-mk { color: var(--brand); }
+.bk-pick.pend .bk-pick-mk { color: var(--text-soft); }
 
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }

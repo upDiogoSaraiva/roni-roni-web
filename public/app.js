@@ -1275,18 +1275,34 @@ function bkTeam(side, isWin, played, goals) {
     nm,
     (played && goals != null) ? el('span', { class: 'bk-g num' }, String(goals)) : el('span', { class: 'bk-g' }));
 }
-function bkMatch(m) {
+// palpite do jogador para um jogo: seleção escolhida + acertou/falhou/pendente
+function bkPick(mid, m, picks) {
+  if (!picks) return null;
+  const pk = picks[mid];
+  if (!pk || !pk.winner) return null;
+  const played = !!m.winner;
+  let cls = 'pend'; let mark = '·'; let title = 'Palpite (jogo por decidir)';
+  if (played) {
+    if (pk.winner === m.winner) { cls = 'ok'; mark = '✓'; title = 'Acertou o vencedor'; }
+    else { cls = 'miss'; mark = '✗'; title = 'Falhou o vencedor'; }
+  }
+  return el('div', { class: 'bk-pick ' + cls, title },
+    el('span', { class: 'bk-pick-lbl' }, 'aposta'), teamMini(pk.winner), el('span', { class: 'bk-pick-mk' }, mark));
+}
+function bkMatch(m, mid, picks) {
   if (!m) return el('div', { class: 'bk-match' });
   const played = !!m.winner;
   const card = el('div', { class: 'bk-match' + (played ? ' played' : '') },
     bkTeam(m.home, played && m.winner === m.home.team, played, m.homeGoals),
     bkTeam(m.away, played && m.winner === m.away.team, played, m.awayGoals));
   if (played && m.method) card.appendChild(el('div', { class: 'bk-method num' }, METHOD_SHORT[m.method] || m.method));
+  const pk = bkPick(mid, m, picks);
+  if (pk) card.appendChild(pk);
   return card;
 }
-function bkRound(round, resolved) {
+function bkRound(round, resolved, picks) {
   const body = el('div', { class: 'bk-round-body' });
-  for (const id of round.matches) body.appendChild(bkMatch(resolved[id]));
+  for (const id of round.matches) body.appendChild(bkMatch(resolved[id], id, picks));
   return el('div', { class: 'bk-round' }, el('div', { class: 'bk-round-head' }, round.label), body);
 }
 async function pageQuadro() {
@@ -1296,21 +1312,41 @@ async function pageQuadro() {
   const host = el('div', {});
   MAIN.appendChild(host);
   host.appendChild(skeletonList(3));
-  let data;
-  try { data = await api('/api/bracket'); }
+  let data; let lb;
+  try { [data, lb] = await Promise.all([api('/api/bracket'), api('/api/leaderboard').catch(() => null)]); }
   catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar o quadro.', render)); return; }
   clear(host);
   const rounds = (data.rounds || []).filter((r) => r.matches && r.matches.length);
   if (!rounds.length) { host.appendChild(emptyState('Sem mata-mata', 'Esta competição corre como liga, sem eliminatória.', 'trophy')); return; }
   const main = rounds.filter((r) => r.id !== 'third');
   const third = rounds.find((r) => r.id === 'third');
-  const tree = el('div', { class: 'bk-tree' });
-  for (const r of main) tree.appendChild(bkRound(r, data.resolved));
-  host.appendChild(el('div', { class: 'bk-scroll' }, tree));
-  if (third) {
-    host.appendChild(el('div', { class: 'bk-third' },
-      el('div', { class: 'bk-round-head' }, third.label), bkMatch(data.resolved[third.matches[0]])));
+
+  // seletor de jogador: sobrepõe o palpite de cada jogo (acertou/falhou/pendente)
+  const players = lb ? lb.leaderboard.map((r) => r.player) : [];
+  const me = localStorage.getItem('roni-me') || '';
+  let selected = players.includes(me) ? me : '';
+  if (players.length) {
+    const sel = el('select', { class: 'select bk-sel', onchange: (e) => { selected = e.target.value; paint(); } },
+      el('option', { value: '' }, 'Ver palpites de um jogador…'),
+      ...players.map((p) => el('option', { value: p }, p)));
+    sel.value = selected;
+    host.appendChild(el('div', { class: 'bk-picker' }, sel));
   }
+  const wrap = el('div', {});
+  host.appendChild(wrap);
+
+  function paint() {
+    clear(wrap);
+    const picks = selected && lb && lb.bets ? lb.bets[selected] && lb.bets[selected].knockouts : null;
+    const tree = el('div', { class: 'bk-tree' });
+    for (const r of main) tree.appendChild(bkRound(r, data.resolved, picks));
+    wrap.appendChild(el('div', { class: 'bk-scroll' }, tree));
+    if (third) {
+      wrap.appendChild(el('div', { class: 'bk-third' },
+        el('div', { class: 'bk-round-head' }, third.label), bkMatch(data.resolved[third.matches[0]], third.matches[0], picks)));
+    }
+  }
+  paint();
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
