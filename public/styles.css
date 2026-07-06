@@ -241,6 +241,22 @@ button { font: inherit; cursor: pointer; }
 .bk-pick.miss .bk-pick-mk { color: var(--brand); }
 .bk-pick.pend .bk-pick-mk { color: var(--text-soft); }
 
+/* ---------- quem tem quem ---------- */
+.qt-picker { margin-bottom: 14px; }
+.qt-picker .select { max-width: 360px; }
+.qt-team { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.qt-status { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--hairline); }
+.qt-status.alive { color: var(--ok); background: var(--ok-bg); border-color: var(--ok); }
+.qt-status.out { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 45%, var(--hairline)); }
+.qt-status.na { color: var(--text-soft); }
+.qt-sec { padding: 10px 0; border-top: 1px solid var(--hairline); }
+.qt-sec-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+.qt-count { color: var(--text-soft); background: var(--surface-2); border-radius: 999px; padding: 1px 9px; font-size: 12px; }
+.qt-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.qt-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 3px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--hairline); font-size: 12.5px; text-decoration: none; color: inherit; }
+.qt-chip:hover { border-color: var(--brand); }
+.qt-chip .mono { width: 22px; height: 22px; font-size: 10px; }
+
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }

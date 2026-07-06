@@ -300,7 +300,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -309,7 +309,7 @@ function navigate(route) { location.hash = '#/' + route; }
 
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
-  ['geral', 'Tabela'], ['quadro', 'Quadro'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
+  ['geral', 'Tabela'], ['quadro', 'Quadro'], ['quemtem', 'Quem tem quem'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
   ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
@@ -361,6 +361,7 @@ async function render() {
     else if (r === 'conquistas') await pageConquistas();
     else if (r === 'folha') await pageFolha();
     else if (r === 'quadro') await pageQuadro();
+    else if (r === 'quemtem') await pageQuemTem();
   } catch (e) {
     if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
@@ -1347,6 +1348,85 @@ async function pageQuadro() {
     }
   }
   paint();
+}
+
+/* ---------------- PÁGINA: QUEM TEM QUEM (seleção -> quem apostou nela) ---------------- */
+// chip clicável de jogador que abre a folha partilhável
+function playerChip(name) {
+  return el('a', { class: 'qt-chip', href: '#/folha/' + encodeURIComponent(name) }, monogram(name), el('span', {}, name));
+}
+async function pageQuemTem() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Quem tem quem'),
+    el('p', {}, 'Escolhe uma seleção e vê quem a apostou como campeã, no Final 4 ou para vencer no mata-mata.')));
+  MAIN.appendChild(engageNav('quemtem'));
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  host.appendChild(skeletonList(3));
+  let lb; let bracket;
+  try { [lb, bracket] = await Promise.all([api('/api/leaderboard'), api('/api/bracket').catch(() => null)]); }
+  catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar.', render)); return; }
+  clear(host);
+  const bets = lb.bets || {};
+
+  // estado de cada seleção a partir do quadro: em prova / eliminada / não apurada
+  const eliminated = new Set(); const inBracket = new Set();
+  const resolved = (bracket && bracket.resolved) || {};
+  const roundLabelById = {};
+  for (const r of (bracket && bracket.rounds) || []) roundLabelById[r.id] = r.label;
+  for (const m of Object.values(resolved)) {
+    if (m.home && m.home.team) inBracket.add(m.home.team);
+    if (m.away && m.away.team) inBracket.add(m.away.team);
+    if (m.winner && m.home && m.away && m.home.team && m.away.team) {
+      eliminated.add(m.winner === m.home.team ? m.away.team : m.home.team);
+    }
+  }
+  function statusOf(team) {
+    if (eliminated.has(team)) return { cls: 'out', txt: 'Eliminada' };
+    if (inBracket.has(team)) return { cls: 'alive', txt: 'Ainda em prova' };
+    return { cls: 'na', txt: 'Não apurada / grupos a decorrer' };
+  }
+
+  // lista de seleções: todas as da competição, por ordem alfabética
+  const teams = Object.keys(STATE.teams || {}).sort((a, b) => a.localeCompare(b, 'pt'));
+  const sel = el('select', { class: 'select', onchange: (e) => paint(e.target.value) },
+    el('option', { value: '' }, 'Escolher seleção…'),
+    ...teams.map((t) => el('option', { value: t }, `${codeOf(t)} · ${t}`)));
+  host.appendChild(el('div', { class: 'qt-picker' }, sel));
+  const wrap = el('div', {});
+  host.appendChild(wrap);
+
+  function section(title, names) {
+    const head = el('div', { class: 'qt-sec-head' }, el('span', {}, title), el('span', { class: 'qt-count num' }, String(names.length)));
+    if (!names.length) return el('div', { class: 'qt-sec' }, head, el('p', { class: 'muted', style: { margin: '4px 0 0' } }, 'Ninguém.'));
+    const chips = el('div', { class: 'qt-chips' }, ...names.sort((a, b) => a.localeCompare(b, 'pt')).map(playerChip));
+    return el('div', { class: 'qt-sec' }, head, chips);
+  }
+
+  function paint(team) {
+    clear(wrap);
+    if (!team) { wrap.appendChild(emptyState('Escolhe uma seleção', 'Para ver quem apostou nela.', 'search')); return; }
+    const champions = []; const final4 = []; const koByRound = {};
+    for (const [player, bet] of Object.entries(bets)) {
+      if (bet.champion === team) champions.push(player);
+      if ((bet.final4 || []).includes(team)) final4.push(player);
+      for (const [mid, pk] of Object.entries(bet.knockouts || {})) {
+        if (pk && pk.winner === team) {
+          const rid = (resolved[mid] && resolved[mid].round) || 'ko';
+          (koByRound[rid] ||= []).push(player);
+        }
+      }
+    }
+    const st = statusOf(team);
+    wrap.appendChild(el('div', { class: 'qt-team' },
+      teamChip(team), el('span', { class: 'qt-status ' + st.cls }, st.txt)));
+    wrap.appendChild(section('Campeã', champions));
+    wrap.appendChild(section('No Final 4', final4));
+    // mata-mata por ronda (pela ordem das rondas do quadro)
+    const order = ((bracket && bracket.rounds) || []).map((r) => r.id);
+    const koRounds = Object.keys(koByRound).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    for (const rid of koRounds) wrap.appendChild(section('Vencer ' + (roundLabelById[rid] || rid), koByRound[rid]));
+  }
+  paint('');
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
