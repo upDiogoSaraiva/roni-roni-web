@@ -460,7 +460,24 @@ button { font: inherit; cursor: pointer; }
 .sheet-line { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
 .sheet-line.faded { opacity: 0.5; }
 .sheet-line .pos { font-family: var(--font-num); font-size: 11px; color: var(--text-soft); width: 18px; flex: none; }
+.sheet-line .pos.ko { width: 74px; letter-spacing: -0.02em; }
 .sheet-line .team { flex: 1; min-width: 0; }
+.ko-sheet-m { font-size: 10px; color: var(--text-soft); margin-left: 4px; }
+
+/* secções colapsáveis do detalhe (grupos / mata-mata) */
+.sheet-fold { border: 1px solid var(--hairline); border-radius: var(--r-ctrl); margin-top: var(--s3); overflow: hidden; background: var(--surface); }
+.sheet-fold > summary {
+  list-style: none; cursor: pointer; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft);
+}
+.sheet-fold > summary::-webkit-details-marker { display: none; }
+.sheet-fold > summary::after { content: '⌄'; font-size: 14px; transition: transform .18s; margin-left: 8px; }
+.sheet-fold[open] > summary::after { transform: rotate(180deg); }
+.sheet-fold > summary:hover { color: var(--text); }
+.sheet-fold .sf-pts { color: var(--brand); font-weight: 500; letter-spacing: 0; }
+.sheet-fold .sf-body { padding: 0 12px 12px; }
+.ko-sheet-round { font-size: 11px; font-weight: 700; color: var(--text-soft); margin: 10px 0 2px; }
+.ko-sheet-round:first-child { margin-top: 4px; }
 .pt-badges { display: inline-flex; gap: 4px; margin-left: auto; flex: none; }
 .pt-chip {
   display: inline-flex; align-items: center; justify-content: center; min-width: 22px;

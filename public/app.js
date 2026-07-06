@@ -406,7 +406,7 @@ async function pageGeral() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList());
-  const [data, tl] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null)]);
+  const [data, tl, bracket] = await Promise.all([api('/api/leaderboard'), api('/api/timeline').catch(() => null), api('/api/bracket').catch(() => null)]);
   clear(host);
 
   const myName = localStorage.getItem('roni-me');
@@ -510,7 +510,7 @@ async function pageGeral() {
             el('div', { class: 'sub' }, isMe ? 'Tu' : (r.seed ? 'Aposta inicial' : 'Submetida')))),
         el('div', { class: 'lb-pts' }, movementEl(r.movement || 0), el('span', { class: 'v num' }, r.score.total)));
       card.appendChild(row);
-      if (expanded.has(r.player)) card.appendChild(sheetDetail(data.bets[r.player], r.score));
+      if (expanded.has(r.player)) card.appendChild(sheetDetail(data.bets[r.player], r.score, bracket));
     });
   }
   function paint() {
@@ -562,14 +562,39 @@ function pointsBar(score) {
   for (const s of segs) legend.appendChild(el('span', {}, el('i', { style: { background: s.color } }), `${s.label} ${s.v}`));
   return el('div', { style: { marginTop: '12px' } }, el('div', { class: 'section-label', style: { marginTop: 0 } }, 'Composição dos pontos'), bar, legend);
 }
-function sheetDetail(bet, score) {
+// secção colapsável (grupos / mata-mata) com um resumo de pontos no cabeçalho
+function sheetFold(title, pts, open, body) {
+  const d = el('details', { class: 'sheet-fold' });
+  if (open) d.setAttribute('open', '');
+  d.appendChild(el('summary', {},
+    el('span', { class: 'sf-title' }, title),
+    pts != null ? el('span', { class: 'sf-pts num' }, '+' + pts) : null));
+  d.appendChild(el('div', { class: 'sf-body' }, body));
+  return d;
+}
+// uma linha de um jogo do mata-mata: adversários · quem apostou (+ forma) · pontos ganhos
+function koSheetLine(mid, match, pick, detail, isJoker) {
+  const ctx = match && match.home?.team && match.away?.team ? `${codeOf(match.home.team)}–${codeOf(match.away.team)}` : 'Jogo ' + mid;
+  const badges = el('span', { class: 'pt-badges' });
+  if (detail) {
+    if (detail.pts > 0) {
+      badges.appendChild(el('span', { class: 'pt-chip apura', title: detail.methodCorrect ? 'Vencedor e forma certos' : 'Vencedor certo' }, '+' + detail.pts));
+      if (isJoker) badges.appendChild(el('span', { class: 'pt-chip dup', title: 'Joker (pontos a dobrar)' }, '★'));
+    } else {
+      badges.appendChild(el('span', { class: 'pt-chip out', title: 'Falhou' }, '—'));
+    }
+  } else {
+    badges.appendChild(el('span', { class: 'pt-chip', style: { color: 'var(--text-soft)' }, title: 'Ainda por jogar' }, '·'));
+  }
+  const method = pick.method ? el('span', { class: 'ko-sheet-m num' }, METHOD_SHORT[pick.method] || '') : null;
+  return el('div', { class: 'sheet-line' + (detail && detail.pts === 0 ? ' faded' : '') },
+    el('span', { class: 'pos ko' }, ctx),
+    el('span', { class: 'team' }, teamChip(pick.winner), method),
+    badges);
+}
+function sheetDetail(bet, score, bracket) {
   const box = el('div', { class: 'lb-detail' });
   if (!bet) { box.appendChild(el('p', { class: 'muted' }, 'Sem folha.')); return box; }
-  box.appendChild(el('div', { class: 'sheet-top' },
-    el('div', { class: 'kv' }, el('b', {}, 'Campeão'), teamChip(bet.champion)),
-    ...bet.final4.map((t) => el('div', { class: 'kv' }, el('b', {}, 'Final 4'), teamChip(t)))));
-  box.appendChild(el('p', { class: 'muted', style: { fontSize: '11.5px', margin: '0 0 4px' } },
-    'Campeão e Final 4 contam nas eliminatórias.'));
   if (score) {
     const kvs = [
       el('div', { class: 'kv' }, el('b', {}, 'Apuramento'), el('span', { class: 'num', style: { color: 'var(--ok)' } }, '+' + score.qualification)),
@@ -584,10 +609,11 @@ function sheetDetail(bet, score) {
     const pb = pointsBar(score);
     if (pb) box.appendChild(pb);
   }
-  box.appendChild(el('div', { class: 'section-label' }, 'Folha por grupo · de onde vêm os pontos'));
-  box.appendChild(el('div', { class: 'sheet-legend' },
-    el('span', {}, el('span', { class: 'pt-chip apura' }, '+1'), 'apurou'),
-    el('span', {}, el('span', { class: 'pt-chip pos' }, '+1'), 'posição certa')));
+
+  // já há apostas de mata-mata? em modo playoff, os grupos entram recolhidos (história)
+  const hasKoPicks = Object.values(bet.knockouts || {}).some((k) => k && k.winner);
+
+  // FASE DE GRUPOS (colapsável) — a folha por grupo, de onde vêm os pontos
   const grid = el('div', { class: 'sheet-grid' });
   for (const g of STATE.groupOrder) {
     const p = bet.groups[g] || {};
@@ -598,7 +624,35 @@ function sheetDetail(bet, score) {
       sheetLine('2.º', p.second, picks.second),
       p.third ? sheetLine('3.º', p.third, picks.third) : null));
   }
-  box.appendChild(grid);
+  const groupBody = el('div', {},
+    el('div', { class: 'sheet-legend' },
+      el('span', {}, el('span', { class: 'pt-chip apura' }, '+1'), 'apurou'),
+      el('span', {}, el('span', { class: 'pt-chip pos' }, '+1'), 'posição certa')),
+    grid);
+  box.appendChild(sheetFold('Fase de grupos', score ? score.qualification + score.position : null, !hasKoPicks, groupBody));
+
+  // MATA-MATA (colapsável) — cada jogo apostado, com os pontos que rendeu
+  const koPicks = bet.knockouts || {};
+  const jokers = new Set((bet.jokers || []).map(String));
+  const kd = (score && score.knockoutDetail) || {};
+  const koBody = el('div', {});
+  for (const r of (STATE.koRounds || [])) {
+    const rows = (r.matches || []).filter((mid) => koPicks[String(mid)]?.winner);
+    if (!rows.length) continue;
+    koBody.appendChild(el('div', { class: 'ko-sheet-round' }, r.label));
+    for (const mid of rows) {
+      const m = bracket && bracket.resolved ? bracket.resolved[String(mid)] : null;
+      koBody.appendChild(koSheetLine(String(mid), m, koPicks[String(mid)], kd[String(mid)], jokers.has(String(mid))));
+    }
+  }
+  // campeão + Final 4 resolvem no fim; mostram-se aqui como parte do mata-mata
+  koBody.appendChild(el('div', { class: 'ko-sheet-round' }, 'Aposta inicial (resolve no fim)'));
+  koBody.appendChild(el('div', { class: 'sheet-line' },
+    el('span', { class: 'pos ko' }, 'Campeão'), el('span', { class: 'team' }, teamChip(bet.champion)),
+    score?.champion ? el('span', { class: 'pt-badges' }, el('span', { class: 'pt-chip apura' }, '+' + score.champion)) : null));
+  for (const t of (bet.final4 || [])) koBody.appendChild(el('div', { class: 'sheet-line' },
+    el('span', { class: 'pos ko' }, 'Final 4'), el('span', { class: 'team' }, teamChip(t))));
+  box.appendChild(sheetFold('Mata-mata', score ? (score.knockout || 0) + (score.champion || 0) + (score.final4 || 0) : null, hasKoPicks, koBody));
   return box;
 }
 
@@ -1219,7 +1273,7 @@ async function pageFolha() {
   const host = el('div', {});
   MAIN.append(host);
   host.appendChild(skeletonList(4));
-  const data = await api('/api/leaderboard');
+  const [data, bracket] = await Promise.all([api('/api/leaderboard'), api('/api/bracket').catch(() => null)]);
   clear(host);
   const row = data.leaderboard.find((r) => r.player === player);
   if (!row) { host.appendChild(emptyState('Jogador não encontrado', 'Verifica o nome no link.', 'search')); return; }
@@ -1229,7 +1283,7 @@ async function pageFolha() {
   host.appendChild(el('button', { class: 'btn btn-ghost', style: { margin: '10px 0' },
     onclick: async () => { try { await navigator.clipboard.writeText(location.href); toast('Link copiado!'); } catch { toast('Copia o link da barra do browser.', true); } } },
     'Copiar link da folha'));
-  host.appendChild(sheetDetail(data.bets[player], row.score));
+  host.appendChild(sheetDetail(data.bets[player], row.score, bracket));
 }
 
 /* ---------------- PÁGINA: CONQUISTAS (badges) ---------------- */
