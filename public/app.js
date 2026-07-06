@@ -300,7 +300,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem', 'ligas'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -309,7 +309,7 @@ function navigate(route) { location.hash = '#/' + route; }
 
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
-  ['geral', 'Tabela'], ['quadro', 'Quadro'], ['quemtem', 'Quem tem quem'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
+  ['geral', 'Tabela'], ['quadro', 'Quadro'], ['quemtem', 'Quem tem quem'], ['ligas', 'Mini-ligas'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
   ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
@@ -362,6 +362,7 @@ async function render() {
     else if (r === 'folha') await pageFolha();
     else if (r === 'quadro') await pageQuadro();
     else if (r === 'quemtem') await pageQuemTem();
+    else if (r === 'ligas') await pageLigas();
   } catch (e) {
     if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
@@ -1427,6 +1428,63 @@ async function pageQuemTem() {
     for (const rid of koRounds) wrap.appendChild(section('Vencer ' + (roundLabelById[rid] || rid), koByRound[rid]));
   }
   paint('');
+}
+
+/* ---------------- PÁGINA: MINI-LIGAS (sub-tabelas por critério) ---------------- */
+function surnameInitial(name) {
+  const parts = String(name).trim().split(/\s+/);
+  return (parts[parts.length - 1][0] || '?').toUpperCase();
+}
+async function pageLigas() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Mini-ligas'),
+    el('p', {}, 'Sub-tabelas por critério: quem vai à frente dentro do mesmo grupo.')));
+  MAIN.appendChild(engageNav('ligas'));
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  host.appendChild(skeletonList(4));
+  let lb;
+  try { lb = await api('/api/leaderboard'); }
+  catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar.', render)); return; }
+  clear(host);
+  const rows = lb.leaderboard || [];
+  const bets = lb.bets || {};
+
+  let crit = 'champion';
+  const sel = el('select', { class: 'select', onchange: (e) => { crit = e.target.value; paint(); } },
+    el('option', { value: 'champion' }, 'Por campeão apostado'),
+    el('option', { value: 'surname' }, 'Por inicial do apelido'));
+  host.appendChild(el('div', { class: 'qt-picker' }, sel));
+  const wrap = el('div', {});
+  host.appendChild(wrap);
+
+  function paint() {
+    clear(wrap);
+    const map = new Map();
+    for (const r of rows) {
+      const key = crit === 'champion' ? (bets[r.player] && bets[r.player].champion) || '—' : surnameInitial(r.player);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(r);
+    }
+    // ligas maiores primeiro; desempate pela chave
+    const entries = [...map.entries()].sort((a, b) => b[1].length - a[1].length || String(a[0]).localeCompare(String(b[0]), 'pt'));
+    const grid = el('div', { class: 'ml-grid' });
+    for (const [key, members] of entries) {
+      members.sort((a, b) => b.score.total - a.score.total || a.rank - b.rank);
+      const head = crit === 'champion'
+        ? el('div', { class: 'ml-head' }, key === '—' ? el('span', { class: 'muted' }, 'Sem campeão') : teamChip(key), el('span', { class: 'ml-n num' }, members.length))
+        : el('div', { class: 'ml-head' }, el('span', { class: 'ml-letter' }, key), el('span', { class: 'ml-n num' }, members.length));
+      const table = el('div', { class: 'ml-table' });
+      members.forEach((r, i) => {
+        table.appendChild(el('a', { class: 'ml-row' + (i === 0 ? ' lead' : ''), href: '#/folha/' + encodeURIComponent(r.player) },
+          el('span', { class: 'ml-pos num' }, String(i + 1)),
+          el('span', { class: 'ml-name' }, monogram(r.player), el('span', { class: 'ml-nm' }, r.player)),
+          el('span', { class: 'ml-pts num' }, String(r.score.total))));
+      });
+      grid.appendChild(el('div', { class: 'ml-card' }, head, table));
+    }
+    wrap.appendChild(grid);
+  }
+  paint();
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */

@@ -257,6 +257,23 @@ button { font: inherit; cursor: pointer; }
 .qt-chip:hover { border-color: var(--brand); }
 .qt-chip .mono { width: 22px; height: 22px; font-size: 10px; }
 
+/* ---------- mini-ligas (sub-tabelas por critério) ---------- */
+.ml-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.ml-card { border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.ml-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 11px; background: var(--surface-2); border-bottom: 1px solid var(--hairline); }
+.ml-letter { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+.ml-n { color: var(--text-soft); background: var(--surface); border-radius: 999px; padding: 1px 9px; font-size: 12px; }
+.ml-table { display: flex; flex-direction: column; }
+.ml-row { display: flex; align-items: center; gap: 8px; padding: 6px 11px; text-decoration: none; color: inherit; border-top: 1px solid var(--hairline); }
+.ml-row:first-child { border-top: 0; }
+.ml-row:hover { background: var(--surface-2); }
+.ml-row.lead { background: var(--gold-bg, rgba(242,180,65,.1)); }
+.ml-pos { width: 18px; text-align: center; color: var(--text-soft); font-size: 12px; }
+.ml-name { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+.ml-name .mono { width: 22px; height: 22px; font-size: 10px; flex: 0 0 auto; }
+.ml-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.ml-pts { font-weight: 700; font-size: 13.5px; }
+
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
