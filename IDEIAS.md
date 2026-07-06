@@ -27,7 +27,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 ### Social / competição
 - [✅] **Nemesis / próximo alvo** — o cartão hero mostra quem apanhar a seguir (jogador logo à frente).
 - [✅] **Rivalidades** — pares que mais trocaram de posição entre si ao longo das jornadas (na Evolução).
-- [💡] **Liga de quartos** — sub-grupos (ex.: por apelido/escolha) com mini-tabela.
+- [✅] **Liga de quartos** — vista "Mini-ligas": sub-grupos por critério (campeão apostado ou inicial do apelido) com mini-tabela ordenada por pontos e líder destacado.
 - [💡] **Mural de reações** — emojis por jogador (sem texto livre? rever neutralidade/segurança).
 - [✅] **Partilhar a tabela** como imagem (cartão de leaderboard top 10 para o WhatsApp).
 
@@ -40,7 +40,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 
 ### Qualidade de vida / mobile
 - [✅] **Contagem decrescente** para o fim da fase de grupos (na Geral, a partir das datas da competição).
-- [💡] **Pesquisa global** (jogadores + seleções) no topo.
+- [🔨] **Pesquisa global** (jogadores + seleções) no topo. Parte das seleções feita na vista "Quem tem quem" (seleção -> quem a apostou como campeã/Final 4/vencedor de ronda + estado em prova/eliminada). Falta a pesquisa de jogadores.
 - [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
 - [✅] **Copiar o meu resumo** — botão no hero que copia um texto curto da minha situação para o WhatsApp.
 - [✅] **Partilha por link** de uma folha de jogador (rota `#/folha/<nome>` + copiar link).
@@ -133,7 +133,18 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   intervalos de 5, no Reveal. Fonte: histogramas de dashboards. Porquê: mostra se a pool está
   renhida ou esticada. Neutro.
 
-## Ronda "uau" (efeito genuíno, pesquisa de microinterações 2026) — ✅ todas implementadas+testadas
+## Ronda "playoff" (mata-mata + pedidos do utilizador) — ✅ implementadas+testadas
+
+- **Construtor gera mata-mata** (ângulo admin) — o criador de competições passa a gerar o quadro de
+  eliminatória a partir dos grupos (cruzamento 1.º x 2.º ou só vencedores; 2/4/8/16 grupos, apurados
+  em potência de 2), com meias/final/3.º-4.º, e expõe pontuação de eliminatória, inscrição e prémios.
+  Antes nascia sem mata-mata. Fonte: pedido do utilizador ("mil e uma opções"). Porquê: torna uma
+  edição nova jogável de ponta a ponta.
+- **Quadro do mata-mata** (ângulo visualização) — vista "Quadro" com a árvore ronda a ronda
+  (resultado + método + vencedor a destaque) e um seletor que sobrepõe o palpite de cada jogador por
+  jogo (acertou/falhou/pendente). Fonte: brackets de apps desportivas + pedido do utilizador. Neutro.
+- **Quem tem quem** (ângulo dados/social) — seleção -> quem a apostou como campeã/Final 4/vencedor de
+  ronda, com estado em prova/eliminada. Fonte: "who has whom" de pools. Porquê: picardia de playoff. Neutro.
 
 Fonte desta ronda: pesquisa sobre delight/microinterações 2026 (confetti tipo Duolingo, "unicórnio"
 do Asana, heart-bloom do Instagram), técnica **FLIP** para reordenação a 60fps, e UX dos **stories**
