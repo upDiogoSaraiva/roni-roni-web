@@ -417,6 +417,7 @@ async function pageGeral() {
   let query = '';
   const expanded = new Set();
   let firstLbPaint = true;
+  let animateRows = false; // marca as linhas com entrada escalonada só na 1.ª pintura
 
   // contagem decrescente (entra no bento abaixo)
   const cd = groupStageCountdown();
@@ -501,7 +502,7 @@ async function pageGeral() {
     rows.forEach((r, i) => {
       const isMe = myName && r.player === myName;
       const row = el('button', {
-        class: 'lb-row' + (r.rank === 1 ? ' leader' : '') + (isMe ? ' me' : ''),
+        class: 'lb-row' + (r.rank === 1 ? ' leader' : '') + (isMe ? ' me' : '') + (animateRows ? ' lb-in' : ''),
         'data-flip': r.player,
         style: { animationDelay: Math.min(i * 18, 360) + 'ms' },
         'aria-expanded': expanded.has(r.player) ? 'true' : 'false',
@@ -520,11 +521,13 @@ async function pageGeral() {
   function paint() {
     if (firstLbPaint) {
       firstLbPaint = false;
+      animateRows = true; // entrada escalonada só nesta 1.ª pintura
       build();
+      animateRows = false;
       for (const v of card.querySelectorAll('.lb-pts .v')) countUp(v, v.textContent);
       maybeCelebrate();
     } else {
-      flipReorder(card, '.lb-row', build);
+      flipReorder(card, '.lb-row', build); // reordenação usa FLIP, sem re-animar a entrada
     }
   }
   paint();
@@ -1686,6 +1689,32 @@ async function pageHallOfFame() {
     el('div', { class: 'kv' }, el('b', {}, 'Edições'), el('span', { class: 'v num' }, String(data.editions))),
     rec ? el('div', { class: 'kv' }, el('b', {}, 'Recorde de pontos'), el('span', { class: 'v' }, `${rec.player} · ${rec.total}`)) : null,
     jump && jump.d > 0 ? el('div', { class: 'kv' }, el('b', {}, 'Maior salto'), el('span', { class: 'v' }, `${jump.player} · +${jump.d} (J${jump.md})`)) : null));
+
+  // linha do tempo: o maior salto de pontos em cada jornada (do timeline da edição ativa)
+  if (tl && tl.players.length) {
+    const jumps = [];
+    for (let k = 1; k < tl.labels.length; k++) {
+      let best = null;
+      for (const p of tl.players) {
+        if (!p.points[k] || !p.points[k - 1]) continue;
+        const d = p.points[k].total - p.points[k - 1].total;
+        if (!best || d > best.d) best = { player: p.player, d };
+      }
+      if (best && best.d > 0) jumps.push({ label: stageLabel(tl, k), ...best });
+    }
+    if (jumps.length) {
+      host.appendChild(el('div', { class: 'section-label' }, 'Linha do tempo · maior salto por jornada'));
+      const tlCard = el('div', { class: 'card tl-jumps' });
+      const topD = Math.max(...jumps.map((j) => j.d));
+      for (const j of jumps) {
+        tlCard.appendChild(el('div', { class: 'tl-jump' + (j.d === topD ? ' peak' : '') },
+          el('span', { class: 'tl-stage' }, j.label),
+          el('span', { class: 'tl-player' }, monogram(j.player), el('span', { class: 'tl-nm' }, j.player)),
+          el('span', { class: 'tl-gain' }, '+' + j.d)));
+      }
+      host.appendChild(tlCard);
+    }
+  }
 
   host.appendChild(el('div', { class: 'section-label' }, 'Campeões por edição'));
   const champCard = el('div', { class: 'card' });

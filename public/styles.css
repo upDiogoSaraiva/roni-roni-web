@@ -300,6 +300,17 @@ button { font: inherit; cursor: pointer; }
 .heat-cell:first-of-type { border-top: 0; }
 .heat-n { font-size: 12px; color: var(--text-soft); }
 
+/* ---------- linha do tempo dos saltos (hall da fama) ---------- */
+.tl-jumps { padding: 2px 0; }
+.tl-jump { display: grid; grid-template-columns: 68px 1fr auto; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid var(--hairline); }
+.tl-jump:first-child { border-top: 0; }
+.tl-jump.peak { background: var(--gold-bg, rgba(242,180,65,.1)); }
+.tl-stage { font-size: 11.5px; font-weight: 600; color: var(--text-soft); }
+.tl-player { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.tl-player .mono { width: 24px; height: 24px; font-size: 11px; flex: 0 0 auto; }
+.tl-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+.tl-gain { font-family: var(--font-num); font-weight: 700; color: var(--ok); }
+
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }
@@ -544,6 +555,9 @@ button { font: inherit; cursor: pointer; }
 .mv.up { color: var(--ok); } .mv.down { color: var(--out); } .mv.flat { color: var(--pending); }
 .lb-row.leader { background: color-mix(in srgb, var(--gold) 10%, transparent); }
 .lb-row.me { box-shadow: inset 3px 0 0 var(--brand); }
+/* entrada escalonada das linhas (só na 1.ª pintura; usa o animation-delay inline por linha) */
+@keyframes lbRowIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.lb-row.lb-in { animation: lbRowIn 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 .lb-detail { padding: var(--s4); background: var(--surface-2); border-top: 1px solid var(--hairline); }
 .sheet-grid { display: grid; grid-template-columns: 1fr; gap: var(--s4) var(--s5); }
