@@ -28,15 +28,15 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Nemesis / próximo alvo** — o cartão hero mostra quem apanhar a seguir (jogador logo à frente).
 - [✅] **Rivalidades** — pares que mais trocaram de posição entre si ao longo das jornadas (na Evolução).
 - [✅] **Liga de quartos** — vista "Mini-ligas": sub-grupos por critério (campeão apostado ou inicial do apelido) com mini-tabela ordenada por pontos e líder destacado.
-- [💡] **Mural de reações** — emojis por jogador (sem texto livre? rever neutralidade/segurança).
+- [✅] **Mural de reações** — vista "Mural": paleta fixa de emojis (👏 🔥 😂 😱 🐐) por jogador, toggle por dispositivo, sem texto livre (neutro e sem abuso), endpoint rate-limited.
 - [✅] **Partilhar a tabela** como imagem (cartão de leaderboard top 10 para o WhatsApp).
 
 ### Dados / visualização
-- [✅] **Mais escolhidas para apurar** (Reveal) — seleções mais escolhidas como 1.º/2.º em todos os grupos. [💡] falta versão por-grupo (heatmap).
+- [✅] **Mais escolhidas para apurar** (Reveal) — seleções mais escolhidas como 1.º/2.º em todos os grupos, e **mapa de calor por grupo** (todas as seleções com intensidade ∝ consenso de apuramento).
 - [✅] **Distribuição de pontos** (Reveal) — histograma dos pontos do grupo por intervalos de 5.
 - [✅] **"De onde vêm os meus pontos"** — barra empilhada (apuramento/posição/campeão/Final 4/mata-mata/extras) na folha que abre no leaderboard.
-- [✅] **Recorde "maior salto"** no Hall da Fama (maior ganho de pontos numa jornada). [💡] falta linha do tempo completa.
-- [💡] **Comparador de N jogadores** (estender o H2H a 3-4 colunas).
+- [✅] **Recorde "maior salto"** no Hall da Fama (maior ganho de pontos numa jornada) + **linha do tempo** com o maior salto de cada jornada (pico destacado).
+- [✅] **Comparador de N jogadores** — o "Frente a frente" passou a "Comparador" (2 a 4 jogadores em colunas, melhor de cada métrica destacado, jogo-a-jogo do mata-mata).
 
 ### Qualidade de vida / mobile
 - [✅] **Contagem decrescente** para o fim da fase de grupos (na Geral, a partir das datas da competição).
@@ -50,7 +50,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 - [✅] **Contagem animada** dos pontos (count-up) ao abrir a tabela (respeita prefers-reduced-motion).
 - [✅] **Realce do líder** — coroa 👑 + fundo dourado subtil na linha do 1.º.
 - [✅] **Magnitude do movimento** — a seta de subiu/desceu passa a mostrar quantas posições.
-- [💡] **Animação de entrada** das linhas da tabela (já há fade; afinar).
+- [✅] **Animação de entrada** das linhas da tabela — fade+slide escalonado na 1.ª pintura (marca por linha, sem colidir com o FLIP da reordenação; respeita reduced-motion).
 - [✅] **Transições de página** suaves (fade+slide ao mudar de vista; respeita reduced-motion).
 
 ### Acessibilidade
@@ -145,6 +145,18 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
   jogo (acertou/falhou/pendente). Fonte: brackets de apps desportivas + pedido do utilizador. Neutro.
 - **Quem tem quem** (ângulo dados/social) — seleção -> quem a apostou como campeã/Final 4/vencedor de
   ronda, com estado em prova/eliminada. Fonte: "who has whom" de pools. Porquê: picardia de playoff. Neutro.
+- **Pesquisa global** (ângulo QoL) — ícone no cabeçalho; filtra jogadores (-> folha) e seleções
+  (-> "Quem tem quem"), insensível a acentos. Fonte: pesquisa global de apps. Porquê: acesso rápido. Neutro.
+- **Mini-ligas** (ângulo social) — sub-tabelas por campeão ou apelido, líder destacado. Fonte:
+  ligas privadas de social sportsbooks. Porquê: rivalidades dentro de sub-grupos. Neutro.
+
+## Ronda "fecho do backlog" — ✅ implementadas+testadas
+
+- **Mapa de calor por grupo** (Reveal) — cada seleção com intensidade ∝ consenso de apuramento.
+- **Comparador de N** — o H2H passou a comparar 2 a 4 jogadores em colunas, melhor de cada métrica destacado.
+- **Linha do tempo do maior salto** (Hall da Fama) — o maior salto de pontos em cada jornada, pico a dourado.
+- **Entrada escalonada das linhas** (Geral) — fade+slide por linha na 1.ª pintura, sem colidir com o FLIP.
+- **Mural de reações** — paleta fixa de emojis por jogador (toggle por dispositivo, rate-limited, sem texto).
 
 Fonte desta ronda: pesquisa sobre delight/microinterações 2026 (confetti tipo Duolingo, "unicórnio"
 do Asana, heart-bloom do Instagram), técnica **FLIP** para reordenação a 60fps, e UX dos **stories**
