@@ -300,7 +300,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem', 'ligas', 'pesquisa'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem', 'ligas', 'pesquisa', 'mural'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -310,7 +310,7 @@ function navigate(route) { location.hash = '#/' + route; }
 // barra de chips que une as páginas de "drama" (mostra só as já existentes)
 const ENGAGE = [
   ['geral', 'Tabela'], ['quadro', 'Quadro'], ['quemtem', 'Quem tem quem'], ['ligas', 'Mini-ligas'], ['evolucao', 'Evolução'], ['simular', 'E se?'],
-  ['reveal', 'Reveal'], ['h2h', 'Frente a frente'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
+  ['reveal', 'Reveal'], ['h2h', 'Comparar'], ['mural', 'Mural'], ['partilhar', 'Partilhar'], ['halloffame', 'Hall da Fama'], ['conquistas', 'Conquistas'],
 ];
 function engageNav(active) {
   const row = el('div', { class: 'engage-nav', role: 'navigation', 'aria-label': 'Mais vistas',
@@ -364,6 +364,7 @@ async function render() {
     else if (r === 'quemtem') await pageQuemTem();
     else if (r === 'ligas') await pageLigas();
     else if (r === 'pesquisa') await pagePesquisa();
+    else if (r === 'mural') await pageMural();
   } catch (e) {
     if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
@@ -1558,6 +1559,70 @@ async function pagePesquisa() {
   }
   paint('');
   input.focus();
+}
+
+/* ---------------- PÁGINA: MURAL (reações em emoji por jogador) ---------------- */
+function reactionRid() {
+  let r = localStorage.getItem('roni-rid');
+  if (!r) { r = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'r' + Date.now() + Math.round(Math.random() * 1e9); localStorage.setItem('roni-rid', r); }
+  return r;
+}
+function loadMyReactions() { try { return JSON.parse(localStorage.getItem('roni-reactions') || '{}'); } catch { return {}; } }
+function saveMyReactions(m) { try { localStorage.setItem('roni-reactions', JSON.stringify(m)); } catch { /* storage cheio/indisponível */ } }
+function setMuralBtn(btn, nEl, on, count) {
+  btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  nEl.textContent = count ? String(count) : '';
+}
+async function toggleReaction(player, emoji, key, btn, mine, rid) {
+  const nEl = btn.querySelector('.me-n');
+  const was = !!mine[key];
+  const cur = parseInt(nEl.textContent || '0', 10) || 0;
+  setMuralBtn(btn, nEl, !was, was ? cur - 1 : cur + 1); // otimista
+  if (was) delete mine[key]; else mine[key] = true;
+  saveMyReactions(mine);
+  try {
+    const resp = await api('/api/reactions', { method: 'POST', body: { player, emoji, rid } });
+    setMuralBtn(btn, nEl, resp.active, resp.counts[emoji] || 0); // verdade do servidor
+    if (resp.active) mine[key] = true; else delete mine[key];
+    saveMyReactions(mine);
+  } catch (e) {
+    setMuralBtn(btn, nEl, was, cur); // reverter
+    if (was) mine[key] = true; else delete mine[key];
+    saveMyReactions(mine);
+    toast(e.message || 'Não deu para reagir.', true);
+  }
+}
+function muralCard(player, counts, emojis, mine, rid) {
+  const row = el('div', { class: 'mural-emojis' });
+  for (const e of emojis) {
+    const key = player + '§' + e;
+    const btn = el('button', { class: 'mural-emo' + (mine[key] ? ' on' : ''), type: 'button', 'aria-pressed': mine[key] ? 'true' : 'false', 'aria-label': 'Reagir ' + e + ' a ' + player },
+      el('span', { class: 'me-e' }, e), el('span', { class: 'me-n num' }, counts[e] ? String(counts[e]) : ''));
+    btn.onclick = () => toggleReaction(player, e, key, btn, mine, rid);
+    row.appendChild(btn);
+  }
+  return el('div', { class: 'mural-card' },
+    el('div', { class: 'mural-hd' }, monogram(player), el('span', { class: 'mural-nm' }, player)), row);
+}
+async function pageMural() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Mural'),
+    el('p', {}, 'Deixa uma reação nos jogadores. Só emojis, sem texto.')));
+  MAIN.appendChild(engageNav('mural'));
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  host.appendChild(skeletonList(5));
+  let lb; let rx;
+  try { [lb, rx] = await Promise.all([api('/api/leaderboard'), api('/api/reactions').catch(() => ({ reactions: {}, emojis: [] }))]); }
+  catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar o mural.', render)); return; }
+  clear(host);
+  const emojis = (rx.emojis && rx.emojis.length) ? rx.emojis : ['👏', '🔥', '😂', '😱', '🐐'];
+  const counts = rx.reactions || {};
+  const rid = reactionRid();
+  const mine = loadMyReactions();
+  const grid = el('div', { class: 'mural-grid' });
+  for (const r of lb.leaderboard) grid.appendChild(muralCard(r.player, counts[r.player] || {}, emojis, mine, rid));
+  host.appendChild(grid);
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */

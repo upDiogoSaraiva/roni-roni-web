@@ -311,6 +311,20 @@ button { font: inherit; cursor: pointer; }
 .tl-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
 .tl-gain { font-family: var(--font-num); font-weight: 700; color: var(--ok); }
 
+/* ---------- mural de reações ---------- */
+.mural-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.mural-card { border: 1px solid var(--hairline); border-radius: 12px; padding: 10px 12px; background: var(--surface); }
+.mural-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mural-hd .mono { width: 26px; height: 26px; font-size: 11px; flex: 0 0 auto; }
+.mural-nm { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mural-emojis { display: flex; flex-wrap: wrap; gap: 6px; }
+.mural-emo { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--hairline); background: var(--surface-2); cursor: pointer; font-size: 15px; line-height: 1; transition: transform .08s ease, border-color .15s ease; }
+.mural-emo:hover { border-color: var(--brand); }
+.mural-emo:active { transform: scale(.9); }
+.mural-emo.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 15%, transparent); }
+.mural-emo .me-n { font-size: 12px; color: var(--text-soft); min-width: 6px; }
+.mural-emo.on .me-n { color: var(--brand); font-weight: 700; }
+
 /* ---------- nível do jogador ---------- */
 .lvl-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .lvl-name { font-family: var(--font-display); font-weight: 700; font-size: 16px; }

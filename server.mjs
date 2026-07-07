@@ -15,6 +15,8 @@ const PUBLIC = join(root, 'public');
 const PORT = Number(process.env.PORT || 4026);
 const HOST = process.env.HOST || '0.0.0.0';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'roni2026';
+// paleta fixa do mural de reações (sem texto livre -> neutro e sem vetor de abuso)
+const REACTION_EMOJIS = ['👏', '🔥', '😂', '😱', '🐐'];
 const REGISTRY_PATH = join(root, 'data/registry.json');
 const compDir = (id) => join(root, 'data/competitions', id);
 
@@ -290,6 +292,35 @@ async function api(req, res, path) {
       windows: store.windows,
       groupStageComplete: groupStageComplete(w.standings),
     });
+  }
+
+  // mural de reações: emojis fixos por jogador (social e neutro, sem texto livre).
+  // toggle por dispositivo (rid do cliente); contagens guardadas no store da edição.
+  if (path === '/api/reactions' && method === 'GET') {
+    return json(res, 200, { reactions: store.reactions || {}, emojis: REACTION_EMOJIS });
+  }
+  if (path === '/api/reactions' && method === 'POST') {
+    if (rateLimited(req, 'react')) return json(res, 429, { error: 'Demasiadas reações. Espera um pouco.' });
+    const body = await readBody(req);
+    const player = (body.player || '').trim();
+    const emoji = body.emoji;
+    const rid = String(body.rid || '').slice(0, 64);
+    if (!REACTION_EMOJIS.includes(emoji)) return json(res, 400, { error: 'Emoji inválido.' });
+    if (!rid) return json(res, 400, { error: 'Sessão inválida.' });
+    if (!store.bets.some((b) => b.player === player)) return json(res, 400, { error: 'Jogador desconhecido.' });
+    registerStrike(req, 'react');
+    store.reactions = store.reactions || {};
+    store.reactionVotes = store.reactionVotes || {};
+    if (!store.reactionVotes[rid] && Object.keys(store.reactionVotes).length > 20000) return json(res, 429, { error: 'Mural cheio, tenta mais tarde.' });
+    const votes = store.reactionVotes[rid] || (store.reactionVotes[rid] = {});
+    const pv = votes[player] || (votes[player] = {});
+    const counts = store.reactions[player] || (store.reactions[player] = {});
+    let active;
+    if (pv[emoji]) { delete pv[emoji]; counts[emoji] = Math.max(0, (counts[emoji] || 0) - 1); active = false; }
+    else { pv[emoji] = true; counts[emoji] = (counts[emoji] || 0) + 1; active = true; }
+    if (!counts[emoji]) delete counts[emoji];
+    saveStore();
+    return json(res, 200, { player, emoji, active, counts: store.reactions[player] || {} });
   }
 
   // lista de competições (ativa + arquivadas)
