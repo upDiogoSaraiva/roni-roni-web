@@ -1044,17 +1044,27 @@ async function pageReveal() {
   host.appendChild(el('div', { class: 'section-label' }, 'Mais escolhidas para apurar'));
   host.appendChild(barCard(qualifyPicks.slice(0, 12)));
 
-  host.appendChild(el('div', { class: 'section-label' }, 'Vencedor de cada grupo · consenso'));
-  const grid = el('div', { class: 'sheet-grid' });
+  host.appendChild(el('div', { class: 'section-label' }, 'Mapa de calor · apurar por grupo'));
+  host.appendChild(el('p', { class: 'muted', style: { fontSize: '12px', margin: '0 2px 8px' } },
+    'Quantos apostaram cada seleção para apurar (1.º ou 2.º). Quanto mais quente, maior o consenso.'));
+  const heatGrid = el('div', { class: 'heat-grid' });
   for (const g of STATE.groupOrder) {
-    const c = countPicks(bets.map((b) => b.groups?.[g]?.first));
-    if (!c.length) continue;
-    grid.appendChild(el('div', { class: 'sheet-grp' },
-      el('div', { class: 'g' }, 'GRUPO ' + g),
-      el('div', { class: 'sheet-line' }, teamChip(c[0].team),
-        el('span', { class: 'muted', style: { marginLeft: 'auto', fontSize: '12px' } }, `${c[0].n}/${total}`))));
+    const teamsG = STATE.groups[g] || [];
+    if (!teamsG.length) continue;
+    const counts = teamsG.map((t) => ({
+      team: t,
+      n: bets.filter((b) => { const p = b.groups?.[g]; return p && (p.first === t || p.second === t); }).length,
+    })).sort((a, b) => b.n - a.n || a.team.localeCompare(b.team, 'pt'));
+    const col = el('div', { class: 'heat-col' }, el('div', { class: 'heat-g' }, 'Grupo ' + g));
+    for (const { team, n } of counts) {
+      const frac = total ? n / total : 0;
+      col.appendChild(el('div', { class: 'heat-cell', title: `${n}/${total} apostaram apurar`,
+        style: { background: `color-mix(in srgb, var(--brand) ${Math.round(frac * 60)}%, transparent)` } },
+        teamMini(team), el('span', { class: 'heat-n num' }, String(n))));
+    }
+    heatGrid.appendChild(col);
   }
-  host.appendChild(grid);
+  host.appendChild(heatGrid);
 }
 
 /* ---------------- PÁGINA: FRENTE A FRENTE (H2H) ---------------- */
@@ -1062,17 +1072,15 @@ function h2hTrio(bet, g) {
   const p = bet.groups?.[g] || {};
   return [p.first, p.second, p.third].filter(Boolean).map(codeOf).join('/') || '-';
 }
-function h2hRow(label, a, b, eq, win) {
-  return el('div', { class: 'h2h-row' + (eq ? ' eq' : '') },
-    el('span', { class: 'h2h-lbl' }, label),
-    el('span', { class: 'h2h-a num' + (win === 'a' ? ' win' : '') }, a),
-    el('span', { class: 'h2h-b num' + (win === 'b' ? ' win' : '') }, b));
+// uma linha do comparador: rótulo + N células (cada uma {txt, win?, eq?})
+function cmpRow(label, cells) {
+  return el('div', { class: 'cmp-row' },
+    el('span', { class: 'cmp-lbl' }, label),
+    ...cells.map((c) => el('span', { class: 'cmp-cell num' + (c.win ? ' win' : '') + (c.eq ? ' eq' : '') }, c.txt)));
 }
-// quem ganha uma métrica: 'a'|'b'|null (hi=true → maior é melhor)
-function h2hWin(x, y, hi = true) { return x === y ? null : ((hi ? x > y : x < y) ? 'a' : 'b'); }
 async function pageH2H() {
-  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Frente a frente'),
-    el('p', {}, 'Compara dois jogadores lado a lado: quem lidera e onde diferem.')));
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Comparador'),
+    el('p', {}, 'Compara 2 a 4 jogadores lado a lado: quem lidera cada categoria e onde diferem.')));
   MAIN.appendChild(engageNav('h2h'));
   const host = el('div', {});
   MAIN.append(host);
@@ -1083,67 +1091,80 @@ async function pageH2H() {
   const byPlayer = Object.fromEntries(lb.map((r) => [r.player, r]));
   const names = lb.map((r) => r.player).sort((a, b) => a.localeCompare(b, 'pt'));
   const meName = localStorage.getItem('roni-me');
-  let A = meName && byPlayer[meName] ? meName : names[0];
-  let B = (lb.find((r) => r.player !== A) || {}).player || names[0];
+  const first = meName && byPlayer[meName] ? meName : names[0];
+  const sel = [first, (lb.find((r) => r.player !== first) || {}).player || names[0]].filter(Boolean);
 
-  const selWrap = el('div', { class: 'h2h-selects' });
+  const controls = el('div', { class: 'cmp-controls' });
   const body = el('div', {});
-  const mkSel = (val, onChange) => el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => onChange(e.target.value) },
-    ...names.map((n) => el('option', { value: n, selected: n === val }, n)));
-  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, selWrap));
+  host.appendChild(el('div', { class: 'card', style: { padding: '14px' } }, controls));
   host.append(body);
 
+  const mkSel = (val, onChange) => el('select', { class: 'select', style: { width: '100%' }, onchange: (e) => onChange(e.target.value) },
+    ...names.map((n) => el('option', { value: n, selected: n === val }, n)));
+
+  // células numéricas com destaque do(s) melhor(es); hi=true -> maior é melhor
+  const numCells = (getVal, hi = true, fmt = (v) => String(v)) => {
+    const vals = sel.map((p) => getVal(byPlayer[p], data.bets[p]));
+    const best = hi ? Math.max(...vals) : Math.min(...vals);
+    const allEq = vals.every((v) => v === vals[0]);
+    return vals.map((v) => ({ txt: fmt(v), win: !allEq && v === best }));
+  };
+  const textCells = (getTxt) => {
+    const vals = sel.map((p) => getTxt(p) || '-');
+    const allEq = vals.every((v) => v === vals[0] && v !== '-');
+    return vals.map((v) => ({ txt: v, eq: allEq }));
+  };
+
   function paint() {
-    clear(selWrap);
-    selWrap.appendChild(mkSel(A, (v) => { A = v; paint(); }));
-    selWrap.appendChild(el('span', { class: 'h2h-vs num' }, 'vs'));
-    selWrap.appendChild(mkSel(B, (v) => { B = v; paint(); }));
+    clear(controls);
+    sel.forEach((p, i) => {
+      const box = el('div', { class: 'cmp-pick' }, mkSel(p, (v) => { sel[i] = v; paint(); }));
+      if (sel.length > 2) box.appendChild(el('button', { class: 'cmp-x', type: 'button', title: 'Remover', 'aria-label': 'Remover jogador', onclick: () => { sel.splice(i, 1); paint(); } }, '×'));
+      controls.appendChild(box);
+    });
+    if (sel.length < 4) {
+      controls.appendChild(el('button', { class: 'btn btn-ghost cmp-add', type: 'button', onclick: () => { const avail = names.find((n) => !sel.includes(n)) || names[0]; sel.push(avail); paint(); } }, icon('plus'), 'jogador'));
+    }
     clear(body);
-    const ra = byPlayer[A], rb = byPlayer[B], ba = data.bets[A], bb = data.bets[B];
-    if (!ra || !rb || !ba || !bb) { body.appendChild(emptyState('Escolhe dois jogadores', '', 'search')); return; }
+    body.style.setProperty('--cmp-n', sel.length);
 
-    body.appendChild(el('div', { class: 'h2h-head' }, el('div', {}),
-      el('div', { class: 'h2h-pl' }, monogram(A), el('div', { class: 'nm' }, A), el('div', { class: 'sub num' }, ra.rank + '.º · ' + ra.score.total + ' pts')),
-      el('div', { class: 'h2h-pl' }, monogram(B), el('div', { class: 'nm' }, B), el('div', { class: 'sub num' }, rb.rank + '.º · ' + rb.score.total + ' pts'))));
-
-    const diff = ra.score.total - rb.score.total;
-    const lead = diff === 0 ? 'Empatados em pontos.' : `${diff > 0 ? A : B} lidera por ${Math.abs(diff)} ponto(s).`;
-    let sameG = 0;
-    for (const g of STATE.groupOrder) if (h2hTrio(ba, g) === h2hTrio(bb, g)) sameG++;
-    body.appendChild(el('p', { class: 'muted', style: { textAlign: 'center', margin: '4px 0 12px' } },
-      `${lead} Coincidem em ${sameG}/${STATE.groupOrder.length} grupos${ba.champion === bb.champion ? ' e no campeão' : ''}.`));
+    // cabeçalho: uma coluna por jogador
+    const head = el('div', { class: 'cmp-row cmp-head' }, el('span', { class: 'cmp-lbl' }, ''));
+    for (const p of sel) {
+      const r = byPlayer[p];
+      head.appendChild(el('span', { class: 'cmp-cell cmp-pl' }, monogram(p), el('span', { class: 'cmp-nm' }, p), el('span', { class: 'sub num' }, `${r.rank}.º · ${r.score.total}`)));
+    }
+    body.appendChild(head);
 
     const card = el('div', { class: 'card', style: { padding: '4px 0' } });
-    card.appendChild(h2hRow('Posição', ra.rank + '.º', rb.rank + '.º', false, h2hWin(ra.rank, rb.rank, false)));
-    card.appendChild(h2hRow('Pontos', ra.score.total, rb.score.total, false, h2hWin(ra.score.total, rb.score.total)));
-    card.appendChild(h2hRow('Apuramento', '+' + ra.score.qualification, '+' + rb.score.qualification, false, h2hWin(ra.score.qualification, rb.score.qualification)));
-    card.appendChild(h2hRow('Posições', '+' + ra.score.position, '+' + rb.score.position, false, h2hWin(ra.score.position, rb.score.position)));
-    card.appendChild(h2hRow('Campeão', codeOf(ba.champion), codeOf(bb.champion), ba.champion === bb.champion));
-    card.appendChild(h2hRow('Final 4', (ba.final4 || []).map(codeOf).join(' '), (bb.final4 || []).map(codeOf).join(' '), false));
-    for (const g of STATE.groupOrder) card.appendChild(h2hRow('Grupo ' + g, h2hTrio(ba, g), h2hTrio(bb, g), h2hTrio(ba, g) === h2hTrio(bb, g)));
+    card.appendChild(cmpRow('Posição', numCells((r) => r.rank, false, (v) => v + '.º')));
+    card.appendChild(cmpRow('Pontos', numCells((r) => r.score.total)));
+    card.appendChild(cmpRow('Apuramento', numCells((r) => r.score.qualification, true, (v) => '+' + v)));
+    card.appendChild(cmpRow('Posições', numCells((r) => r.score.position, true, (v) => '+' + v)));
+    card.appendChild(cmpRow('Campeão', textCells((p) => codeOf(data.bets[p].champion))));
+    card.appendChild(cmpRow('Final 4', textCells((p) => (data.bets[p].final4 || []).map(codeOf).join(' '))));
+    for (const g of STATE.groupOrder) card.appendChild(cmpRow('Grupo ' + g, textCells((p) => h2hTrio(data.bets[p], g))));
     body.appendChild(card);
 
-    // playoffs: pontos do mata-mata, jokers e as escolhas jogo a jogo (verde = acertou)
-    if (br?.rounds) {
+    // playoffs: pontos, jokers e as escolhas jogo a jogo (verde = acertou o vencedor)
+    if (br && br.rounds) {
       const gameRows = [];
       for (const r of br.rounds) {
         for (const mid of r.matches) {
           const m = br.resolved[String(mid)];
-          const pa = ba.knockouts?.[mid]?.winner || null;
-          const pb = bb.knockouts?.[mid]?.winner || null;
-          if (!pa && !pb) continue;
-          const win = m?.winner ? ((pa === m.winner) === (pb === m.winner) ? null : (pa === m.winner ? 'a' : 'b')) : null;
-          const lbl = m?.home?.team ? `${codeOf(m.home.team)}-${codeOf(m.away.team)}` : `Jogo ${mid}`;
-          gameRows.push(h2hRow(lbl, pa ? codeOf(pa) : '-', pb ? codeOf(pb) : '-', !!pa && pa === pb, win));
+          const picks = sel.map((p) => (data.bets[p].knockouts && data.bets[p].knockouts[mid] && data.bets[p].knockouts[mid].winner) || null);
+          if (picks.every((x) => !x)) continue;
+          const lbl = m && m.home && m.home.team ? `${codeOf(m.home.team)}-${codeOf(m.away.team)}` : `Jogo ${mid}`;
+          gameRows.push(cmpRow(lbl, picks.map((pk) => ({ txt: pk ? codeOf(pk) : '-', win: !!(m && m.winner) && pk === m.winner }))));
         }
       }
       if (gameRows.length) {
         body.appendChild(el('div', { class: 'section-label' }, 'Mata-mata'));
         const kcard = el('div', { class: 'card', style: { padding: '4px 0' } });
-        kcard.appendChild(h2hRow('Pontos', '+' + (ra.score.knockout || 0), '+' + (rb.score.knockout || 0), false, h2hWin(ra.score.knockout || 0, rb.score.knockout || 0)));
-        kcard.appendChild(h2hRow('Vitórias certas', ra.score.correctWinners || 0, rb.score.correctWinners || 0, false, h2hWin(ra.score.correctWinners || 0, rb.score.correctWinners || 0)));
-        kcard.appendChild(h2hRow('Jokers', (ba.jokers || []).map((j) => 'J' + j).join(' ') || '-', (bb.jokers || []).map((j) => 'J' + j).join(' ') || '-', false));
-        for (const r of gameRows) kcard.appendChild(r);
+        kcard.appendChild(cmpRow('Pontos', numCells((r) => r.score.knockout || 0, true, (v) => '+' + v)));
+        kcard.appendChild(cmpRow('Vitórias certas', numCells((r) => r.score.correctWinners || 0)));
+        kcard.appendChild(cmpRow('Jokers', textCells((p) => (data.bets[p].jokers || []).map((j) => 'J' + j).join(' '))));
+        for (const gr of gameRows) kcard.appendChild(gr);
         body.appendChild(kcard);
       }
     }
