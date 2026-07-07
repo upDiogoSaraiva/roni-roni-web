@@ -300,7 +300,7 @@ function errorState(msg, retry) {
 }
 
 /* ---------------- router ---------------- */
-const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem', 'ligas'];
+const ROUTES = ['geral', 'apostar', 'premios', 'resultados', 'admin', 'historico', 'pessoal', 'evolucao', 'simular', 'reveal', 'h2h', 'cartao', 'halloffame', 'conquistas', 'folha', 'partilhar', 'quadro', 'quemtem', 'ligas', 'pesquisa'];
 function currentRoute() {
   const h = location.hash.replace(/^#\//, '').split('/')[0];
   return ROUTES.includes(h) ? h : 'geral';
@@ -363,6 +363,7 @@ async function render() {
     else if (r === 'quadro') await pageQuadro();
     else if (r === 'quemtem') await pageQuemTem();
     else if (r === 'ligas') await pageLigas();
+    else if (r === 'pesquisa') await pagePesquisa();
   } catch (e) {
     if (my !== renderSeq) return; // já se navegou para outra página — não pintar o erro antigo
     MAIN.appendChild(errorState(e.message || 'Erro inesperado.', render));
@@ -1389,9 +1390,11 @@ async function pageQuemTem() {
 
   // lista de seleções: todas as da competição, por ordem alfabética
   const teams = Object.keys(STATE.teams || {}).sort((a, b) => a.localeCompare(b, 'pt'));
+  const initial = decodeURIComponent(location.hash.split('/')[2] || '');
   const sel = el('select', { class: 'select', onchange: (e) => paint(e.target.value) },
     el('option', { value: '' }, 'Escolher seleção…'),
     ...teams.map((t) => el('option', { value: t }, `${codeOf(t)} · ${t}`)));
+  sel.value = teams.includes(initial) ? initial : '';
   host.appendChild(el('div', { class: 'qt-picker' }, sel));
   const wrap = el('div', {});
   host.appendChild(wrap);
@@ -1427,7 +1430,7 @@ async function pageQuemTem() {
     const koRounds = Object.keys(koByRound).sort((a, b) => order.indexOf(a) - order.indexOf(b));
     for (const rid of koRounds) wrap.appendChild(section('Vencer ' + (roundLabelById[rid] || rid), koByRound[rid]));
   }
-  paint('');
+  paint(sel.value);
 }
 
 /* ---------------- PÁGINA: MINI-LIGAS (sub-tabelas por critério) ---------------- */
@@ -1485,6 +1488,52 @@ async function pageLigas() {
     wrap.appendChild(grid);
   }
   paint();
+}
+
+/* ---------------- PÁGINA: PESQUISA (jogadores + seleções) ---------------- */
+function normSearch(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+async function pagePesquisa() {
+  MAIN.appendChild(el('div', { class: 'page-head' }, el('h1', {}, 'Pesquisa'),
+    el('p', {}, 'Procura um jogador (abre a folha) ou uma seleção (quem a apostou).')));
+  const host = el('div', {});
+  MAIN.appendChild(host);
+  host.appendChild(skeletonList(3));
+  let lb;
+  try { lb = await api('/api/leaderboard'); }
+  catch (e) { clear(host); host.appendChild(errorState(e.message || 'Erro ao carregar.', render)); return; }
+  clear(host);
+  const players = lb.leaderboard || [];
+  const teams = Object.keys(STATE.teams || {});
+
+  const input = el('input', { class: 'input', type: 'search', placeholder: 'Escrever nome ou seleção…', oninput: () => paint(input.value) });
+  host.appendChild(el('div', { class: 'search-box' }, input));
+  const results = el('div', {});
+  host.appendChild(results);
+
+  function paint(q) {
+    clear(results);
+    const nq = normSearch(q).trim();
+    if (!nq) { results.appendChild(el('p', { class: 'muted', style: { margin: '6px 2px' } }, 'Escreve para procurar jogadores e seleções.')); return; }
+    const pl = players.filter((r) => normSearch(r.player).includes(nq)).slice(0, 25);
+    const tm = teams.filter((t) => normSearch(t).includes(nq) || normSearch(codeOf(t)).includes(nq)).sort((a, b) => a.localeCompare(b, 'pt')).slice(0, 25);
+    if (!pl.length && !tm.length) { results.appendChild(emptyState('Sem resultados', 'Tenta outro nome.', 'search')); return; }
+    if (pl.length) {
+      const box = el('div', { class: 'srch-sec' }, el('div', { class: 'srch-head' }, 'Jogadores'));
+      for (const r of pl) box.appendChild(el('a', { class: 'srch-row', href: '#/folha/' + encodeURIComponent(r.player) },
+        el('span', { class: 'srch-main' }, monogram(r.player), el('span', { class: 'srch-nm' }, r.player)),
+        el('span', { class: 'srch-meta num' }, `${r.rank}.º · ${r.score.total} pts`)));
+      results.appendChild(box);
+    }
+    if (tm.length) {
+      const box = el('div', { class: 'srch-sec' }, el('div', { class: 'srch-head' }, 'Seleções'));
+      for (const t of tm) box.appendChild(el('a', { class: 'srch-row', href: '#/quemtem/' + encodeURIComponent(t) },
+        el('span', { class: 'srch-main' }, flag(t), el('span', { class: 'srch-nm' }, t), el('span', { class: 'srch-code num' }, codeOf(t))),
+        el('span', { class: 'srch-meta muted' }, 'quem a apostou')));
+      results.appendChild(box);
+    }
+  }
+  paint('');
+  input.focus();
 }
 
 /* ---------------- PÁGINA: FOLHA (partilhável por link) ---------------- */
