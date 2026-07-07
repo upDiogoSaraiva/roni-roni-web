@@ -40,7 +40,7 @@ acessível (sem innerHTML cru), tema claro/escuro. Servidor de dev na porta 4100
 
 ### Qualidade de vida / mobile
 - [✅] **Contagem decrescente** para o fim da fase de grupos (na Geral, a partir das datas da competição).
-- [🔨] **Pesquisa global** (jogadores + seleções) no topo. Parte das seleções feita na vista "Quem tem quem" (seleção -> quem a apostou como campeã/Final 4/vencedor de ronda + estado em prova/eliminada). Falta a pesquisa de jogadores.
+- [✅] **Pesquisa global** (jogadores + seleções) — ícone no cabeçalho abre uma vista que filtra jogadores (-> folha) e seleções (-> "Quem tem quem"), insensível a acentos. A vista "Quem tem quem" detalha cada seleção (quem a apostou campeã/Final 4/vencedor de ronda + estado em prova/eliminada).
 - [✅] **Cartão pessoal "hero"** — topo da Geral mostra a minha posição/pontos/movimento e distância ao 1.º.
 - [✅] **Copiar o meu resumo** — botão no hero que copia um texto curto da minha situação para o WhatsApp.
 - [✅] **Partilha por link** de uma folha de jogador (rota `#/folha/<nome>` + copiar link).
