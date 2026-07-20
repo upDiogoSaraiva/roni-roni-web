@@ -3,7 +3,7 @@
     "tournament": "Torneio Roni Roni 2026",
     "players": 27,
     "generatedFrom": "field_2026_real.csv + estado_atual_ref.json",
-    "note": "Conteúdo neutro: apostas, resultados e pontos. Sem outputs do motor de decisão.",
+    "note": "Conteúdo neutro: apostas, resultados e pontos. Sem outputs do motor de decisão. Edição COMPLETA: torneio encerrado (campeã: Espanha).",
     "fonte": "edição de demonstração com jogadores fictícios"
   },
   "groups": {
@@ -1012,7 +1012,7 @@
       ]
     }
   },
-  "windowOpen": true,
+  "windowOpen": false,
   "bets": [
     {
       "player": "Rui Tavares",
@@ -1152,6 +1152,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "PROL"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
           "method": "TR"
         }
       },
@@ -1301,9 +1365,76 @@
         "88": {
           "winner": "Austrália",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "PROL"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "PROL"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "PEN"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "95",
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -1446,6 +1577,70 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "PEN"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -1593,6 +1788,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
           "method": "TR"
         }
       },
@@ -1742,9 +2001,76 @@
         "88": {
           "winner": "Austrália",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "86",
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -1887,6 +2213,70 @@
         "88": {
           "winner": "Egito",
           "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "PROL"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "PROL"
         }
       },
       "jokers": [
@@ -2037,6 +2427,70 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -2185,6 +2639,70 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Canadá",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "PEN"
         }
       },
       "jokers": [
@@ -2332,6 +2850,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
           "method": "TR"
         }
       },
@@ -2488,6 +3070,70 @@
         "88": {
           "winner": "Egito",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "PEN"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -2635,6 +3281,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "PROL"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
           "method": "TR"
         }
       },
@@ -2784,6 +3494,70 @@
         "88": {
           "winner": "Egito",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -2931,6 +3705,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
           "method": "TR"
         }
       },
@@ -3080,6 +3918,70 @@
         "88": {
           "winner": "Egito",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "México",
+          "method": "PEN"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "PROL"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -3228,9 +4130,76 @@
         "88": {
           "winner": "Egito",
           "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PEN"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "PROL"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "94",
+        "93"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -3372,6 +4341,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "México",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "PEN"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
           "method": "PEN"
         }
       },
@@ -3522,6 +4555,70 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "PROL"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -3670,9 +4767,75 @@
         "88": {
           "winner": "Austrália",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "PEN"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "PROL"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -3815,6 +4978,70 @@
         "88": {
           "winner": "Egito",
           "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "103": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -3967,6 +5194,70 @@
         "88": {
           "winner": "Austrália",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "México",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "100": {
+          "winner": "Suíça",
+          "method": "PROL"
+        },
+        "101": {
+          "winner": "Espanha",
+          "method": "PEN"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "PEN"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -4115,9 +5406,75 @@
         "88": {
           "winner": "Egito",
           "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "PROL"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -4260,9 +5617,74 @@
         "88": {
           "winner": "Egito",
           "method": "TR"
+        },
+        "89": {
+          "winner": "Paraguai",
+          "method": "PROL"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "PROL"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "México",
+          "method": "PEN"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
+        "84",
         "76"
       ],
       "markets": {},
@@ -4407,9 +5829,76 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "PROL"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PEN"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PEN"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "PEN"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Argentina",
+          "method": "PROL"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "90",
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -4551,6 +6040,70 @@
         },
         "88": {
           "winner": "Egito",
+          "method": "TR"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Argentina",
           "method": "TR"
         }
       },
@@ -4700,6 +6253,70 @@
         "88": {
           "winner": "Austrália",
           "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PEN"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "103": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "104": {
+          "winner": "Argentina",
+          "method": "PEN"
         }
       },
       "jokers": [
@@ -4848,9 +6465,76 @@
         "88": {
           "winner": "Egito",
           "method": "PROL"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Noruega",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "TR"
+        },
+        "94": {
+          "winner": "EUA",
+          "method": "TR"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Suíça",
+          "method": "TR"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "TR"
+        },
+        "99": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "103": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
-      "jokers": [],
+      "jokers": [
+        "86",
+        "89"
+      ],
       "markets": {},
       "groupJoker": null
     },
@@ -4993,6 +6677,70 @@
         "88": {
           "winner": "Egito",
           "method": "PEN"
+        },
+        "89": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "90": {
+          "winner": "Marrocos",
+          "method": "TR"
+        },
+        "91": {
+          "winner": "Brasil",
+          "method": "TR"
+        },
+        "92": {
+          "winner": "Inglaterra",
+          "method": "TR"
+        },
+        "93": {
+          "winner": "Portugal",
+          "method": "PROL"
+        },
+        "94": {
+          "winner": "Bélgica",
+          "method": "PROL"
+        },
+        "95": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "96": {
+          "winner": "Colômbia",
+          "method": "PEN"
+        },
+        "97": {
+          "winner": "França",
+          "method": "TR"
+        },
+        "98": {
+          "winner": "Espanha",
+          "method": "PROL"
+        },
+        "99": {
+          "winner": "Noruega",
+          "method": "PEN"
+        },
+        "100": {
+          "winner": "Argentina",
+          "method": "TR"
+        },
+        "101": {
+          "winner": "França",
+          "method": "PROL"
+        },
+        "102": {
+          "winner": "Inglaterra",
+          "method": "PROL"
+        },
+        "103": {
+          "winner": "França",
+          "method": "PEN"
+        },
+        "104": {
+          "winner": "Espanha",
+          "method": "TR"
         }
       },
       "jokers": [
@@ -5115,6 +6863,134 @@
       "awayGoals": null,
       "winner": "Egito",
       "method": "TR"
+    },
+    "89": {
+      "home": "Paraguai",
+      "away": "França",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "França",
+      "method": "TR"
+    },
+    "90": {
+      "home": "Canadá",
+      "away": "Marrocos",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Marrocos",
+      "method": "TR"
+    },
+    "91": {
+      "home": "Brasil",
+      "away": "Noruega",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Noruega",
+      "method": "TR"
+    },
+    "92": {
+      "home": "México",
+      "away": "Inglaterra",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Inglaterra",
+      "method": "TR"
+    },
+    "93": {
+      "home": "Portugal",
+      "away": "Espanha",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Espanha",
+      "method": "TR"
+    },
+    "94": {
+      "home": "EUA",
+      "away": "Bélgica",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Bélgica",
+      "method": "TR"
+    },
+    "95": {
+      "home": "Argentina",
+      "away": "Egito",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Argentina",
+      "method": "TR"
+    },
+    "96": {
+      "home": "Suíça",
+      "away": "Colômbia",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Suíça",
+      "method": "PEN"
+    },
+    "97": {
+      "home": "França",
+      "away": "Marrocos",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "França",
+      "method": "TR"
+    },
+    "98": {
+      "home": "Espanha",
+      "away": "Bélgica",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Espanha",
+      "method": "TR"
+    },
+    "99": {
+      "home": "Noruega",
+      "away": "Inglaterra",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Inglaterra",
+      "method": "PROL"
+    },
+    "100": {
+      "home": "Argentina",
+      "away": "Suíça",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Argentina",
+      "method": "PROL"
+    },
+    "101": {
+      "home": "França",
+      "away": "Espanha",
+      "homeGoals": 0,
+      "awayGoals": 2,
+      "winner": "Espanha",
+      "method": "TR"
+    },
+    "102": {
+      "home": "Inglaterra",
+      "away": "Argentina",
+      "homeGoals": 1,
+      "awayGoals": 2,
+      "winner": "Argentina",
+      "method": "TR"
+    },
+    "103": {
+      "home": "França",
+      "away": "Inglaterra",
+      "homeGoals": null,
+      "awayGoals": null,
+      "winner": "Inglaterra",
+      "method": "TR"
+    },
+    "104": {
+      "home": "Espanha",
+      "away": "Argentina",
+      "homeGoals": 1,
+      "awayGoals": 0,
+      "winner": "Espanha",
+      "method": "PROL"
     }
   }
 }
