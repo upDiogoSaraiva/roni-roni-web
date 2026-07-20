@@ -1,0 +1,472 @@
+{
+  "checkpoint": "grupos_pos_J2",
+  "modo": "grupos",
+  "grupos_resultados": {
+    "A": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "México",
+          "África do Sul",
+          2,
+          0,
+          1
+        ],
+        [
+          "Coreia do Sul",
+          "Chéquia",
+          2,
+          1,
+          1
+        ],
+        [
+          "Chéquia",
+          "África do Sul",
+          1,
+          1,
+          2
+        ],
+        [
+          "México",
+          "Coreia do Sul",
+          1,
+          0,
+          2
+        ]
+      ]
+    },
+    "B": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Canadá",
+          "Bósnia-Herzegovina",
+          1,
+          1,
+          1
+        ],
+        [
+          "Catar",
+          "Suíça",
+          1,
+          1,
+          1
+        ],
+        [
+          "Suíça",
+          "Bósnia-Herzegovina",
+          4,
+          1,
+          2
+        ],
+        [
+          "Canadá",
+          "Catar",
+          6,
+          0,
+          2
+        ]
+      ]
+    },
+    "C": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Brasil",
+          "Marrocos",
+          1,
+          1,
+          1
+        ],
+        [
+          "Haiti",
+          "Escócia",
+          0,
+          1,
+          1
+        ],
+        [
+          "Escócia",
+          "Marrocos",
+          0,
+          1,
+          2
+        ],
+        [
+          "Brasil",
+          "Haiti",
+          3,
+          0,
+          2
+        ]
+      ]
+    },
+    "D": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "EUA",
+          "Paraguai",
+          4,
+          1,
+          1
+        ],
+        [
+          "Austrália",
+          "Turquia",
+          2,
+          0,
+          1
+        ],
+        [
+          "EUA",
+          "Austrália",
+          2,
+          0,
+          2
+        ],
+        [
+          "Turquia",
+          "Paraguai",
+          0,
+          1,
+          2
+        ]
+      ]
+    },
+    "E": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Alemanha",
+          "Curaçao",
+          7,
+          1,
+          1
+        ],
+        [
+          "Costa do Marfim",
+          "Equador",
+          1,
+          0,
+          1
+        ],
+        [
+          "Alemanha",
+          "Costa do Marfim",
+          2,
+          1,
+          2
+        ],
+        [
+          "Equador",
+          "Curaçao",
+          0,
+          0,
+          2
+        ]
+      ]
+    },
+    "F": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Suécia",
+          "Tunísia",
+          5,
+          1,
+          1
+        ],
+        [
+          "Holanda",
+          "Japão",
+          2,
+          2,
+          1
+        ],
+        [
+          "Holanda",
+          "Suécia",
+          5,
+          1,
+          2
+        ],
+        [
+          "Tunísia",
+          "Japão",
+          0,
+          4,
+          2
+        ]
+      ]
+    },
+    "G": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Bélgica",
+          "Egito",
+          1,
+          1,
+          1
+        ],
+        [
+          "Irão",
+          "Nova Zelândia",
+          2,
+          2,
+          1
+        ],
+        [
+          "Bélgica",
+          "Irão",
+          0,
+          0,
+          2
+        ],
+        [
+          "Nova Zelândia",
+          "Egito",
+          1,
+          3,
+          2
+        ]
+      ]
+    },
+    "H": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Espanha",
+          "Cabo Verde",
+          0,
+          0,
+          1
+        ],
+        [
+          "Arábia Saudita",
+          "Uruguai",
+          1,
+          1,
+          1
+        ],
+        [
+          "Espanha",
+          "Arábia Saudita",
+          4,
+          0,
+          2
+        ],
+        [
+          "Uruguai",
+          "Cabo Verde",
+          2,
+          2,
+          2
+        ]
+      ]
+    },
+    "I": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "França",
+          "Senegal",
+          3,
+          1,
+          1
+        ],
+        [
+          "Iraque",
+          "Noruega",
+          1,
+          4,
+          1
+        ],
+        [
+          "França",
+          "Iraque",
+          3,
+          0,
+          2
+        ],
+        [
+          "Noruega",
+          "Senegal",
+          3,
+          2,
+          2
+        ]
+      ]
+    },
+    "J": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Argentina",
+          "Argélia",
+          3,
+          0,
+          1
+        ],
+        [
+          "Áustria",
+          "Jordânia",
+          3,
+          1,
+          1
+        ],
+        [
+          "Argentina",
+          "Áustria",
+          2,
+          0,
+          2
+        ],
+        [
+          "Jordânia",
+          "Argélia",
+          1,
+          2,
+          2
+        ]
+      ]
+    },
+    "K": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Uzbequistão",
+          "Colômbia",
+          1,
+          3,
+          1
+        ],
+        [
+          "Portugal",
+          "Congo",
+          1,
+          1,
+          1
+        ],
+        [
+          "Portugal",
+          "Uzbequistão",
+          5,
+          0,
+          2
+        ],
+        [
+          "Colômbia",
+          "Congo",
+          1,
+          0,
+          2
+        ]
+      ]
+    },
+    "L": {
+      "jornadas": 2,
+      "jogos": [
+        [
+          "Inglaterra",
+          "Croácia",
+          4,
+          2,
+          1
+        ],
+        [
+          "Gana",
+          "Panamá",
+          1,
+          0,
+          1
+        ],
+        [
+          "Inglaterra",
+          "Gana",
+          0,
+          0,
+          2
+        ],
+        [
+          "Panamá",
+          "Croácia",
+          0,
+          1,
+          2
+        ]
+      ]
+    }
+  },
+  "minhas_apostas": {
+    "campeao": "Espanha",
+    "final4": [
+      "Espanha",
+      "França",
+      "Inglaterra",
+      "Argentina"
+    ],
+    "grupos": {
+      "A": [
+        "México",
+        "Coreia do Sul"
+      ],
+      "B": [
+        "Suíça",
+        "Canadá"
+      ],
+      "C": [
+        "Brasil",
+        "Marrocos"
+      ],
+      "D": [
+        "Turquia",
+        "EUA"
+      ],
+      "E": [
+        "Alemanha",
+        "Equador"
+      ],
+      "F": [
+        "Holanda",
+        "Japão"
+      ],
+      "G": [
+        "Bélgica",
+        "Irão"
+      ],
+      "H": [
+        "Espanha",
+        "Uruguai"
+      ],
+      "I": [
+        "França",
+        "Senegal"
+      ],
+      "J": [
+        "Argentina",
+        "Áustria"
+      ],
+      "K": [
+        "Portugal",
+        "Colômbia"
+      ],
+      "L": [
+        "Inglaterra",
+        "Croácia"
+      ]
+    },
+    "terceiros": [
+      "Noruega",
+      "Argélia",
+      "Chéquia",
+      "Austrália",
+      "Bósnia-Herzegovina",
+      "Escócia",
+      "Costa do Marfim",
+      "Egito"
+    ],
+    "grupos_mexidos": []
+  }
+}

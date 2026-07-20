@@ -7,6 +7,11 @@ saem os resultados reais, da fase de grupos à final.
 O repositório traz uma edição de demonstração com 27 jogadores fictícios e os resultados reais do
 torneio, por isso a app funciona à primeira em qualquer clone.
 
+Com o Mundial 2026 encerrado, o repositório guarda também a **edição real do grupo como registo
+histórico** (`data/competitions/wc2026/` — torneio completo, classificação final validada 27/27
+contra a folha oficial do bolão). As edições futuras (Euro 2028, …) seguem o mesmo destino quando
+terminarem.
+
 <p align="center">
   <img src="docs/geral.png" width="31%" alt="Classificação geral com cartão pessoal" />
   <img src="docs/apostar.png" width="31%" alt="Apostas do mata-mata, ronda a ronda" />
